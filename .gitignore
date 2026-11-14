@@ -218,3 +218,48 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ===== 2026NASA / Field Shift (project-specific) =====
+# VPS or local data volumes — never commit
+/data/raw/
+/data/processed/
+/data/cache/
+/data/lit/*.pdf
+/data/lit/*.html
+
+# Geospatial rasters, vectors, and archives
+*.nc
+*.hdf
+*.h5
+*.tif
+*.tiff
+*.img
+*.jp2
+*.gpkg
+*.shp
+*.shx
+*.dbf
+*.prj
+*.sbn
+*.sbx
+*.cpg
+*.gdb/
+*.fgb
+*.zip
+*.7z
+*.tar
+*.tar.gz
+
+# Secrets and local env
+.env
+.env.*
+!.env.example
+
+# MATLAB local artifacts
+matlab/*.asv
+matlab/*.m~
+*.mlx.bak
+
+# OS / editor
+.DS_Store
+Thumbs.db
