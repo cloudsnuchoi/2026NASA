@@ -12,7 +12,7 @@ Repository: [github.com/cloudsnuchoi/2026NASA](https://github.com/cloudsnuchoi/2
 
 **Question.** What crop to add to or change in an existing rotation to improve soil health and resilience to weather and water?
 
-**Where.** One Iowa county (rainfed Corn Belt, main case). A Nebraska water-limited contrast is optional and cuttable.
+**Where.** One Iowa or Illinois county (rainfed Corn Belt, main case; picked in the 09:00–11:00 KST data spike). A Nebraska water-limited contrast is optional and cuttable.
 
 **Strategies compared**
 
@@ -25,7 +25,7 @@ Repository: [github.com/cloudsnuchoi/2026NASA](https://github.com/cloudsnuchoi/2
 
 **Outputs.** Bare-field periods, vulnerable seasons, a multi-criteria comparison, and per-strategy *why / evidence / benefits / information gaps / local-review risks*, with priority sliders and a field map. Uncertainty is shown with Monte Carlo percentiles and CVaR. Validation is a CDL / Crop Sequence Boundaries backtest.
 
-The live engine for this weekend is **rule/index scoring + Monte Carlo + CVaR**. There is no reinforcement learning and no model fine-tuning. An LLM may call the model API and attach citations; it does not compute numbers. MATLAB is **offline only** (analysis and calibration exported to the database).
+AI is organized in four layers: **vision** (Prithvi crop-classification checkpoint, inference only, CDL fallback) → **forecast/scenarios** (NASA GEOS-S2S seasonal ensemble, NASA NEX-GDDP-CMIP6 for the 2030s; distributions only) → **simulation** (Monte Carlo water balance + CVaR, rule/index scoring) → **LLM explanation** with tool-calling and citation-only RAG. The live engine for this weekend is **rule/index scoring + Monte Carlo + CVaR**. There is no reinforcement learning and no model fine-tuning. An LLM may call the model API and attach citations; it does not compute numbers. MATLAB is **offline only** (analysis and calibration exported to the database).
 
 ---
 
@@ -35,12 +35,14 @@ These documents are frozen in Korean. Identifiers in code stay English.
 
 | Doc | Role |
 | --- | --- |
+| [docs/TEAM_SPEC.md](docs/TEAM_SPEC.md) | **Start here.** Product lock status, user flow & screens, requirement traceability, data mapping, AI 4-layer architecture, data spike, roles & handoff contracts, CLI guide, timeline |
 | [docs/PRD.md](docs/PRD.md) | Problem, users, decision, scope, success criteria, demo, cut order |
 | [docs/SOT.md](docs/SOT.md) | Datasets, IDs/units/CRS, aggregation, directories, DB schema, API contract |
 | [docs/CHECKLIST.md](docs/CHECKLIST.md) | 16-hour timeline (KST) and Space Apps submission checklist |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Decision log |
 | [docs/si-log.md](docs/si-log.md) | Use of AI (SI) log for the submission form |
-| [AGENTS.md](AGENTS.md) | Rules for Codex CLI / agy CLI agents |
+| [AGENTS.md](AGENTS.md) | Rules for Codex CLI / Gemini CLI (agy) agents, per role |
+| [GEMINI.md](GEMINI.md) | Gemini CLI entry point (imports AGENTS.md) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Issue → branch → PR → one review → squash merge; hourly 10-minute sync |
 
 ---
@@ -52,7 +54,8 @@ data_pipeline/   # ETL, manifests, QA (raw data stays on the VPS under /data/raw
 model_api/       # FastAPI model service
 rag/             # Evidence cards and citation search
 frontend/        # Public, no-login demo UI
-matlab/          # Offline analysis only
+matlab/          # Offline analysis only (fixed Parquet/CSV outputs)
+sim/             # three.js voxel simulation for the demo video
 infra/           # Docker Compose, Postgres + PostGIS + pgvector
 notebooks/       # EDA
 docs/            # PRD, SOT, checklist, decisions
@@ -68,7 +71,7 @@ Do not commit secrets or raw/processed rasters. See `.gitignore` and the directo
 - Database: Postgres + PostGIS + pgvector (evidence cards only; keyword+DOI fallback if embeddings slip)
 - Frontend: public URL with no login
 - Hosting: team VPS (see `infra/`)
-- NASA inputs (minimum one, preferably more): POWER, GPM IMERG, SMAP (context cell only), Landsat or HLS, SRTM — full table in SOT
+- NASA inputs (minimum one, preferably more): POWER, GPM IMERG, SMAP (context cell only), HLS (Landsat/Sentinel-2), SRTM, NLDAS-2, GEOS-S2S, NEX-GDDP-CMIP6 — full table in SOT
 
 ---
 

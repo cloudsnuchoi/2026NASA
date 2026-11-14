@@ -1,7 +1,7 @@
 # SOT · Source of Truth
 
 팀 **아몰라** · `cloudsnuchoi/2026NASA`  
-동결: **2026-11-15 08:00–10:00 Asia/Seoul (KST)**.
+동결: **2026-11-15 08:00–10:00 Asia/Seoul (KST)**. 갱신: **2026-11-15 08:20 KST** (1.5절 데이터, 5절 테이블, 6절 엔드포인트 추가 — [TEAM_SPEC.md](./TEAM_SPEC.md) 연동).
 
 이 문서가 **데이터, 식별자, 단위, 좌표계, 집계, 디렉터리, DB 스키마, API 계약**의 단일 원본이다. 코드·이슈·에이전트는 여기와 다른 필드명, 단위, 엔드포인트를 만들지 않는다. 바꾸려면 이슈와 PR이 필요하다.
 
@@ -41,7 +41,7 @@
 
 ### 1.3 이번 주말 후순위 (본편에서 빼도 됨)
 
-GAEZ, GRACE/GRACE-FO, NAIP, NLCD, LANDFIRE, GEDI, VIIRS, ERA5, NLDAS 등. 쓰면 출처와 NASA/기타를 구분해 제출서에 적는다. GRACE는 유역 맥락만, 필지 값 금지.
+GAEZ, GRACE/GRACE-FO, NLCD, LANDFIRE, GEDI, VIIRS, ERA5 등. (**NAIP와 NLDAS는 2026-11-15 08:20 결정으로 1.5절로 승격.**) 쓰면 출처와 NASA/기타를 구분해 제출서에 적는다. GRACE는 유역 맥락만, 필지 값 금지.
 
 ### 1.4 접근 주의
 
@@ -51,6 +51,29 @@ GAEZ, GRACE/GRACE-FO, NAIP, NLCD, LANDFIRE, GEDI, VIIRS, ERA5, NLDAS 등. 쓰면
 - 미국 전용 자료를 한국 필지에 붙이지 않는다.
 - 비밀값(Earthdata, QuickStats, OpenET 등)은 환경 변수만.
 
+### 1.5 2026-11-15 08:20 KST 추가 (예측·시나리오·비전·영상)
+
+근거: [DECISIONS.md](./DECISIONS.md) 2026-11-15 08:20, [TEAM_SPEC.md](./TEAM_SPEC.md) 4·5절. 접근 경로는 2026-11-15 KST에 웹·API로 확인한 것만 적었다. 파일 내부 변수명처럼 열어 보지 못한 것은 `미확인`.
+
+| 이름 | `source_id` | 출처 | 해상도·주기 | 접근 (확인함) | NASA 여부 | 라이선스·인용 | 우선 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| NLDAS-2 Noah / Forcing | `nldas2` | NASA GES DISC, 공식07 (#16 NLDAS/GLDAS) | 0.125°, 시간(`NLDAS_NOAH0125_H`)·월(`NLDAS_NOAH0125_M`), forcing `NLDAS_FORA0125_H`, 1979~ | Earthdata + `earthaccess` (CMR에서 v2.0 확인). Giovanni 가능 | NASA | DOI 10.5067/T4OW83T8EXDO (Noah 시간). data.nasa.gov 메타 라이선스: U.S. Government Works | P0 (ET·근권 토양수분, 맥락 칸) |
+| GLDAS Noah | `gldas` | NASA GES DISC, 공식07 (#16) | 0.25°, 3시간·월, v2.1 2000~ / v2.0 1948~ | Earthdata (CMR `GLDAS_NOAH025_3H`, `_M`) | NASA | 제품 DOI·인용 (사용 시 확인) | 컷 (미국 밖 대체용) |
+| GEOS-S2S-3 | `geos_s2s` | NASA GMAO, **외부** | 0.5° 격자, 월 초기화 40멤버(GMAO 설명) | `https://portal.nccs.nasa.gov/datashare/gmao/geos-s2s-3/` → `NRT/APCN/YYYYMM/` 에 `YYYYMM_precip.tar.xz`, `YYYYMM_at.tar.xz` 등 공개 목록(2026-11-02 파일 확인). `Hindcast/` 폴더 있음. 압축 내부 형식·변수명·리드 수는 **미확인** | NASA | 명시 라이선스 문구 **미확인**. GMAO GEOS-S2S-3 인용 + 접근일 | P0 (다음 시즌 분포) |
+| NEX-GDDP-CMIP6 | `nex_gddp` | NASA NCCS / NEX, **외부** | 0.25°, 일, historical ~2014 + SSP | `s3://nex-gddp-cmip6/` (us-west-2, AWS Open Data) 또는 NCCS THREDDS NCSS 칸 추출 | NASA | **CC0** (2022-09 이후). 인용: “NEX-GDDP-CMIP6 was accessed on DATE from https://registry.opendata.aws/nex-gddp-cmip6” + tech note | P0 (2030년대 분포) |
+| NAIP | `naip` | USDA FPAC, 공식07 (#14) | 아이오와 중부 STAC 검색 결과 2017(1 m), 2019·2021(0.6 m), 2023(0.3/0.6 m), 2025(0.6 m) | Microsoft Planetary Computer STAC `collections=naip` (검색 무계정), AWS `naip-analytic`(Requester Pays) | 기타 (공식07) | AWS 레지스트리 표기 “Public Domain with Attribution” | P0 (영상), P1 (앱 썸네일) |
+| HLS v2 | `hls` | NASA LP DAAC, 외부(Landsat/S2 행의 조화 산출물) | 30 m, `HLSL30` 2013-04-11~, `HLSS30` 2015-11-28~ | Earthdata + `earthaccess` (CMR v2.0 확인) | NASA | 제품 인용 | P0 (NDVI·Prithvi 입력) |
+| Prithvi 작물 분류 체크포인트 | `prithvi_crop` | NASA·IBM (Hugging Face `ibm-nasa-geospatial`), **외부 모델** | 입력 HLS 6밴드 × 3시점, 224×224 칩, 30 m, 13클래스 | `https://huggingface.co/ibm-nasa-geospatial/Prithvi-EO-1.0-100M-multi-temporal-crop-classification` (`multi_temporal_crop_classification_Prithvi_100M.pth`, `config.yaml`) | NASA·파트너 | **Apache-2.0**, DOI 10.57967/hf/0954. 카드 성능 aAcc 60.64 %, mIoU 0.4269 | P0 보조 (실패 시 CDL) |
+| Prithvi-EO-2.0 백본 | — | NASA·IBM·JSC | 사전학습만 (tiny/100M/300M/600M, TL 변형), 미세조정본은 Sen1Floods11·BurnScars뿐 | HF `ibm-nasa-geospatial/Prithvi-EO-2.0-*` | NASA·파트너 | 각 모델 카드 | **사용 안 함** (작물 헤드 없음 → 미세조정 필요 → 결정 위반) |
+| WeatherNext 2/3 | `weathernext` | Google DeepMind, **외부** | WN2: 0.25°, 6시간, 15일, 64멤버. 신규는 WN3 권장 | Earth Engine / BigQuery / GCS. **접근 신청 폼 승인 5–7 영업일** | 기타 | 과거 자료 CC BY 4.0, 실시간은 별도 실험 약관 | **선택·컷 기본** (작업 창 15일 애드온만) |
+
+규칙:
+
+- GEOS-S2S·NEX-GDDP·NLDAS는 **맥락 칸** 자료다. 필지 정밀 값처럼 표시하지 않는다(2절 2단 격자의 맥락 단).
+- 미래는 분포(앙상블 분위, 다모델 범위)로만 보여 준다. 3년 결정론적 값 금지.
+- NEX-GDDP 기준기간은 모델 historical 1985–2014, 미래 창은 2031–2040(기본). delta 방식만.
+- Prithvi는 **추론만**. 결과는 `vision_result` 테이블에 배치 적재하고, 요청 경로에서 GPU 추론을 하지 않는다.
+
 ---
 
 ## 2. 정규 ID, 단위, 좌표계
@@ -59,8 +82,8 @@ GAEZ, GRACE/GRACE-FO, NAIP, NLCD, LANDFIRE, GEDI, VIIRS, ERA5, NLDAS 등. 쓰면
 | --- | --- |
 | `field_id` | **CSB 고유 식별자.** 적재 시 CSB 속성 테이블의 공식 컬럼명을 확인해 그대로 쓴다. 컬럼명을 여기서 지어내지 않는다. 문자열로 저장. |
 | `county_fips` | 5자리 문자 (주 2 + 카운티 3). 아이오와 본편 AOI 키. |
-| `state_alpha` | `IA` (본편), 선택 확장 시 `NE`. |
-| `strategy_code` | `A` \| `B` \| `C` \| `D` (PRD 4절). |
+| `state_alpha` | `IA` 또는 `IL` (본편, 데이터 검증 스파이크에서 하나로 확정), 선택 확장 시 `NE`. |
+| `strategy_code` | `A` \| `B` \| `C` \| `D` (PRD 4절). 2ⁿ 후보 생성(TEAM_SPEC 2.3)을 쓰면 후보는 `candidate_id`(예: `C-S+cover_rye`)로 식별하고, A–D에 해당하면 `strategy_code`를 함께 준다. |
 | `year` | 작물 연도 정수. CDL 연 라벨과 맞출 때는 CDL 연도를 따름. |
 | `date` | 저장은 ISO 8601 날짜(`YYYY-MM-DD`). 시각이 있으면 UTC. 화면의 현지 달력은 `America/Chicago`. |
 | 저장 CRS | **EPSG:4326** (경위도, WGS84). `geometry`는 GeoJSON도 4326. 경도·위도 순서 주의(GeoJSON은 lon, lat). |
@@ -122,7 +145,17 @@ notebooks/       # EDA
 docs/            # PRD, SOT, 체크리스트, 결정 로그
 ```
 
-MATLAB 출력 파일명 예: `/data/processed/v1/matlab/field_dekad_anomaly.parquet`. 컬럼은 이 문서의 단위·ID를 따른다.
+MATLAB 출력은 `/data/processed/v{N}/matlab/` 아래 다음 파일만 만든다 (스키마 상세: [TEAM_SPEC.md](./TEAM_SPEC.md) 7.4).
+
+| 파일 | 키 | 적재 테이블 |
+| --- | --- | --- |
+| `field_dekad.parquet` | `field_id, year, dekad` | `field_dekad` |
+| `field_season.parquet` | `field_id, year, season` | `field_season` |
+| `climate_annual.parquet` | `field_id, year` | `climate_annual` |
+| `scenario_climate.parquet` | `field_id, horizon, source_id, scenario, model, member, variable, period` | `scenario_climate` |
+| `calibration_params.csv` | `param` | `calibration_param` |
+
+공통: Parquet 우선(CSV면 UTF-8, 쉼표, 헤더 1줄), snake_case, 결측은 빈 값(0 금지), 파일마다 `{file}.manifest.json`(`rows`, `sha256`, `schema_version`, `matlab_version`, `script`, `git_commit`, `created_kst`, `sources`). MATLAB은 DB에 직접 쓰지 않고, 적재는 `data_pipeline/load_matlab.py`가 한다.
 
 ---
 
@@ -238,6 +271,79 @@ CREATE TABLE evidence_chunk (
 -- 주말 안에 임베딩이 실패하면 embedding 을 비우고 키워드 검색만 한다.
 CREATE INDEX evidence_chunk_t_idx ON evidence_chunk
   USING GIN (to_tsvector('simple', coalesce(quote, '') || ' ' || coalesce(source_title, '')));
+
+-- 2026-11-15 08:20 추가: MATLAB 산출, 시나리오, 비전 (TEAM_SPEC 7.4)
+CREATE TABLE field_dekad (
+  field_id        text NOT NULL REFERENCES fields (field_id),
+  year            integer NOT NULL,
+  dekad           smallint NOT NULL,         -- 1..36
+  date_start      date NOT NULL,
+  ndvi_raw        numeric,
+  ndvi_sg         numeric,                   -- Savitzky-Golay smoothed
+  n_obs           integer,
+  bare_flag       boolean,
+  precip_mm       numeric,
+  et0_mm          numeric,
+  t2m_c           numeric,
+  sm_anom_ctx     numeric,                   -- context cell, not field-precise
+  qa_flag         text,
+  PRIMARY KEY (field_id, year, dekad)
+);
+
+CREATE TABLE climate_annual (
+  field_id        text NOT NULL REFERENCES fields (field_id),
+  year            integer NOT NULL,
+  precip_mm       numeric,
+  et_mm           numeric,                   -- actual ET (NLDAS-2, context cell)
+  et0_mm          numeric,                   -- FAO-56 reference ET from POWER
+  t2m_mean_c      numeric,
+  ndvi_peak       numeric,
+  gdd_c           numeric,                   -- base 10 C
+  frost_days      integer,                   -- tmin < 0 C
+  heat_days       integer,                   -- tmax > 32 C
+  crop_cdl        text,
+  source_ids      text,                      -- ';' separated
+  PRIMARY KEY (field_id, year)
+);
+
+CREATE TABLE scenario_climate (
+  field_id        text NOT NULL REFERENCES fields (field_id),
+  horizon         text NOT NULL,             -- next_season | 2030s
+  source_id       text NOT NULL,             -- geos_s2s | nex_gddp
+  scenario        text NOT NULL,             -- forecast | ssp245 | ssp585
+  model           text NOT NULL,
+  member          text NOT NULL DEFAULT 'mean',
+  variable        text NOT NULL,             -- pr | tas | tasmax | tasmin
+  period          text NOT NULL,             -- e.g. 2027-JJA, 2031-2040
+  value           numeric,
+  unit            text,
+  baseline_period text,
+  anomaly         numeric,
+  anomaly_unit    text,
+  PRIMARY KEY (field_id, horizon, source_id, scenario, model, member, variable, period)
+);
+
+CREATE TABLE vision_result (
+  field_id        text NOT NULL REFERENCES fields (field_id),
+  year            integer NOT NULL,
+  model_id        text NOT NULL,             -- e.g. ibm-nasa-geospatial/Prithvi-EO-1.0-100M-multi-temporal-crop-classification
+  scene_dates     text NOT NULL,             -- 3 HLS dates, ';' separated
+  crop_pred       text,                      -- field majority class
+  class_fractions jsonb,                     -- {class: fraction}
+  bare_fraction   numeric,
+  agreement_with_cdl numeric,                -- pixel agreement 0-1
+  notes           text,
+  PRIMARY KEY (field_id, year, model_id)
+);
+
+CREATE TABLE calibration_param (
+  param           text PRIMARY KEY,
+  value           numeric,
+  unit            text,
+  method          text,
+  source          text,
+  notes           text
+);
 ```
 
 맵 레이어는 사전 계산한 GeoJSON/COG를 객체 스토리지 또는 `/data/processed/vN/maps/`에 두고, 메타만 DB에 둘 수 있다.
@@ -470,6 +576,155 @@ CREATE INDEX evidence_chunk_t_idx ON evidence_chunk
 
 DOI가 없는 공식 핸드북은 `url` 필수. 근거가 없으면 `insufficient_evidence: true` 이고 문장을 생성하지 않는다.
 
+### 2026-11-15 08:20 추가 엔드포인트
+
+화면 흐름은 [TEAM_SPEC.md](./TEAM_SPEC.md) 2절. 아래 예시의 숫자는 **자리 표시자**다.
+
+#### `GET /locate?lat=&lon=`
+
+```json
+{
+  "in_service_area": true,
+  "field_id": "CSB-EXAMPLE-0001",
+  "county_fips": "19000",
+  "state_alpha": "IA",
+  "area_ha": 28.47,
+  "geometry": { "type": "MultiPolygon", "coordinates": [] },
+  "message": null
+}
+```
+
+서비스 지역 밖이면 `in_service_area: false`, `field_id: null`, `message: "Outside the service area."`
+
+#### `GET /field/{id}/profile` 확장 필드
+
+기존 응답에 아래 필드를 추가한다(모두 nullable, 없으면 `null`과 `info_gaps`에 이유).
+
+```json
+{
+  "region_label": "Central Iowa, Corn Belt",
+  "precip_mm_yr": 790.0,
+  "et_mm_day": 4.2,
+  "et0_mm_day": null,
+  "ndvi_peak": 0.68,
+  "ndvi_class": "good",
+  "t2m_mean_c": 9.5,
+  "cdl_history": [{ "year": 2025, "crop": "Corn" }, { "year": 2024, "crop": "Soybeans" }],
+  "soil": { "om_pct": null, "k_factor": null, "awc_cm_cm": null },
+  "vision": { "model_id": "ibm-nasa-geospatial/Prithvi-EO-1.0-100M-multi-temporal-crop-classification", "crop_pred": "Corn", "bare_fraction": null, "agreement_with_cdl": null },
+  "hero_state": "normal",
+  "period": { "start": "1991-01-01", "end": "2020-12-31" },
+  "info_gaps": []
+}
+```
+
+`ndvi_class` ∈ `good`·`fair`·`low`(임계값은 `calibration_param`). `hero_state` ∈ `normal`·`drought`·`wet`·`heat`·`frost`.
+
+#### `POST /rotations/candidates`
+
+```json
+{
+  "field_id": "CSB-EXAMPLE-0001",
+  "current_rotation": "C-S",
+  "selected_options": ["cover_rye", "small_grain"],
+  "constraints": { "water_limited": false, "water_cap_mm": null, "equipment": [], "market": [] }
+}
+```
+
+`selected_options` ⊂ {`cover_rye`, `small_grain`, `alfalfa`}, 길이 ≤ 3. 응답은 부분집합 2ⁿ개:
+
+```json
+{
+  "field_id": "CSB-EXAMPLE-0001",
+  "n_options": 2,
+  "candidates": [
+    { "candidate_id": "C-S", "strategy_code": "A", "sequence": "C-S", "options": [], "feasible": true, "warnings": [] },
+    { "candidate_id": "C-S+cover_rye", "strategy_code": "B", "sequence": "C-S", "options": ["cover_rye"], "feasible": true, "warnings": [] },
+    { "candidate_id": "C-S-W", "strategy_code": null, "sequence": "C-S-W", "options": ["small_grain"], "feasible": true, "warnings": [] },
+    { "candidate_id": "C-S-W+cover_rye", "strategy_code": "C", "sequence": "C-S-W", "options": ["small_grain", "cover_rye"], "feasible": true, "warnings": [] }
+  ]
+}
+```
+
+#### `POST /strategies/compare` 확장 필드
+
+요청에 `candidate_ids`(선택, 없으면 A–D)를 받을 수 있다. 응답의 각 전략에 아래를 추가한다.
+
+```json
+{
+  "candidate_id": "C-S+cover_rye",
+  "rank": 1,
+  "goal_label": "Water saving",
+  "display": {
+    "vegetation_pct": { "p10": -2.0, "p50": 3.0, "p90": 7.0 },
+    "water_use_pct": { "p10": -12.0, "p50": -6.0, "p90": 1.0 },
+    "revenue_pct": { "p10": -5.0, "p50": 0.0, "p90": 4.0 },
+    "basis": "relative index change vs strategy A; not a guarantee"
+  },
+  "pros": ["...", "...", "..."],
+  "cons": ["..."],
+  "unique_feature": "...",
+  "weights_applied": { "water": 0.5, "soil": 0.3, "stability": 0.1, "income": 0.1 },
+  "water_weight_boosted": false,
+  "scenario_results": [
+    { "horizon": "next_season", "source_id": "geos_s2s", "metric": "season_water_deficit_mm", "p10": null, "p50": null, "p90": null, "cvar": null },
+    { "horizon": "2030s", "source_id": "nex_gddp", "scenario": "ssp245", "metric": "season_water_deficit_mm", "p10": null, "p50": null, "p90": null, "cvar": null }
+  ]
+}
+```
+
+`pros`는 정확히 3개, 탭끼리 같은 문장을 쓰지 않는다. `cons`는 1개 이상. 카드 5항목은 그대로 유지.
+
+#### `GET /field/{id}/climate/history?years=5`
+
+```json
+{
+  "field_id": "CSB-EXAMPLE-0001",
+  "years": [
+    { "year": 2025, "precip_mm": null, "et_mm": null, "ndvi_peak": null, "t2m_mean_c": null, "crop_cdl": "Corn", "naip_thumb_url": null }
+  ],
+  "sources": ["POWER", "IMERG", "NLDAS-2", "HLS", "CDL", "NAIP"]
+}
+```
+
+`years` 최대 5, 최신 연도부터.
+
+#### `GET /field/{id}/climate/outlook`
+
+```json
+{
+  "field_id": "CSB-EXAMPLE-0001",
+  "next_season": {
+    "source_id": "geos_s2s", "init": "2026-11", "period": "2027-JJA",
+    "pr_anomaly_pct": { "p10": null, "p50": null, "p90": null },
+    "tas_anomaly_c": { "p10": null, "p50": null, "p90": null },
+    "n_members": null, "native_resolution": "0.5 deg"
+  },
+  "mid_century": [
+    { "source_id": "nex_gddp", "scenario": "ssp245", "period": "2031-2040", "baseline_period": "1985-2014",
+      "pr_change_pct": { "min": null, "p50": null, "max": null }, "tasmax_change_c": { "min": null, "p50": null, "max": null }, "n_models": null }
+  ],
+  "label": "Possible ranges (scenarios), not a forecast of a single future.",
+  "native_resolution_note": "Context-cell data (tens of km), not field-precise."
+}
+```
+
+GEOS-S2S가 스파이크에서 실패하면 `next_season`은 `null`이고 `info_gaps`에 이유를 적는다.
+
+#### `GET /glossary`
+
+```json
+{ "terms": [{ "term_id": "evapotranspiration", "ko": "증발산", "en": "Evapotranspiration", "short_ko": "...", "short_en": "...", "source_url": null }] }
+```
+
+#### `POST /explain`
+
+요청 `{ "field_id", "candidate_id" | "strategy_code", "question", "lang": "ko" | "en" }`. 응답 `{ "answer", "tool_calls": [{ "endpoint", "json_paths_used": [] }], "citations": [{ "doi", "url" }], "insufficient_evidence": false }`. 숫자는 `tool_calls` 응답에 있는 것만.
+
+#### `GET /sim/{field_id}/scene?strategy=`
+
+복셀 시뮬용. 스키마는 [TEAM_SPEC.md](./TEAM_SPEC.md) 7.5의 `sim_scene.json` (`schema_version`, `field_id`, `strategy_code`, `grid`, `texture`, `frames[]`, `events[]`, `sources[]`). 정적 파일 `/data/processed/vN/sim/{field_id}_{strategy}.json`로 대체 가능.
+
 ### LLM 규칙
 
 - 숫자는 위 엔드포인트 응답에 있는 것만 사용한다.
@@ -482,5 +737,6 @@ DOI가 없는 공식 핸드북은 `url` 필수. 근거가 없으면 `insufficien
 
 - 아이오와 본편 **카운티 이름과 `county_fips`** — 동결 창 이슈로 닫고 이 절을 PR로 갱신한다.
 - 데모 `field_id` 실값, POWER 격자 해상도, CSB ID 컬럼명, 임베딩 차원, 공개 API 베이스 URL.
+- GEOS-S2S 압축 파일 내부 형식·변수명·리드 월 수, NEX-GDDP 사용 모델 3개 이름, Prithvi 체크포인트 로드 방식(mmseg vs terratorch), `ndvi_class`·`hero_state` 임계값, 후보 생성 규칙 최종안(TEAM_SPEC O1).
 
 이 목록에 없는 숫자를 계약인 것처럼 추가하지 않는다.
