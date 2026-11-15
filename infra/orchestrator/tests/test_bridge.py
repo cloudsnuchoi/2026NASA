@@ -1,6 +1,7 @@
 """Unit tests for bridge.py with mocked LLM, GitHub and Mattermost (no network)."""
 import io
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -549,3 +550,63 @@ def test_cursor_and_missed_events(tmp_path):
     assert not any("/channels/q/" in c for c in calls)
     assert mm.parse_event(evs[0]).create_at == 1500
     assert mm.missed_events(0) == []
+
+
+# ---- progress placeholder, design channel, onboarding facts
+class FakeNotifier:
+    def __init__(self):
+        self.events = []
+
+    def typing(self, ch, root):
+        self.events.append(("typing", ch, root))
+
+    def placeholder(self, ch, root, text):
+        self.events.append(("placeholder", ch, root, text))
+        return "ph1"
+
+    def edit(self, pid, text):
+        self.events.append(("edit", pid, text))
+
+
+def test_placeholder_then_answer_edits_it(orch):
+    orch.notifier = FakeNotifier()
+    i = inc("jieun", "1on1-jieun", "안녕")
+    i.post_id = "q1"
+    out = orch.handle(i)[0]
+    kinds = [e[0] for e in orch.notifier.events]
+    assert kinds[:2] == ["typing", "placeholder"]
+    assert orch.notifier.events[1][2] == "q1" and "⏳ 답변 준비 중… (DeepSeek V4.1 Flash)" in orch.notifier.events[1][3]
+    assert out.edit_id == "ph1" and out.root_id == "q1"
+
+
+def test_deep_placeholder_shows_tier_switches(orch):
+    orch.notifier = FakeNotifier()
+    orch.cfg.progress_every = 0.01
+    import time as _t
+
+    class Slow(FakeDeep):
+        def ask(self, prompt):
+            _t.sleep(0.05)
+            return super().ask(prompt)
+    orch.deep = DeepChain([FakeDeep(exc=RuntimeError("limit"), label="Codex gpt-6.1-sol (VPS, 읽기 전용)"),
+                           Slow("terra ok", label="Codex gpt-6.1-terra (VPS, 읽기 전용)")])
+    out = orch.handle(inc("woochan", "1on1-woochan", "!deep NDVI 결측"))[0]
+    texts = [e[-1] for e in orch.notifier.events if e[0] in ("placeholder", "edit")]
+    assert any("gpt-6.1-sol" in t for t in texts) and any("gpt-6.1-terra" in t for t in texts)
+    assert any("아직 생각 중" in t for t in texts)
+    assert out.message.startswith("terra ok") and out.edit_id == "ph1"
+
+
+def test_design_channel_answers_questions_with_deep_by_default(orch):
+    orch.deep = FakeDeep("sol design", label="Codex gpt-6.1-sol (VPS, 읽기 전용)")
+    assert orch.handle(inc("jieun", "uiux-design", "오늘 회의 몇 시죠")) == []  # no mention, no '?'
+    out = orch.handle(inc("jieun", "uiux-design", "S4에서 수익 % 칸 빼도 될까?"))[0]
+    assert out.message.startswith("sol design") and len(orch.deep.prompts) == 1
+    out2 = orch.handle(inc("jimin", "uiux-design", "안녕", mentioned=True))[0]
+    assert "gpt-6.1-sol" in out2.message  # even short greetings use the deep model here
+
+
+def test_onboarding_order_in_static_context_without_ip(orch):
+    sysmsg = orch.build_system()
+    assert "공개키" in sysmsg and "자동" in sysmsg and "서버 주소를 모른다" in sysmsg
+    assert not re.search(r"\b\d{1,3}(\.\d{1,3}){3}\b", sysmsg.split("## 저장소 문서")[0])
