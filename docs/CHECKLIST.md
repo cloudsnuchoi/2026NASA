@@ -3,7 +3,7 @@
 팀 **아몰라** · 저장소 [cloudsnuchoi/2026NASA](https://github.com/cloudsnuchoi/2026NASA)  
 마감 **2026-11-15 23:59 KST** (권장 제출 완료 **23:55**). 이 문서의 시각은 모두 **Asia/Seoul (KST)** 이다.
 
-제품·데이터·API의 고정본은 [PRD.md](./PRD.md), [SOT.md](./SOT.md)다. 결정은 [DECISIONS.md](./DECISIONS.md)에만 추가한다. 작업 항목은 GitHub Issues다.
+제품·데이터·API의 고정본은 [PRD.md](./PRD.md), [SOT.md](./SOT.md)다. 구조·파이프라인은 [ARCHITECTURE.md](./ARCHITECTURE.md). 결정은 [DECISIONS.md](./DECISIONS.md)에만 추가한다. 작업 항목은 GitHub Issues다. 현황은 [dashboard](./dashboard/index.html).
 
 ---
 
@@ -11,7 +11,7 @@
 
 ## 0. 운영 원칙 (16시간)
 
-1. **아이디어는 이미 확정됐다.** 챌린지 07의 결정(기존 윤작에 무엇을 더하거나 바꿀지)과 전략 A–D, 아이오와 본편은 다시 논쟁하지 않는다. 남은 시간은 구현·검증·제출이다.
+1. **아이디어는 이미 확정됐다.** 챌린지 07의 결정(기존 윤작에 무엇을 더하거나 바꿀지)과 전략 A–D, 공간 두 층(콘벨트 12주 카운티 + Story County `19169` 필지)은 다시 논쟁하지 않는다. 남은 시간은 구현·검증·제출이다.
 2. **순서는 “데이터 전체 분석 → 그다음 설계”가 아니다.** 설계(PRD·SOT·스키마·API)를 먼저 고정하고, 데이터 다운로드·EDA는 **그와 동시에** 한다. 프론트·API는 계약과 스텁으로 병렬 착수하고, 가공 테이블이 나오는 대로 교체한다.
 3. **이번 주말 엔진은 규칙·지수 스코어링 + 몬테카를로 + CVaR** 이다. 강화학습·미세조정은 하지 않는다. WOFOST·Prithvi·네브래스카·경제 심화는 시간이 남을 때만, 아래 컷 순서를 따른다.
 4. **MATLAB은 라이브 파이프라인에 넣지 않는다.** 오프라인 분석·캘리브레이션만 하고, 결과는 CSV/Parquet로보내 DB에 적재한다.
@@ -32,7 +32,7 @@
 - [ ] [SOT.md](./SOT.md) 확정 (데이터 표, ID/단위/CRS, 집계, 디렉터리, DB 스키마, API 계약)
 - [ ] [DECISIONS.md](./DECISIONS.md)에 오늘 아침 동결을 기록
 - [ ] [AGENTS.md](../AGENTS.md), [CONTRIBUTING.md](../CONTRIBUTING.md)를 각 노트북의 Codex CLI / agy CLI 컨텍스트로 지정
-- [ ] 아이오와 본편 **카운티 이름**을 정하고 SOT·이슈에 반영 (미정이면 다운로드 AOI만 임시 FIPS로 고정하고 이름을 빈칸으로 두지 말 것)
+- [x] 본편 카운티: 아이오와 **Story County** (`19169`) — 2026-11-15 11:10 KST 동결
 - [ ] VPS 접속 정보·데이터 경로·DB URL은 환경 변수로만 공유 (저장소에 비밀값 금지)
 - [ ] GitHub 라벨·이슈·보드가 열려 있고, 각자 맡을 이슈를 고른다 (계정 할당은 선택)
 
@@ -44,9 +44,9 @@
 
 담당 중심: 강다은 (다운로드·ETL), 하지민 (시계열 EDA), 김우찬 (문헌·작물 특성 테이블).
 
-- [ ] Earthdata / QuickStats / (쓰면) OpenET 키가 VPS 환경 변수로만 설정됨
+- [ ] Earthdata 키가 VPS 환경 변수로만 설정됨. QuickStats API는 **선택**(사이트 접속 실패 시 NASS 일괄 파일 `sb.nass.usda.gov/datasets/`). OpenET는 선택
 - [ ] 필수 NASA: POWER, GPM IMERG, SMAP(맥락 칸), Landsat 또는 HLS, SRTM — AOI 클립만 `/data/raw/`에 저장
-- [ ] 필수 기타: CDL, CSB, SSURGO/gSSURGO, QuickStats, 피복·윤작 문헌 목록
+- [ ] 필수 기타: CDL(1층 카운티 비율 + 2층 Story 30 m), CSB, SSURGO/gSSURGO, 피복·윤작 문헌 목록. 카운티 수량은 **선택**(NASS 일괄 파일, 실패 시 생략)
 - [ ] 권장(시간 되면): PRISM, OpenET 포인트, ECOSTRESS
 - [ ] 원본은 `/data/raw`에 **불변** 보관. 체크섬·출처·라이선스를 `data_pipeline/` 매니페스트에 기록
 - [ ] 가공은 `/data/processed/v1` (이후 버전은 `v2`…). Git에는 경로와 스크립트만
@@ -110,7 +110,7 @@
 - [ ] README 최종 (구조, 실행 방법, 데이터 출처, 라이선스)
 - [ ] References: 사용 데이터·문헌·소프트웨어 **라이선스와 인용** 포함
 - [ ] 제출서 **NASA Data**에 사용한 NASA 데이터/자원 **최소 1개** (권장: POWER + IMERG 또는 SMAP 또는 Landsat/HLS)
-- [ ] 제출서 **Space Agency Partner & Other Data**: CSB, SSURGO, QuickStats, PRISM, 문헌 등 Resources 밖·파트너 자료
+- [ ] 제출서 **Space Agency Partner & Other Data**: CSB, SSURGO, NASS 수량(쓰면), PRISM, 문헌 등 Resources 밖·파트너 자료
 - [ ] 제출서 **Use of AI (SI)**: 사용 범위, 가속 도구임을 명시. SI가 만든 그림·영상은 워터마크. NASA 로고·깃발·미션 표식 사용·변조 금지
 - [ ] Summary, Project Details, Project Demonstration URL, Project URL 초안 완성
 - [ ] **모든 링크가 로그인·비밀번호·가입 없이 열린다** (GitHub 공개 저장소, 공개 데모, YouTube/Drive 등 링크 권한 확인)

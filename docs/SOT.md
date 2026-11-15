@@ -1,7 +1,7 @@
 # SOT · Source of Truth
 
 팀 **아몰라** · `cloudsnuchoi/2026NASA`  
-동결: **2026-11-15 08:00–10:00 Asia/Seoul (KST)**. 갱신: **2026-11-15 08:20 KST** (1.5절 데이터, 5절 테이블, 6절 엔드포인트 추가 — [TEAM_SPEC.md](./TEAM_SPEC.md) 연동).
+동결: **2026-11-15 08:00–10:00 Asia/Seoul (KST)**. 갱신: **2026-11-15 08:20 KST** (1.5절), **2026-11-15 11:10 KST** (1.6절 두 층 공간, QuickStats 선택 + NASS 일괄 대체, Story County `19169` 동결).
 
 이 문서가 **데이터, 식별자, 단위, 좌표계, 집계, 디렉터리, DB 스키마, API 계약**의 단일 원본이다. 코드·이슈·에이전트는 여기와 다른 필드명, 단위, 엔드포인트를 만들지 않는다. 바꾸려면 이슈와 PR이 필요하다.
 
@@ -27,7 +27,7 @@
 | SSURGO / gSSURGO | USDA NRCS, 공식07 (gSSURGO는 SSURGO 항목의 격자 배포) | 폴리곤(SSURGO) / 주 단위 격자(gSSURGO, 통상 10 m 안내) | Soil Data Access, Web Soil Survey, 주 FileGDB 다운로드 | 기타 (공식07) | 미국 정부 저작물 가능성이 큼. NRCS 이용 조건 확인 후 인용 |
 | CDL (Cropland Data Layer) | USDA NASS, 공식07 (CropScape) | 탭: 30 m, 연 1회. 공식 배포 2008–2025 전국 30 m. 2024–2025는 10 m 원본+30 m 리샘플 안내 | 공식 다운로드 또는 문서화된 CDL 서비스. 사용 전 엔드포인트 생존 확인. 클래스 코드는 공식 속성표만 | 기타 (공식07) | 미국 정부 저작물 가능성이 큼. NASS 인용. CropScape UI 로그인은 변동 가능 |
 | Crop Sequence Boundaries (CSB) | USDA NASS, **외부** | 8년 창, 2018–2025는 v2024 안내(2026-03-27 공개) | 공식 FileGDB. 아이오와만 클립 | 기타 (외부) | NASS 이용 조건 확인. **제출 Other Data 필수.** 소유 경계가 아님 |
-| USDA NASS QuickStats | USDA NASS, 공식07 | 연, 카운티/주 | API (`api_GET`, 키 필수, 요청당 최대 50,000행) 또는 웹 UI | 기타 (공식07) | NASS 인용. API 키는 환경 변수 |
+| USDA NASS QuickStats / NASS bulk (**선택**) | USDA NASS, 공식07 | 연, 카운티/주 수량(`yield_bu_ac`). **옆축·보조**. 본편 목적함수·go/no-go 아님 | **선택.** QuickStats API(`api_GET`, 키 필수, 요청당 최대 50,000행) 사이트는 2026-11-15 팀에서 접속 불가. **대체 (확인함):** NASS Large Datasets 일괄 파일. 안내 URL `https://www.nass.usda.gov/datasets/` 는 11:10 KST에 origin 500. 목록·파일 호스트 `https://sb.nass.usda.gov/datasets/` (HTTP 200). 작물 파일 `qs.crops_20261103.txt.gz` (1,132,568,713 bytes, Last-Modified 2026-11-03 08:14 UTC = 17:14 KST, HTTP 200, 키 없음). 콘벨트 12주·카운티·옥수수/대두·연 수량만 필터해 `/data/raw/nass_bulk/`에 저장. 실패 시 수량 열은 `null`이고 CDL/CSB 백테스트만 유지 | 기타 (공식07) | NASS 인용. API를 쓸 때만 “This product uses the NASS API but is not endorsed or certified by NASS.” |
 | 피복·윤작 문헌 | SARE, Iowa State Extension, MCCC 등, **외부** | 해당 없음 (문서) | 공식 URL. 전문 PDF를 저장소에 올리지 않음 | 기타 (외부) | 각 문헌 저작권. 짧은 인용+DOI/URL만 RAG. Other Data·References |
 
 ### 1.2 강하게 권장 (시간 되는 대로)
@@ -37,7 +37,7 @@
 | PRISM | Oregon State PRISM Climate Group, 공식07 | 일·월·30년. 무료 웹서비스 해상도 4 km 등 (문서 2025-03-26). 30년 평년은 웹서비스에 없고 별도 다운로드 | `services.nacse.org` 그리드 서비스 또는 FTP | 기타 (공식07) | PRISM 이용 약관 확인 후 인용 |
 | OpenET | OpenET, 공식07 (탭은 미국 서부; 2025-12-16 발표로 인접 48주 래스터 확대). 아이오와 **필지 ID 서비스 개통은 미확인** | 통상 30 m ET, 2016~ (확대 발표 기준) | `POST https://openet-api.org/raster/timeseries/point` (API 키). 필지 경계 API는 이 주말 전제로 두지 않음 | 기타 (공식07) | OpenET 약관·키. 시간이 없으면 FAO-56만으로 물 비교 |
 | ECOSTRESS | NASA/JPL, 공식07 | 통상 약 70 m (탭/문서 불일치 가능, 제품 메타데이터 따름) | Earthdata / JPL / AppEEARS | NASA | 제품 DOI·인용. 공백은 「관측 없음」 |
-| USDA 가격 lite / RMA Cause of Loss | USDA AMS/ERS/RMA, 주로 **외부** 또는 QuickStats 일부 | 연·카운티/주 등 | QuickStats, ERS, RMA 공개 표 | 기타 | 인용 + Other Data. 본편 목적함수로 쓰지 않음 |
+| USDA 가격 lite / RMA Cause of Loss | USDA AMS/ERS/RMA, 주로 **외부** 또는 NASS 수량 일부 | 연·카운티/주 등 | NASS 일괄 파일(선택), ERS, RMA 공개 표. QuickStats API는 선택 | 기타 | 인용 + Other Data. 본편 목적함수로 쓰지 않음 |
 
 ### 1.3 이번 주말 후순위 (본편에서 빼도 됨)
 
@@ -49,7 +49,7 @@ GAEZ, GRACE/GRACE-FO, NLCD, LANDFIRE, GEDI, VIIRS, ERA5 등. (**NAIP와 NLDAS는
 - POWER 격자는 API 메타데이터를 따른다.
 - CDL 웹서비스는 호출 전에 생존을 확인한다. 클래스 코드를 추측하지 않는다.
 - 미국 전용 자료를 한국 필지에 붙이지 않는다.
-- 비밀값(Earthdata, QuickStats, OpenET 등)은 환경 변수만.
+- 비밀값(Earthdata, OpenET, 선택적 QuickStats 키 등)은 환경 변수만. NASS 일괄 파일은 키가 없다.
 
 ### 1.5 2026-11-15 08:20 KST 추가 (예측·시나리오·비전·영상)
 
@@ -76,13 +76,29 @@ GAEZ, GRACE/GRACE-FO, NLCD, LANDFIRE, GEDI, VIIRS, ERA5 등. (**NAIP와 NLDAS는
 
 ---
 
+### 1.6 공간 두 층 (2026-11-15 11:10 KST 동결)
+
+콘벨트 전체를 대상으로 하되, **모든 데이터를 콘벨트 30 m로 받지 않는다.** 상세 그림은 [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+| 층 | 범위 | 해상도 | 데이터셋 (이번 주말 P0) | 화면 역할 |
+| --- | --- | --- | --- | --- |
+| **1층** 넓게 | 콘벨트 12개 주: `IA, IL, IN, OH, NE, MN, SD, WI, MO, KS, MI, KY` | 카운티 집계 (네이티브 칸을 카운티 평균 또는 중심점 배정) | NASA POWER 일별(카운티 중심점, 1995–2025), GPM IMERG 일별, SMAP L3/L4(맥락 칸, 필지 정밀 금지), CDL **카운티 작물 비율** 2008–2025, NEX-GDDP-CMIP6 카운티 평균(2030s) | 어디든 핀을 찍으면 1차 물·맨땅·가뭄 위험과 윤작 힌트 |
+| **2층** 깊게 | 아이오와 **Story County**, `county_fips=19169` | 필지 30 m 또는 필지 평균(CSB 마스크) | CDL 30 m 래스터 2008–2025, Crop Sequence Boundaries, SSURGO(유기물, K factor, 배수, AWC), HLS L30/S30 NDVI, GEOS-S2S-3 다음 시즌 분포 | 데모 본편, 몬테카를로, 2012 가뭄 백테스트, 복셀 시뮬 |
+
+선택 수량(옆축): NASS 일괄 파일로 12주 카운티 연 수량. 없거나 실패해도 1·2층 P0는 성립한다.
+
+저장 위치: 원본 `/srv/hackathon/data/raw/<dataset>/` (SOT 약칭 `/data/raw`). 1층 집계와 2층 래스터를 같은 데이터셋 폴더 안에서 `tier1_county/`와 `tier2_story/`처럼 구분해도 된다. 가공은 `/srv/hackathon/data/processed/vN`.
+
+
+---
+
 ## 2. 정규 ID, 단위, 좌표계
 
 | 항목 | 규칙 |
 | --- | --- |
 | `field_id` | **CSB 고유 식별자.** 적재 시 CSB 속성 테이블의 공식 컬럼명을 확인해 그대로 쓴다. 컬럼명을 여기서 지어내지 않는다. 문자열로 저장. |
-| `county_fips` | 5자리 문자 (주 2 + 카운티 3). 아이오와 본편 AOI 키. |
-| `state_alpha` | `IA` 또는 `IL` (본편, 데이터 검증 스파이크에서 하나로 확정), 선택 확장 시 `NE`. |
+| `county_fips` | 5자리 문자 (주 2 + 카운티 3). 2층 본편은 **`19169`** (Iowa Story County). 1층은 콘벨트 12주 모든 카운티. |
+| `state_alpha` | 본편 **`IA`**. 1층은 콘벨트 12주 코드. 선택 확장 시 `NE`. |
 | `strategy_code` | `A` \| `B` \| `C` \| `D` (PRD 4절). 2ⁿ 후보 생성(TEAM_SPEC 2.3)을 쓰면 후보는 `candidate_id`(예: `C-S+cover_rye`)로 식별하고, A–D에 해당하면 `strategy_code`를 함께 준다. |
 | `year` | 작물 연도 정수. CDL 연 라벨과 맞출 때는 CDL 연도를 따름. |
 | `date` | 저장은 ISO 8601 날짜(`YYYY-MM-DD`). 시각이 있으면 UTC. 화면의 현지 달력은 `America/Chicago`. |
@@ -93,7 +109,7 @@ GAEZ, GRACE/GRACE-FO, NLCD, LANDFIRE, GEDI, VIIRS, ERA5 등. (**NAIP와 NLDAS는
 | 토양수분 | 제품 원단위를 컬럼 주석에 기록. 표시·모델에는 **평년 대비 아노말리**를 우선 (`smap_sm_anomaly`, 무차원 또는 제품 단위 차). 필지 평균인 척하지 않음. |
 | NDVI 등 식생지수 | 무차원 (`ndvi`). 유효 범위는 제품 정의. |
 | 면적 | ha (`area_ha`). 에이커가 필요하면 표시 직전에만 변환하고 필드명을 `area_ac`로 구분. |
-| 수량 (QuickStats 옥수수) | `bu/ac` (`yield_bu_ac`). 리터/ha로 바꾸지 말고, 단위를 응답에 포함. |
+| 수량 (NASS, 선택) | `bu/ac` (`yield_bu_ac`). 리터/ha로 바꾸지 말고, 단위를 응답에 포함. 없으면 `null`. |
 | 지수 스코어 | 0–1 또는 문서화된 상대 지수. **확정 t/ha, kg/ha를 자동 출력하지 않음.** |
 | 확률·분위 | P10/P50/P90, CVaR는 같은 물리량 단위를 응답의 `unit` 필드에 명시. |
 
@@ -126,7 +142,7 @@ VPS(또는 로컬 데이터 디스크) 기준. **Git에는 원본·가공 래스
 
 ```text
 /data/raw/                 # 불변. 다운로드 원본만. 덮어쓰기 금지. 재처리는 새 사본 금지, 재다운로드만
-  /power/ /imerg/ /smap/ /hls/ /landsat/ /srtm/ /cdl/ /csb/ /ssurgo/ /quickstats/ /prism/ ...
+  /power/ /imerg/ /smap/ /hls/ /landsat/ /srtm/ /cdl/ /csb/ /ssurgo/ /nass_bulk/ /quickstats/ /prism/ ...
 /data/processed/v1/        # 첫 가공본. 스키마가 바뀌면 v2, v3... (vN을 덮어쓰지 말 것)
 /data/cache/               # 재생성 가능
 /data/lit/                 # 문헌 원문은 라이선스가 허용할 때만. 저장소에는 URL·DOI 목록만
@@ -376,7 +392,7 @@ CREATE TABLE calibration_param (
 {
   "field_id": "CSB-EXAMPLE-0001",
   "csb_version": "v2024",
-  "county_fips": "19000",
+  "county_fips": "19169",
   "state_alpha": "IA",
   "area_ha": 24.3,
   "current_rotation": "C-S",
@@ -525,11 +541,11 @@ CREATE TABLE calibration_param (
       "strategy_code": "A",
       "year": 2012,
       "observed_sequence": "C-S",
-      "notes": "County yield filled when QuickStats is loaded. 2012 US drought is a candidate stress year.",
+      "notes": "County yield is optional (NASS bulk fallback if QuickStats API is unreachable). 2012 US drought is a candidate stress year.",
       "metrics": {}
     }
   ],
-  "sources": ["CDL", "CSB", "QuickStats"]
+  "sources": ["CDL", "CSB"]
 }
 ```
 
@@ -586,7 +602,7 @@ DOI가 없는 공식 핸드북은 `url` 필수. 근거가 없으면 `insufficien
 {
   "in_service_area": true,
   "field_id": "CSB-EXAMPLE-0001",
-  "county_fips": "19000",
+  "county_fips": "19169",
   "state_alpha": "IA",
   "area_ha": 28.47,
   "geometry": { "type": "MultiPolygon", "coordinates": [] },
@@ -735,7 +751,7 @@ GEOS-S2S가 스파이크에서 실패하면 `next_season`은 `null`이고 `info_
 
 ## 7. 아직 비워 두는 값
 
-- 아이오와 본편 **카운티 이름과 `county_fips`** — 동결 창 이슈로 닫고 이 절을 PR로 갱신한다.
+- ~~아이오와 본편 카운티 이름과 `county_fips`~~ — **닫힘 (2026-11-15 11:10 KST):** Story County, `19169`, `IA`.
 - 데모 `field_id` 실값, POWER 격자 해상도, CSB ID 컬럼명, 임베딩 차원, 공개 API 베이스 URL.
 - GEOS-S2S 압축 파일 내부 형식·변수명·리드 월 수, NEX-GDDP 사용 모델 3개 이름, Prithvi 체크포인트 로드 방식(mmseg vs terratorch), `ndvi_class`·`hero_state` 임계값, 후보 생성 규칙 최종안(TEAM_SPEC O1).
 

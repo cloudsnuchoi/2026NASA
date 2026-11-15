@@ -1,5 +1,7 @@
 # 2026NASA · Field Shift
 
+**Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · **Status dashboard:** [docs/dashboard/](docs/dashboard/index.html) ([GitHub Pages](https://cloudsnuchoi.github.io/2026NASA/dashboard/))
+
 Team **아몰라** · [NASA Space Apps Challenge 2026](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/) (Seoul) · Challenge 07 *Field Shift: Adapting Farms with NASA Data*.
 
 A **decision-support** tool for Corn Belt corn–soy farmers. It compares crop-rotation strategies that may improve soil health and resilience to weather and water, using NASA Earth observations. It **supports, and does not replace**, farmer judgment and local agronomic expertise.
@@ -12,7 +14,7 @@ Repository: [github.com/cloudsnuchoi/2026NASA](https://github.com/cloudsnuchoi/2
 
 **Question.** What crop to add to or change in an existing rotation to improve soil health and resilience to weather and water?
 
-**Where.** One Iowa or Illinois county (rainfed Corn Belt, main case; picked in the 09:00–11:00 KST data spike). A Nebraska water-limited contrast is optional and cuttable.
+**Where.** Two tiers. Tier 1 covers the 12-state Corn Belt (`IA, IL, IN, OH, NE, MN, SD, WI, MO, KS, MI, KY`) at **county aggregates**. Tier 2 is field-scale (30 m) in **Story County, Iowa** (`county_fips=19169`). A Nebraska water-limited contrast remains optional and cuttable.
 
 **Strategies compared**
 
@@ -23,7 +25,7 @@ Repository: [github.com/cloudsnuchoi/2026NASA](https://github.com/cloudsnuchoi/2
 | `C` | `C-S`–wheat or oats plus a cover crop |
 | `D` | `C-S`–alfalfa (forage, nitrogen fixation, deep roots; water-use risk must be flagged, especially in the West) |
 
-**Outputs.** Bare-field periods, vulnerable seasons, a multi-criteria comparison, and per-strategy *why / evidence / benefits / information gaps / local-review risks*, with priority sliders and a field map. Uncertainty is shown with Monte Carlo percentiles and CVaR. Validation is a CDL / Crop Sequence Boundaries backtest.
+**Outputs.** Bare-field periods, vulnerable seasons, a multi-criteria comparison, and per-strategy *why / evidence / benefits / information gaps / local-review risks*, with priority sliders and a field map. Uncertainty is shown with Monte Carlo percentiles and CVaR. Validation is a CDL / Crop Sequence Boundaries backtest. County yields are an optional side axis (NASS bulk files if the QuickStats API is unreachable).
 
 AI is organized in four layers: **vision** (Prithvi crop-classification checkpoint, inference only, CDL fallback) → **forecast/scenarios** (NASA GEOS-S2S seasonal ensemble, NASA NEX-GDDP-CMIP6 for the 2030s; distributions only) → **simulation** (Monte Carlo water balance + CVaR, rule/index scoring) → **LLM explanation** with tool-calling and citation-only RAG. The live engine for this weekend is **rule/index scoring + Monte Carlo + CVaR**. There is no reinforcement learning and no model fine-tuning. An LLM may call the model API and attach citations; it does not compute numbers. MATLAB is **offline only** (analysis and calibration exported to the database).
 
@@ -35,7 +37,9 @@ These documents are frozen in Korean. Identifiers in code stay English.
 
 | Doc | Role |
 | --- | --- |
-| [docs/TEAM_SPEC.md](docs/TEAM_SPEC.md) | **Start here.** Product lock status, user flow & screens, requirement traceability, data mapping, AI 4-layer architecture, data spike, roles & handoff contracts, CLI guide, timeline |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, **build vs service pipelines**, decision model, collaboration workflow, AI 4 layers and algorithms |
+| [docs/dashboard/](docs/dashboard/index.html) | Live hackathon status (issues, PRs, commits, countdown). Also on [GitHub Pages](https://cloudsnuchoi.github.io/2026NASA/dashboard/) |
+| [docs/TEAM_SPEC.md](docs/TEAM_SPEC.md) | Product lock status, user flow & screens, requirement traceability, data mapping, AI 4-layer architecture, data spike, roles & handoff contracts, CLI guide, timeline |
 | [docs/PRD.md](docs/PRD.md) | Problem, users, decision, scope, success criteria, demo, cut order |
 | [docs/SOT.md](docs/SOT.md) | Datasets, IDs/units/CRS, aggregation, directories, DB schema, API contract |
 | [docs/CHECKLIST.md](docs/CHECKLIST.md) | 16-hour timeline (KST) and Space Apps submission checklist |
@@ -58,7 +62,7 @@ matlab/          # Offline analysis only (fixed Parquet/CSV outputs)
 sim/             # three.js voxel simulation for the demo video
 infra/           # Docker Compose, Postgres + PostGIS + pgvector
 notebooks/       # EDA
-docs/            # PRD, SOT, checklist, decisions
+docs/            # PRD, SOT, architecture, checklist, decisions, status dashboard
 ```
 
 Do not commit secrets or raw/processed rasters. See `.gitignore` and the directory rules in [docs/SOT.md](docs/SOT.md).

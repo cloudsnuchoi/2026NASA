@@ -1,7 +1,7 @@
 # TEAM_SPEC · 팀 작업 명세 (v1)
 
 팀 **아몰라** · NASA Space Apps 2026 · 챌린지 07 *Field Shift: Adapting Farms with NASA Data* · 저장소 `cloudsnuchoi/2026NASA`  
-작성 **2026-11-15 08:20 KST (Asia/Seoul)**. 마감 **2026-11-15 23:59 KST**.  
+작성 **2026-11-15 08:20 KST (Asia/Seoul)**. 갱신 **2026-11-15 11:10 KST**. 마감 **2026-11-15 23:59 KST**.  
 입력: 팀 아이디에이션·UIUX·디자인 PDF(14쪽), 챌린지 07 원문, [PRD.md](./PRD.md), [SOT.md](./SOT.md), [DECISIONS.md](./DECISIONS.md), 내부 메모 `fieldshift_context_v3.md`·`fieldshift_data_pipeline.md`.
 
 > 이 문서는 **누가 무엇을 어떤 형식으로 넘기는지**를 고정한다. 필드명·단위·엔드포인트의 최종 원본은 [SOT.md](./SOT.md)다. 둘이 다르면 SOT가 이기고, 이 문서를 PR로 고친다.  
@@ -24,7 +24,7 @@
 
 ### 1.1 잠금 (2026-11-15 08:20 KST)
 
-1. **대상.** 미국 콘벨트 옥수수–대두 농가와 그들을 돕는 현지 전문가. 본편 공간은 **아이오와 또는 일리노이 카운티 1곳**(빗물 농업). 카운티 이름은 스파이크에서 이슈 #1로 닫는다.
+1. **대상.** 미국 콘벨트 옥수수–대두 농가와 그들을 돕는 현지 전문가. 공간은 **두 층**: 1층 콘벨트 12주 카운티 집계, 2층 본편 아이오와 **Story County** (`19169`, 빗물 농업). 카운티는 2026-11-15 11:10 KST에 닫혔다.
 2. **돕는 결정.** “기존 윤작에 **어떤 작물을 추가하거나 바꾸면** 토양 건강이 좋아지고 날씨·물 변화에 더 잘 버틸까?” 정답을 명령하지 않고 선택지·트레이드오프·불확실성·정보 공백을 보여 준다.
 3. **최소 산출.** 현재 윤작 포함 3–4개 전략 비교, 전략마다 이유·근거·이점·정보 공백·현지 검토 위험 (챌린지 07 원문 요구).
 4. **AI 구성 원칙.** 위 4층. RL·미세조정 없음. 숫자는 모델 API만 만든다.
@@ -40,7 +40,7 @@
 | O4 | Prithvi 비전 층 포함 여부 | 포함(보조), 실패 시 CDL 라벨 | 스파이크 8번 |
 | O5 | GEOS-S2S 다음 시즌 패널 | 포함 | 스파이크 6번 파일 열림 여부 |
 | O6 | 카운티 (IA vs IL) | 아이오와 후보 1개 + 일리노이 후보 1개 중 택1 | CSB·CDL C–S 비율, HLS 구름 |
-| O7 | 수익 축 데이터 | QuickStats 카운티 수량 × 공개 가격 lite (상대 지수) | QuickStats 키 확보 여부 |
+| O7 | 수익 축 데이터 | NASS 카운티 수량(일괄 파일, 선택) × 공개 가격 lite (상대 지수) | 일괄 파일 적재 여부. 실패 시 수익 %는 숨기거나 공백 |
 
 ---
 
@@ -71,7 +71,7 @@ flowchart LR
 | **S1 지도 핀** | 위성 배경 지도, 핀, 필지 다각형 하이라이트, 서비스 지역 밖이면 빨간 오버레이 | CSB 폴리곤(필지), 배경 타일(무료 위성 타일 또는 NAIP) | `GET /locate?lat=&lon=` `NEW` → `in_service_area`, `field_id`, `county_fips`, `state_alpha`, `area_ha`, `geometry` |
 | **S2 측정 결과** (PDF 팝업 그대로) | 지역 라벨, 면적 `area_ha`(화면에서 m²·ha·평 동시 표기), 연 강수 `precip_mm_yr`, 증발산 `et_mm_day`, 식생지수 `ndvi_peak` + 등급(양호/보통/낮음), 평균기온 `t2m_mean_c`, **이전 작물 이력** `cdl_history[]`(연도·작물), 토양 요약 `soil{om_pct,k_factor,awc_cm_cm}`, 비전 인식 `vision{crop_pred,bare_periods,agreement_with_cdl}`, 버튼 “다시 측정 / 확인” | 강수: IMERG(또는 POWER) 30년 평년. ET: NLDAS-2 Noah(맥락 칸) / POWER→FAO-56 ET0. NDVI: HLS v2(30 m). 기온: POWER. 이력: CDL 2008–2025 + CSB 서열. 토양: SSURGO. 비전: Prithvi | `GET /field/{id}/profile` (확장) |
 | **S3 작물·제약·우선순위** | (a) 현재 윤작 자동 채움(CDL로 추정, 수정 가능) (b) 추가 후보 선택 칩(최대 2–3개, O1) (c) 제약: 물 제한 여부·가용 물(mm), 장비, 시장 (d) 우선순위 슬라이더: 물 절약·토양 개선·안정/회복력·추가 소득 | 작물 특성 표(문헌: FAO-56 Kc, SARE, ISU Extension) | `POST /rotations/candidates` `NEW` → 후보 목록(2ⁿ)·실현 가능 플래그 |
-| **S4 전략 탭 4개** | 탭마다: 순위, 목표 라벨(예: “물 절약 목표”), 윤작 서열(예: `C-S-W`), **기준 A 대비 %**: `vegetation_pct`·`water_use_pct`·`revenue_pct`(각 P10/P50/P90), **장점 3개(탭끼리 겹치지 않게)**, 단점 ≥1, 이 선택만의 특징 `unique_feature`, 7축 지수, CVaR, 카드 5항목(why·evidence·benefits·info_gaps·local_review_risks). 물 제한이면 물 가중치를 올렸다는 배지 | MC 물수지(POWER·IMERG·NLDAS·SSURGO·Kc), 규칙·지수 점수, QuickStats 수량, 가격 lite, RAG 인용 | `POST /strategies/compare` (확장) |
+| **S4 전략 탭 4개** | 탭마다: 순위, 목표 라벨(예: “물 절약 목표”), 윤작 서열(예: `C-S-W`), **기준 A 대비 %**: `vegetation_pct`·`water_use_pct`·`revenue_pct`(각 P10/P50/P90), **장점 3개(탭끼리 겹치지 않게)**, 단점 ≥1, 이 선택만의 특징 `unique_feature`, 7축 지수, CVaR, 카드 5항목(why·evidence·benefits·info_gaps·local_review_risks). 물 제한이면 물 가중치를 올렸다는 배지 | MC 물수지(POWER·IMERG·NLDAS·SSURGO·Kc), 규칙·지수 점수, 선택 카운티 수량, 가격 lite, RAG 인용 | `POST /strategies/compare` (확장) |
 | **S5 탭 상세** | **과거(1–5년)**: 연도별 강수·ET·NDVI·기온·그해 작물(CDL)·NAIP 썸네일 / **다음 시즌**: GEOS-S2S 강수·기온 아노말리 분포(앙상블 P10–P90 또는 3분위 확률) / **2030년대**: NEX-GDDP-CMIP6 SSP2-4.5·SSP5-8.5 여러 모델의 변화 분포 / 이 전략의 시나리오별 물수지·CVaR / 맨땅 기간·취약 계절 / 필지 지도(침식·물 스트레스·서리) | POWER, IMERG, NLDAS-2, HLS, CDL, NAIP, GEOS-S2S, NEX-GDDP-CMIP6, SRTM, SSURGO | `GET /field/{id}/climate/history?years=5` `NEW`, `GET /field/{id}/climate/outlook` `NEW`, `GET /field/{id}/bare-periods`, `GET /field/{id}/vulnerable-seasons`, `GET /maps/{field_id}/{layer}` |
 | **S6 왜? 용어·근거·질문** | 용어 카드(증발산, 토양수분 아노말리, NDVI, 서리 위험, 물수지, CVaR, 피복작물, 질소 고정, 심근 작물, 위성 vs 지상 관측), 전략별 “왜 이 작물이 맞을 수 있나” 설명, 출처 링크, 자유 질문 | 근거 카드(pgvector), 모델 API 숫자 | `GET /glossary` `NEW`, `GET /evidence/search`, `POST /explain` `NEW` (LLM tool-call) |
 | **S7 사람 판단 리마인더** | 화면 하단 고정 문구 + 전략별 “현장에서 확인할 것” 체크리스트(토양검정, 지역 병해충, 장비, 계약·시장, 관개권) + 데이터 해상도 경고(SMAP·NLDAS·GEOS-S2S는 수–수십 km 칸) | 카드 `local_review_risks`, `info_gaps` | `POST /strategies/compare` 응답 재사용 |
@@ -156,7 +156,7 @@ flowchart LR
 | 18 | CoCoRaHS | 강수 지상 검증 | P1 |
 | 19 | USGS NWIS | 관개 맥락 | 컷 (빗물 본편) |
 | 20 | USDA AMS Market News | 가격 lite(시장 적합성) | P1 |
-| 21 | USDA NASS QuickStats | 카운티 수량·면적 → 수익 상대 지수, 2012 백테스트 | P0 |
+| 21 | USDA NASS 수량 (QuickStats API 또는 일괄 파일) | 카운티 수량·면적 → 수익 상대 지수, 2012 백테스트 보조 | 선택 (옆축). API 접속 실패 시 `sb.nass.usda.gov/datasets/` 일괄 파일, 둘 다 실패 시 생략 |
 | 22 | OpenET | ET 교차검증 | P1 |
 | 23 | LANDFIRE | 경관 맥락 | 컷 |
 | 24 | GEDI | 바이오매스 맥락 | 컷 |
@@ -197,7 +197,7 @@ flowchart TB
     S2S[GEOS-S2S-3]:::nasa
     NEX[NEX-GDDP-CMIP6]:::nasa
     NAIP[NAIP]
-    QS[QuickStats]
+    QS[NASS yield 선택]
   end
 
   subgraph L1["L1 비전 인식 (오프라인 배치 추론)"]
@@ -306,9 +306,9 @@ flowchart TB
 | 8 | **Prithvi** 작물 체크포인트 추론 | 백엔드(Colab T4 또는 VPS CPU) | 3시점 HLS 칩 1장 추론, CDL과 픽셀 일치율 기록(목표 ≥ 50 %) | 비전 층을 CDL 라벨로 대체하고 발표에서 “다음 단계”로 |
 | 9 | NAIP 데모 필지 타일 | 시뮬 담당 | Planetary Computer STAC로 2017·2019·2021·2023·2025 중 ≥ 3시점 | 위성 배경 타일 스크린샷 |
 | 10 | SSURGO 유기물·K·AWC | 백엔드 | Soil Data Access 쿼리로 데모 필지 mapunit 값 | 카운티 대표값 |
-| 11 | QuickStats 옥수수·대두 카운티 수량 2008–2025, 2012 포함 | Hylē | API 키로 카운티 행 확보 | 주 단위 수량 |
+| 11 | 카운티 수량 2008–2025(2012 포함) — **선택** | Hylē | NASS 일괄 파일(`sb.nass.usda.gov/datasets/qs.crops_20261103.txt.gz`)로 Story 및 콘벨트 카운티 행 확보. QuickStats API는 접속 실패로 전제하지 않음 | 수량 생략. 백테스트는 CDL/CSB만 |
 
-**11:00 결정 회의(10분).** Go 항목 수로 기능 잠금: 1·2·3·4·11이 Go면 P0 흐름 확정. 6·7 결과로 S5 미래 패널 형태 확정. 8 결과로 L1 포함 여부 확정. 결과를 DECISIONS.md에 기록하고 PRD를 PR로 갱신.
+**11:00 결정 회의(10분).** Go 항목 수로 기능 잠금: **1·2·3·4가 Go면 P0 흐름 확정**(11번 수량은 선택, 실패해도 잠금 가능). 6·7 결과로 S5 미래 패널 형태 확정. 8 결과로 L1 포함 여부 확정. 공간 두 층과 Story `19169`는 11:10에 기록됨. 결과는 DECISIONS.md·ARCHITECTURE.md.
 
 ---
 
@@ -334,7 +334,7 @@ flowchart TB
 | MATLAB B (식생·시나리오) | 김우찬 | `woochan` |
 | UI/UX A (S0–S3) | 고지은 | `jieun` |
 | UI/UX B (S4–S7, 슬라이드 디자인) | 하지민 | `jimin` |
-| three.js 복셀 시뮬·데모 영상 | 강다은 (**확인 필요**) | `daeun` |
+| three.js 복셀 시뮬·데모 영상 | 강다은 (2026-11-15 11:10 확인) | `daeun` |
 
 ### 7.2 백엔드 담당 (해소)
 
@@ -443,7 +443,7 @@ flowchart LR
 
 | 시각 | 할 일 | 산출물 / 게이트 |
 | --- | --- | --- |
-| 08:20–09:00 | TEAM_SPEC 읽기, 역할·백엔드 공백 결정, 계정·키(Earthdata, QuickStats, LLM) 준비 | 역할 확정 기록 |
+| 08:20–09:00 | TEAM_SPEC 읽기, 역할·백엔드 공백 결정, 계정·키(Earthdata, LLM). QuickStats는 선택 | 역할 확정 기록 |
 | **09:00–11:00** | **데이터 검증 스파이크** (6절) + UI는 fixture로 S0–S2 골격, 시뮬은 fixture 복셀 | 스파이크 리포트 |
 | 11:00 | **기능 잠금 회의** (O1–O7 닫기) | DECISIONS·PRD 갱신 |
 | 11:00–14:00 | MATLAB 1차 산출(v1 파일 3개), API 실제 DB 연결 시작, UI S3–S4, 시뮬 fixture 재생 | 11:30 API fixture, 13:00 MATLAB v1 |
@@ -463,7 +463,7 @@ flowchart LR
 
 1. **백엔드 소유자**(7.2 안 A/B) — Hylē, 09:00 전.
 2. **후보 생성 규칙**(O1): 팀 PDF는 “최대 2개 선택”(본문)과 “최소 2개 선택”(스케치)이 다르다. 기본안은 추가 요소 최대 2(확장 3) → 2ⁿ.
-3. **% 지표**(O2): “연간 수익 %”를 어디까지 보여 줄지. 기본안은 QuickStats 수량 × 가격 lite의 **상대 지수**, 확정 금액 아님.
+3. **% 지표**(O2): “연간 수익 %”를 어디까지 보여 줄지. 기본안은 NASS 카운티 수량(선택) × 가격 lite의 **상대 지수**, 확정 금액 아님. 수량이 없으면 그 축을 숨긴다.
 4. **카운티**(O6): IA 후보 예 Story County(FIPS 19169), IL 후보 예 Champaign County(FIPS 17019) — 스파이크 1에서 확정. 둘 다 **후보일 뿐**.
 5. **GEOS-S2S 파일 내부 형식·변수명**(`at`가 2 m 기온인지 등) — 스파이크 6에서 확인. 미확인.
 6. **Prithvi-EO-1.0 체크포인트 로드 경로**(mmseg vs terratorch) — 스파이크 8.

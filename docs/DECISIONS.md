@@ -70,3 +70,17 @@
 - **결정 (소통).** VPS에 Mattermost Team Edition 12.0.2 + Postgres를 띄운다(`infra/chat/`, 127.0.0.1만 열고 Cloudflare quick tunnel로 노출). 팀 `amolla`. 공개 채널: 공지(announce), uiux-design, demo-video, ppt-slides, data-matlab, backend, sim-voxel, random. 비공개 `1on1-<이름>` = 팀원 + Hylē + orchestrator 봇.
 - **결정 (오케스트레이터).** 08:20의 「무거운 중앙 에이전트 없음」을 바꾼다. 팀원이 git·Codex 초보라서 1:1 지시가 필요하기 때문이다. 대신 작게 만든다. `infra/orchestrator/bridge.py`가 웹소켓으로 1on1과 멘션을 받고, LLM(OpenAI 호환)에 저장소 문서와 GitHub 읽기 전용 상태를 넣어 "다음 할 일, 붙여 넣을 프롬프트, 완료 기준"을 답한다. Hylē의 글이 우선한다. 봇은 GitHub에 쓰지 않는다. Mattermost 공식 Agents 플러그인은 무라이선스 등급에서 채널 에이전트와 원격 MCP가 막혀 있어 보조(옵션 A)로만 둔다.
 - **결정 (git 운영).** 팀원은 git 명령 대신 `docs/PROMPTS.md`의 **마무리 블록**을 에이전트에 붙인다. MATLAB 담당은 git을 쓰지 않고, Hylē가 커밋한다. main은 PR 필수(승인 0, admin 우회), 머지는 Hylē만 한다. CI는 self-hosted 러너(`[self-hosted, linux]`)에서 돌리고, 포크 PR은 실행하지 않는다. 러너 등록 뒤 `ci-ok`를 필수 체크로 더한다.
+
+---
+
+## 2026-11-15 11:10 · 공간 두 층, QuickStats 선택, 아키텍처·대시보드
+
+- **동결 (본편 카운티).** 2층 정밀 분석의 본편 카운티는 아이오와 **Story County**, `county_fips=19169`, `state_alpha=IA`. 이전 「아이오와 또는 일리노이 중 스파이크로 선택」을 여기서 닫는다. 네브래스카 대비는 그대로 P1·컷 가능.
+- **결정 (데이터 두 층).** 콘벨트 **전체를 다루되 해상도를 나눈다.**
+  - **1층 (넓게):** 콘벨트 12개 주 (`IA, IL, IN, OH, NE, MN, SD, WI, MO, KS, MI, KY`)를 **카운티 집계**로 받는다. NASA POWER(카운티 중심점), GPM IMERG, SMAP L3/L4(맥락 칸 평균), CDL 카운티 작물 비율, NEX-GDDP-CMIP6 카운티 평균. 어느 카운티든 1차 위험·윤작 힌트를 보여 준다.
+  - **2층 (깊게):** Story County만 필지 30 m — CDL 래스터, CSB, SSURGO, HLS NDVI, GEOS-S2S. 몬테카를로·백테스트의 본편 검증 장소다. 30 m를 콘벨트 전체에 받지 않는다.
+- **결정 (QuickStats).** USDA NASS QuickStats API 사이트(`quickstats.nass.usda.gov`)는 2026-11-15 팀에서 **접속 자체가 되지 않았다.** 카운티 수량은 시장 적합성의 **옆축·보조**이므로 QuickStats를 **선택(optional)** 으로 낮춘다. 본편 성공 기준과 go/no-go에서 수량 API를 빼다.
+- **결정 (NASS 일괄 파일 대체, 확인함).** QuickStats 대신 [NASS Large Datasets](https://www.nass.usda.gov/datasets/) 일괄 파일을 먼저 시도한다. 2026-11-15 11:10 KST 확인: `https://www.nass.usda.gov/datasets/` 는 `http://www-origin.nass.usda.gov/datasets` 로 301된 뒤 origin이 **HTTP 500**. 목록·파일은 **`https://sb.nass.usda.gov/datasets/`** 에서 HTTP 200. 작물 파일 `qs.crops_20261103.txt.gz` 는 HTTP 200, `Content-Length=1132568713`, `Last-Modified=2026-11-03 08:14 UTC` (17:14 KST), 키 없음. 콘벨트 12주·카운티·옥수수/대두·연 수량만 필터한다. 이 경로도 실패하면 수량 열을 생략하고 CDL/CSB 백테스트만 남긴다.
+- **결정 (문서·현황판).** 시스템 그림의 원본은 [ARCHITECTURE.md](./ARCHITECTURE.md) (전체 구조, 빌드 파이프라인, 서비스 파이프라인, 의사결정 모델, 협업 흐름, AI 4층·알고리즘). 진행 현황은 `docs/dashboard/` 정적 페이지가 공개 레포 GitHub REST API를 비인증으로 읽어 표시하고, GitHub Pages(`main`의 `/docs`)로 연다.
+- **확인 (역할).** Hylē = 풀스택·오케스트레이터. MATLAB = 김윤성, 김우찬. UI/UX = 고지은, 하지민. three.js 복셀 시뮬 = 강다은. VPS 서버 에이전트가 Postgres 17 + PostGIS + pgvector + pg_trgm (`/srv/hackathon`)으로 적재 중. crawl4ai는 RAG 근거 문서용이며 P0 다운로드 다음이다.
+
