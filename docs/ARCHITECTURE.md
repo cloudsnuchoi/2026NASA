@@ -1,7 +1,9 @@
-# ARCHITECTURE · 시스템 구조와 파이프라인
+# ARCHITECTURE · ART FARM 시스템 구조와 파이프라인
+
+**ART FARM** — *Field Shift: Adapting Farms with NASA Data*
 
 팀 **아몰라** · `cloudsnuchoi/2026NASA` · 챌린지 07 *Field Shift*  
-작성 **2026-11-15 11:10 Asia/Seoul (KST)**. 마감 **2026-11-15 23:59 KST**.
+작성 **2026-11-15 11:10 Asia/Seoul (KST)**. **최종 갱신 2026-11-15 18:57 KST** (ART FARM, Tier 1/Tier 2, 구현 상태). 제출 목표 **22:00 KST**.
 
 이 문서는 **시스템 구조, 빌드(오프라인) 파이프라인, 서비스(런타임) 파이프라인, 의사결정 모델, 협업 흐름, AI 4층·알고리즘**의 단일 그림 원본이다. 필드명·단위·엔드포인트는 [SOT.md](./SOT.md)가 이긴다. 제품 범위는 [PRD.md](./PRD.md). 역할·인계는 [TEAM_SPEC.md](./TEAM_SPEC.md). 진행 현황은 [status dashboard](./dashboard/index.html).
 
@@ -11,12 +13,31 @@
 
 ## 0. 한 줄로
 
-콘벨트 옥수수–대두 농가가 지도에 핀을 찍으면, NASA 지구관측과 필지 이력을 바탕으로 **기존 윤작에 무엇을 추가·변경할지** 전략 A–D를 비교해 주는 **판단 보조 도구**다. 농부 판단을 대체하지 않는다.
+**ART FARM**은 콘벨트 옥수수–대두 농가가 기존 윤작에 **무엇을 추가·변경할지** 비교해 보는 **판단 보조 도구**다. 농부 판단을 대체하지 않는다. 순위·「추천」·보장 문구를 쓰지 않는다.
 
-- **공간, 두 층.** 1층 = 콘벨트 12개 주 카운티 집계 지도. 2층 = 아이오와 **Story County** (`county_fips=19169`) 필지 30 m 정밀 분석.
-- **숫자.** 규칙·지수 스코어링 + 몬테카를로 물수지 + CVaR. LLM은 숫자를 만들지 않는다.
-- **MATLAB.** 라이브 경로에 없음. 오프라인 보정·평활 결과만 DB에 적재.
-- **수확량.** 옆축(시장 적합성)이며, USDA QuickStats API는 **선택**. 대체는 NASS 일괄 파일, 실패 시 생략.
+- **화면 두 단계.**
+  - **Tier 1 Quick Screen** — 콘벨트 어디서나 네 꼭짓점 다각형 + 작물 2–3개 → NASA POWER 10년 + USGS 3DEP + FAO-56/FAO-33 식으로 **screening estimate** 카드. `POST /quick` (SOT 6.0). **[계획]**
+  - **Tier 2 Deep Analysis** — 다각형이 데모 필지 20개(Story IA 12, McLean IL 3, Lancaster NE 3, Union OH 2)와 겹치면 model_api 엔진의 전략 A–D 카드: P10–P90, CVaR, 2012 백테스트, Prithvi/CDL, `/explain`. **[구현됨]** (API, VPS 내부)
+- **데이터 두 층** (SOT 1.6)은 그대로: 1층 카운티 집계, 2층 필지 30 m.
+- **숫자.** Tier 1 = FAO-56 식(팀 MATLAB V8 이식, MATLAB 런타임 없음). Tier 2 = 규칙·지수 + 몬테카를로 물수지 + CVaR. LLM은 숫자를 만들지 않는다.
+- **MATLAB.** 라이브 경로에 없음. 오프라인 산출만 DB에 적재. V8 수식은 Tier 1 엔진으로 옮긴다.
+- **수확량.** 옆축이며 선택.
+
+### 0.1 구현 상태 (2026-11-15 18:57 KST)
+
+| 구성 | 상태 |
+| --- | --- |
+| Postgres 17 + PostGIS + pgvector, 적재: POWER, IMERG, NLDAS-2, SMAP L3(맥락), HLS NDVI, CDL, CSB, SSURGO, GEOS-S2S(멤버 10), NEX-GDDP(모델 2) | 구현됨 |
+| 데모 필지 20개 / 4개 카운티 (`GET /fields`) | 구현됨 |
+| Prithvi-EO-1.0 crop classification 추론 → `vision_result` 20개 필지 | 구현됨 |
+| MC 물수지·P10/P50/P90·CVaR (`/strategies/compare`, `/simulate`) | 구현됨 |
+| 2012 가뭄 백테스트 (`/validation/backtest?field_id=`) | 구현됨 |
+| `/explain` (DeepSeek, tool 응답 숫자만) | 구현됨 |
+| `POST /quick` (Tier 1) | 계획 |
+| frontend (ART FARM UI), 공개 배포 | 계획 (진행 중) |
+| `sim/` 복셀 시뮬, `GET /sim/{field_id}/scene` | 계획 |
+| `GET /maps/{field_id}/{layer}` | 계획 (model_api에 라우트 없음) |
+| MATLAB `field_dekad`, `field_season` | 계획 (진행 중) |
 
 ---
 
@@ -52,7 +73,7 @@ flowchart TB
     NEX1["NEX-GDDP-CMIP6 2030s\n카운티 평균 · 김우찬"]
   end
 
-  subgraph T2["2층 Story County 19169 · 30 m"]
+  subgraph T2["2층 데모 필지 20개 · 4개 카운티 · 30 m"]
     CDL2["CDL 30 m 래스터 2008–2025\nHylē"]
     CSB["CSB 필지 경계\nHylē"]
     SSU["SSURGO 유기물·K·AWC\nHylē"]
@@ -142,10 +163,14 @@ sequenceDiagram
   participant DB as Postgres 17
   participant LLM as LLM + RAG\nHylē
 
-  User->>UI: 지도에 핀 (lon, lat)
+  User->>UI: 네 꼭짓점 다각형 + 작물 2–3개 (Tier 1)
+  UI->>API: POST /quick [계획]
+  API-->>UI: screening estimate 카드 (info_gaps, assumptions+출처, 순위 없음)<br/>+ deep_analysis.available
+  Note over UI,API: 데모 필지 20개와 겹치면 Tier 2, 아니면<br/>"Deep analysis available in 4 pilot counties"
+  User->>UI: Tier 2 진입 또는 프리셋 (IA, IL, NE, OH)
   UI->>API: GET /field/lookup 또는 county
   API->>DB: PostGIS 포함 조회
-  alt Story County 19169 필지
+  alt 데모 필지 20개 (IA·IL·NE·OH)
     DB-->>API: field_id CSB, 2층 피처
   else 콘벨트 다른 카운티
     DB-->>API: county_fips, 1층 집계
@@ -157,7 +182,7 @@ sequenceDiagram
   UI->>API: POST /strategies/compare
   API->>DB: 피처 + 사전계산 MC
   API->>API: 7축 점수 + 슬라이더 재가중\nCVaR·P10/P50/P90
-  API-->>UI: 전략 A–D 순위·카드(정답 강제 없음)
+  API-->>UI: 전략 A–D 카드 (순위 표시 없음, P10–P90·CVaR)
   User->>UI: 설명 질문
   UI->>LLM: POST /explain
   LLM->>API: tool-call (profile, compare, evidence)
@@ -168,7 +193,7 @@ sequenceDiagram
 
 화면 흐름 (TEAM_SPEC S0–S7): 핀 → 필지/카운티 프로필 → 작물 선택 → 탭 4장 → 상세(과거 1–5년, 미래 **분포만**) → 용어 카드 → “판단을 대체하지 않음”.
 
-주요 엔드포인트는 SOT 6절: `GET /health`, `GET /field/{id}/profile`, `GET /field/{id}/bare-periods`, `GET /field/{id}/vulnerable-seasons`, `POST /strategies/compare`, `GET /validation/backtest`, `GET /evidence/search`, `GET /maps/{field_id}/{layer}`, `POST /explain`, `GET /sim/{field_id}/scene`.
+주요 엔드포인트는 SOT 6절: `POST /quick`(Tier 1, 계획), `GET /fields`, `GET /health`, `GET /field/{id}/profile`, `GET /field/{id}/bare-periods`, `GET /field/{id}/vulnerable-seasons`, `POST /strategies/compare`, `GET /validation/backtest`, `GET /evidence/search`, `GET /maps/{field_id}/{layer}`(계획), `POST /explain`, `GET /sim/{field_id}/scene`(계획).
 
 ---
 
@@ -207,7 +232,7 @@ flowchart TB
   subgraph OUT["산출 · 필지 또는 카운티"]
     BARE["맨땅 기간"]
     VUL["취약 계절"]
-    RANK["슬라이더 가중 순위\n단일 정답 없음"]
+    RANK["슬라이더 가중 비교\n순위·단일 정답 없음"]
     CARD["why · evidence · benefits\ngaps · local-review risks"]
     UNC["P10 / P50 / P90 · CVaR"]
     MAP["침식·수분·서리 지도 레이어"]
@@ -341,11 +366,12 @@ flowchart LR
 | `anomaly` | 같은 격자 평년 대비 편차 | SMAP·강수·기온 표시와 입력 | MATLAB / Python |
 | `bare_detect` | NDVI 시계열 + CDL 연 라벨 | 맨땅 시작·끝·일수 | 김우찬, Hylē |
 | `fao56` | FAO-56 ET0, `ETc = ET0 × Kc` | 물수지의 증발산. Kc는 문헌 범위 | Python, 작물 테이블 |
+| `fao56_quick` | Tier 1: 다각형 면적·둘레(WGS84), 3DEP 고도, POWER 10년 ET0·강수, FAO-56 Table 12 Kc, FAO-33 Ky | screening estimate 카드. 순위·최적화 없음 | `POST /quick` (계획, MATLAB V8 이식) |
 | `wb_mc` | 일 물수지 `SM = SM + P − ETc − 유출/배수`, 용량 = SSURGO AWC × 근권. 연 단위 재표본 N=500–1000 | 생육기 물 부족, 스트레스 일수 | `model_api/` Hylē |
 | `scenario_shift` | GEOS-S2S 월 아노말리 가산, NEX-GDDP **delta method** (2031–2040 vs 1985–2014) | 다음 시즌·2030년대 분포 | 사전 계산 |
 | `cvar` | 하위 10% 평균 (CVaR), 함께 P10/P50/P90 | 회복력·꼬리 위험 | `model_api/` |
 | `score7` | 7축 규칙·지수 (0–1): 질소, 침식, 유기물, 병해충, 물, 사료, 시장 | 전략 비교. 확정 kg/ha 금지 | `model_api/` |
-| `reweight` | 우선순위 슬라이더로 축 가중만 변경 | 순위 재계산, 원점수 유지 | 런타임 |
+| `reweight` | 우선순위 슬라이더로 축 가중만 변경 | 가중 점수 재계산, 원점수 유지. 화면에 순위 표시 안 함 | 런타임 |
 | `prithvi_infer` | Prithvi-EO-1.0 다중시점 작물 분할, 필지 다수결 | 보조 작물·맨땅. 기준은 CDL | 배치, Hylē |
 | `backtest_cdl` | CSB 필지 × CDL 서열, 가뭄해(예: 2012) 대조 | 타당성 검증. 수량 열은 선택 | Hylē, 김윤성 |
 | `rag_hnsw` | 청크 임베딩 + pgvector HNSW, 보조 `pg_trgm` | 근거 검색·인용 | `rag/` |
@@ -371,4 +397,4 @@ flowchart LR
 - [PRD.md](./PRD.md) · [SOT.md](./SOT.md) · [TEAM_SPEC.md](./TEAM_SPEC.md) · [CHECKLIST.md](./CHECKLIST.md) · [DECISIONS.md](./DECISIONS.md)
 - 현황 대시보드: [dashboard/index.html](./dashboard/index.html)
 - 설명 페이지(GitHub Pages): [개요](./overview.html) · [PRD](./prd.html) · [데이터](./data.html) · [아키텍처](./architecture.html) · [알고리즘](./algorithms.html) · [팀·역할](./team.html)
-- 팀 드라이브 (아몰라): https://drive.google.com/drive/folders/1pUlXbE_VNiMGHVYSkHHT4Mr-nzo--Yqd
+- 팀 드라이브 (팀 아몰라): https://drive.google.com/drive/folders/1pUlXbE_VNiMGHVYSkHHT4Mr-nzo--Yqd

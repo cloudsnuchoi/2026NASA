@@ -1,8 +1,9 @@
 {
- "generated_at": "2026-11-15T18:49:40+09:00",
+ "generated_at": "2026-11-15T19:15:18+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 190,
+ "remaining_min": 164,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
+ "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
   {
    "id": "data",
@@ -289,13 +290,25 @@
    "model": "—",
    "task": "GitHub Actions 러너",
    "last_activity": "13:09"
+  },
+  {
+   "name": "web",
+   "model": "—",
+   "task": "프론트+API 프록시 (:8095)",
+   "last_activity": "19:08"
+  },
+  {
+   "name": "web-tunnel",
+   "model": "—",
+   "task": "공개 데모 터널",
+   "last_activity": "19:00"
   }
  ],
  "people": [
   {
    "name": "김우찬",
    "user": "woochan",
-   "mattermost_last": "18:25",
+   "mattermost_last": "19:08",
    "repo_last": null
   },
   {
@@ -326,7 +339,7 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "16:52"
+   "repo_last": "19:06"
   }
  ],
  "blockers": [],
@@ -336,6 +349,16 @@
   "MATLAB: field_season.csv"
  ],
  "merged_prs": [
+  {
+   "number": 50,
+   "title": "docs(prd): PRD 확정 — ART FARM, 2층 구조(Quick Screen / Deep Analysis), 정직성 규칙",
+   "merged_at": "2026-11-15T10:06:16Z"
+  },
+  {
+   "number": 49,
+   "title": "feat(status,site): live.json demo_url + 사이트 '라이브 데모' 버튼 + 최종 레인 추적",
+   "merged_at": "2026-11-15T10:03:43Z"
+  },
   {
    "number": 47,
    "title": "feat(model): Prithvi-EO 작물 분류 추론(CPU, 미세조정 없음) → vision_result",
@@ -365,16 +388,6 @@
    "number": 43,
    "title": "feat(status): 실시간 현황 생성기 (docs/status/live.json, LIVE.md)",
    "merged_at": "2026-11-15T06:53:25Z"
-  },
-  {
-   "number": 42,
-   "title": "fix(orchestrator): 봇 답변 품질 (MATLAB 경로·TASKS 맥락·툴박스/토큰 규칙·안내 템플릿·캡처 읽기)",
-   "merged_at": "2026-11-15T06:28:12Z"
-  },
-  {
-   "number": 41,
-   "title": "fix(model): 전략이 물수지에 실제로 반영되게 수정 (QA P1 E1·E3·E4) + NLDAS 반영",
-   "merged_at": "2026-11-15T06:14:42Z"
   }
  ],
  "ai_models": [
@@ -405,9 +418,10 @@
   }
  ],
  "lane_agents_done": {
-  "imerg": true,
-  "fields2": true,
-  "site": true,
-  "prithvi": false
+  "l1": true,
+  "l2": true,
+  "prd": true,
+  "l4": true,
+  "l5": false
  }
 }
