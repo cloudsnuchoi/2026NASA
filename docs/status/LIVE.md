@@ -1,6 +1,6 @@
-# 아몰라 실시간 현황 · 18:59 KST
+# 아몰라 실시간 현황 · 19:05 KST
 
-제출 목표 22:00 KST까지 **3시간 0분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **2시간 54분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -87,13 +87,14 @@
 | --- | --- | --- | --- |
 | api | — | model_api 상시 실행 (:8090) | 15:50 |
 | bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | 16:01 |
-| l1 | ? | ? | 18:59 |
-| l2 | ? | ? | 18:59 |
-| l4 | ? | ? | 18:59 |
+| l1 | claude-opus-5-5 | L1 프론트·/quick·배포 | 18:59 |
+| l2 | codex gpt-6.1-sol | L2 MATLAB 사전계산·검증 | 18:59 |
+| l4 | claude-opus-5-5 | L4 제출물 | 18:59 |
 | live | — | 이 현황 생성기 (5분) | 15:54 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | 12:11 |
-| prd | ? | ? | 18:59 |
 | runner | — | GitHub Actions 러너 | 13:09 |
+| web | — | 프론트+API 프록시 (:8095) | 19:00 |
+| web-tunnel | — | 공개 데모 터널 | 19:00 |
 
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |

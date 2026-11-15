@@ -1,8 +1,9 @@
 {
- "generated_at": "2026-11-15T18:59:56+09:00",
+ "generated_at": "2026-11-15T19:05:03+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 180,
+ "remaining_min": 174,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
+ "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
   {
    "id": "data",
@@ -274,20 +275,20 @@
   },
   {
    "name": "l1",
-   "model": "?",
-   "task": "?",
+   "model": "claude-opus-5-5",
+   "task": "L1 프론트·/quick·배포",
    "last_activity": "18:59"
   },
   {
    "name": "l2",
-   "model": "?",
-   "task": "?",
+   "model": "codex gpt-6.1-sol",
+   "task": "L2 MATLAB 사전계산·검증",
    "last_activity": "18:59"
   },
   {
    "name": "l4",
-   "model": "?",
-   "task": "?",
+   "model": "claude-opus-5-5",
+   "task": "L4 제출물",
    "last_activity": "18:59"
   },
   {
@@ -303,16 +304,22 @@
    "last_activity": "12:11"
   },
   {
-   "name": "prd",
-   "model": "?",
-   "task": "?",
-   "last_activity": "18:59"
-  },
-  {
    "name": "runner",
    "model": "—",
    "task": "GitHub Actions 러너",
    "last_activity": "13:09"
+  },
+  {
+   "name": "web",
+   "model": "—",
+   "task": "프론트+API 프록시 (:8095)",
+   "last_activity": "19:00"
+  },
+  {
+   "name": "web-tunnel",
+   "model": "—",
+   "task": "공개 데모 터널",
+   "last_activity": "19:00"
   }
  ],
  "people": [
@@ -429,9 +436,10 @@
   }
  ],
  "lane_agents_done": {
-  "imerg": true,
-  "fields2": true,
-  "site": true,
-  "prithvi": false
+  "l1": false,
+  "l2": false,
+  "prd": true,
+  "l4": false,
+  "l5": false
  }
 }
