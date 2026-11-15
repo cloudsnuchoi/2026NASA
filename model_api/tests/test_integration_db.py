@@ -15,7 +15,7 @@ def test_simulate_real_demo_field_and_tier1_county():
     app.state.repo = None
     c = TestClient(app)
     fields = c.get("/fields").json()["fields"]
-    assert len(fields) == 12
+    assert len(fields) >= 12  # 12 Story + contrast demo fields
     r = c.post("/simulate", json={"field_id": fields[0]["field_id"], "n": 200})
     assert r.status_code == 200, r.text
     sim = r.json()
