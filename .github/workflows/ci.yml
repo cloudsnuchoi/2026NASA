@@ -70,8 +70,8 @@ jobs:
           [ "$found" = 1 ] || echo "no package.json in frontend/ or sim/, skipping"
 
   ci-ok:
-    # Single required status check for the main ruleset (add later, after runner is registered).
-    if: always()
+    # Single required status check for the main ruleset. Same fork guard as the other jobs.
+    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     needs: [python, frontend]
     runs-on: [self-hosted, linux]
     steps:

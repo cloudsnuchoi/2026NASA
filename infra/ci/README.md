@@ -1,6 +1,6 @@
 # infra/ci · CI 워크플로 (설치 대기)
 
-`ci.yml`이 여기 있는 이유: 봇 쪽 GitHub 토큰에 `workflow` 권한이 없다. 그래서 `.github/workflows/`에 직접 올릴 수 없었다(2026-11-15 KST). Hylē 계정으로 한 번만 옮기면 된다.
+`ci.yml`은 2026-11-15 `.github/workflows/ci.yml`로 옮겼다(러너 `amolla-vps` 등록 완료). 아래는 기록용이다.
 
 ```bash
 # 노트북 또는 VPS, 2026NASA 폴더에서 (gh 로그인 계정에 workflow 권한 필요: gh auth refresh -s workflow)
