@@ -51,19 +51,25 @@ class PgRepo:
         return self._cached(("field", field_id), load)
 
     def demo_field_ids(self) -> list[str]:
-        # The data lane picked 12 Story demo fields; they are the fields with OpenET + HLS series.
+        # Demo fields = fields with an OpenET series: the 12 Story fields picked by the data lane, then the contrast
+        # fields in other Corn Belt counties (data_pipeline/contrast_fields.py). Story comes first, then by county.
         rows = self._cached(
             ("demo_ids",),
-            lambda: db.query("SELECT DISTINCT field_id FROM field_et_openet ORDER BY field_id"),
+            lambda: db.query(
+                "SELECT f.field_id FROM fields f WHERE f.field_id IN (SELECT DISTINCT field_id FROM field_et_openet) "
+                "ORDER BY (f.county_fips <> %s), f.county_fips, f.field_id",
+                (config.STORY_FIPS,),
+            ),
         )
         return [r["field_id"] for r in rows]
 
     def list_fields(self, field_ids: list[str] | None = None, limit: int = 100, offset: int = 0) -> list[dict]:
         if field_ids is not None:
             rows = db.query(
-                "SELECT field_id, county_fips, state_alpha, area_ha, csb_version, ST_X(centroid) AS lon, ST_Y(centroid) AS lat "
-                "FROM fields WHERE field_id = ANY(%s) ORDER BY field_id",
-                (field_ids,),
+                "SELECT f.field_id, f.county_fips, f.state_alpha, c.name AS county_name, f.area_ha, f.csb_version, "
+                "ST_X(f.centroid) AS lon, ST_Y(f.centroid) AS lat FROM fields f LEFT JOIN county c ON c.county_fips = f.county_fips "
+                "WHERE f.field_id = ANY(%s) ORDER BY (f.county_fips <> %s), f.county_fips, f.field_id",
+                (field_ids, config.STORY_FIPS),
             )
         else:
             rows = db.query(

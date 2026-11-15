@@ -80,9 +80,21 @@ def fields(request: Request, all: bool = False, limit: int = Query(100, ge=1, le
     else:
         rows = r.list_fields(r.demo_field_ids())
         total = len(rows)
-    return {"county_fips": config.STORY_FIPS, "demo_only": not all, "total": total,
-            "fields": [{**x, "centroid": {"type": "Point", "coordinates": [x.pop("lon"), x.pop("lat")]}} for x in rows],
-            "notes": "Demo fields = the 12 Story County CSB fields with OpenET + HLS series. CSB polygons are not ownership parcels."}
+    out = []
+    for x in rows:
+        fips = (x["county_fips"] or "").strip()
+        name = x.pop("county_name", None)
+        x["county_label"] = f"{name} County, {x['state_alpha']} ({fips})" if name else fips
+        out.append({**x, "centroid": {"type": "Point", "coordinates": [x.pop("lon"), x.pop("lat")]}})
+    counties: dict[str, dict] = {}
+    for x in out:
+        k = x["county_fips"].strip()
+        counties.setdefault(k, {"county_fips": k, "county_label": x["county_label"], "n_fields": 0})["n_fields"] += 1
+    return {"county_fips": config.STORY_FIPS, "demo_only": not all, "total": total, "fields": out,
+            "counties": list(counties.values()),
+            "notes": "Demo fields = CSB fields with OpenET + HLS series: 12 in Story County, IA (listed first) plus contrast "
+                     "fields in other Corn Belt counties (docs/CONTRAST-FIELDS.md). Weather is one county POWER point, so "
+                     "fields in the same county share weather. CSB polygons are not ownership parcels."}
 
 
 @app.get("/field/{field_id}/profile")
