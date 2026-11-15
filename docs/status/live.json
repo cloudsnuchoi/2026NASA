@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T22:41:17+09:00",
+ "generated_at": "2026-11-15T22:46:26+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -10,15 +10,15 @@
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 18
+   "remaining_min": 13
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 48
+   "remaining_min": 43
   }
  ],
- "remaining_min": 48,
+ "remaining_min": 43,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -434,12 +434,17 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "22:01"
+   "repo_last": "22:34"
   }
  ],
  "blockers": [],
  "next": [],
  "merged_prs": [
+  {
+   "number": 78,
+   "title": "feat(matlab): 윤성 NASS 2012 비교 결과 반영(슬라이드, S5), 새 스크립트 2개",
+   "merged_at": "2026-11-15T13:34:42Z"
+  },
   {
    "number": 77,
    "title": "fix(ui): 결과 화면에 'A decision aid — it does not replace your judgement' 문구",
@@ -474,11 +479,6 @@
    "number": 72,
    "title": "fix(ui): 모바일 360/390/768 점검과 UX-AUDIT 수정",
    "merged_at": "2026-11-15T12:04:07Z"
-  },
-  {
-   "number": 70,
-   "title": "feat(matlab): run_all_<name>.m 원클릭 실행과 JSON 실행 로그, mwatch 자동 수정",
-   "merged_at": "2026-11-15T11:57:47Z"
   }
  ],
  "ai_models": [
