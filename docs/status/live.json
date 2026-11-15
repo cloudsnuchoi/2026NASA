@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T22:31:01+09:00",
+ "generated_at": "2026-11-15T22:36:08+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -10,15 +10,15 @@
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 28
+   "remaining_min": 23
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 58
+   "remaining_min": 53
   }
  ],
- "remaining_min": 58,
+ "remaining_min": 53,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -351,6 +351,14 @@
    "waits_on": ""
   },
   {
+   "name": "mat5",
+   "model": "?",
+   "task": "?",
+   "last_activity": "22:31",
+   "state": "waiting-merge",
+   "waits_on": "main에 없는 커밋 1개 (감독 머지)"
+  },
+  {
    "name": "mfixq",
    "model": "?",
    "task": "?",
@@ -377,14 +385,6 @@
    "model": "?",
    "task": "?",
    "last_activity": "21:00",
-   "state": "running",
-   "waits_on": ""
-  },
-  {
-   "name": "results",
-   "model": "?",
-   "task": "?",
-   "last_activity": "22:25",
    "state": "running",
    "waits_on": ""
   },
@@ -419,7 +419,7 @@
   {
    "name": "김우찬",
    "user": "woochan",
-   "mattermost_last": "22:27",
+   "mattermost_last": "22:35",
    "repo_last": null
   },
   {
@@ -437,7 +437,7 @@
   {
    "name": "하지민",
    "user": "jimin",
-   "mattermost_last": "22:28",
+   "mattermost_last": "22:35",
    "repo_last": null
   },
   {
@@ -583,6 +583,10 @@
    "state": "running",
    "waits_on": ""
   },
+  "mat5": {
+   "state": "waiting-merge",
+   "waits_on": "main에 없는 커밋 1개 (감독 머지)"
+  },
   "mfixq": {
    "state": "running",
    "waits_on": ""
@@ -608,10 +612,6 @@
    "waits_on": "main에 없는 커밋 3개 (감독 머지)"
   },
   "rbatch": {
-   "state": "running",
-   "waits_on": ""
-  },
-  "results": {
    "state": "running",
    "waits_on": ""
   },
