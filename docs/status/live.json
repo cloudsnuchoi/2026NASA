@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T19:31:25+09:00",
+ "generated_at": "2026-11-15T19:35:59+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 148,
+ "remaining_min": 144,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -112,7 +112,7 @@
     {
      "label": "Prithvi 작물 분류",
      "status": "done",
-     "detail": "crop_pred=Soybeans, agreement_with_cdl=0.95"
+     "detail": "crop_pred=Corn, agreement_with_cdl=0.19"
     },
     {
      "label": "GEOS-S2S 다음 시즌 분포",
@@ -127,7 +127,7 @@
     {
      "label": "Monte Carlo·CVaR",
      "status": "done",
-     "detail": "전략별 P50 {'B': 0.584, 'C': 0.569, 'D': 0.533, 'A': 0.484}"
+     "detail": "전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}"
     },
     {
      "label": "/explain (DeepSeek)",
@@ -318,7 +318,7 @@
   {
    "name": "김우찬",
    "user": "woochan",
-   "mattermost_last": "19:29",
+   "mattermost_last": "19:34",
    "repo_last": null
   },
   {
@@ -330,13 +330,13 @@
   {
    "name": "고지은",
    "user": "jieun",
-   "mattermost_last": "19:30",
+   "mattermost_last": "19:31",
    "repo_last": null
   },
   {
    "name": "하지민",
    "user": "jimin",
-   "mattermost_last": "19:20",
+   "mattermost_last": "19:35",
    "repo_last": null
   },
   {
@@ -404,7 +404,7 @@
   {
    "name": "Prithvi 작물 분류",
    "status": "done",
-   "detail": "crop_pred=Soybeans, agreement_with_cdl=0.95"
+   "detail": "crop_pred=Corn, agreement_with_cdl=0.19"
   },
   {
    "name": "GEOS-S2S 다음 시즌 분포",
@@ -419,7 +419,7 @@
   {
    "name": "Monte Carlo·CVaR",
    "status": "done",
-   "detail": "전략별 P50 {'B': 0.584, 'C': 0.569, 'D': 0.533, 'A': 0.484}"
+   "detail": "전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}"
   },
   {
    "name": "/explain (DeepSeek)",

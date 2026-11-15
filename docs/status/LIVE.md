@@ -1,6 +1,6 @@
-# 아몰라 실시간 현황 · 19:31 KST
+# 아몰라 실시간 현황 · 19:35 KST
 
-제출 목표 22:00 KST까지 **2시간 28분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **2시간 24분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -34,10 +34,10 @@
 - ✅ 공개 데모 배포 — https://watts-astrology-asus-blessed.trycloudflare.com
 
 ## AI 모델 100%
-- ✅ Prithvi 작물 분류 — crop_pred=Soybeans, agreement_with_cdl=0.95
+- ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
-- ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.584, 'C': 0.569, 'D': 0.533, 'A': 0.484}
+- ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
 - ✅ /explain (DeepSeek) — 6.6 s, deepseek-flash
 
 ## MATLAB 50%
@@ -78,10 +78,10 @@
 3. MATLAB: field_season.csv
 
 ## AI 모델
-- ✅ Prithvi 작물 분류 — crop_pred=Soybeans, agreement_with_cdl=0.95
+- ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
-- ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.584, 'C': 0.569, 'D': 0.533, 'A': 0.484}
+- ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
 - ✅ /explain (DeepSeek) — 6.6 s, deepseek-flash
 
 ## 에이전트 레인 (tmux)
@@ -98,10 +98,10 @@
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 19:29 | — |
+| 김우찬 | 19:34 | — |
 | 김윤성 | 16:35 | — |
-| 고지은 | 19:30 | — |
-| 하지민 | 19:20 | — |
+| 고지은 | 19:31 | — |
+| 하지민 | 19:35 | — |
 | 강다은 | 17:18 | — |
 | Hylē | 16:01 | 19:24 |
 
