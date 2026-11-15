@@ -5,7 +5,7 @@
 % If a <name>_fixed.m exists it is used instead of <name>.m. No need to close/reopen
 % files after a server fix: just press Run ▶ again (rehash/clear is done for you).
 artfarmUser = 'yoonsung';
-artfarmScripts = {'drought_compare_2012', 'yoonsung_nldas_2012', 'yoonsung_season_anomaly', 'yoonsung_s2s_box'};
+artfarmScripts = {'drought_compare_2012', 'yoonsung_nldas_2012', 'yoonsung_season_anomaly', 'yoonsung_s2s_box', 'yoonsung_nass_compare', 'yoonsung_nass_compare_multi'};
 artfarmHere = fileparts(mfilename('fullpath'));
 if isempty(artfarmHere)
     artfarmHere = fullfile(getenv('HOME'), 'Documents', 'MATLAB', 'work');
