@@ -1,6 +1,6 @@
-# 아몰라 실시간 현황 · 20:17 KST
+# 아몰라 실시간 현황 · 20:22 KST
 
-제출 목표 22:00 KST까지 **1시간 42분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **1시간 37분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -86,18 +86,22 @@
 | api | — | model_api 상시 실행 (:8090) | 19:27 |
 | bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | 19:52 |
 | live | — | 이 현황 생성기 (5분) | 15:54 |
+| mat2 | ? | ? | 20:17 |
 | mfixq | ? | ? | 19:53 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | 12:11 |
 | runner | — | GitHub Actions 러너 | 13:09 |
+| static | ? | ? | 20:17 |
+| sub2 | ? | ? | 20:17 |
+| ux | ? | ? | 20:17 |
 | web | — | 프론트+API 프록시 (:8095) | 20:09 |
 | web-tunnel | — | 공개 데모 터널 | 19:00 |
 
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 20:16 | — |
+| 김우찬 | 20:22 | — |
 | 김윤성 | 20:15 | — |
-| 고지은 | 20:11 | — |
+| 고지은 | 20:20 | — |
 | 하지민 | 19:58 | — |
 | 강다은 | 17:18 | — |
 | Hylē | 16:01 | 20:10 |
