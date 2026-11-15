@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T16:56:49+09:00",
+ "generated_at": "2026-11-15T17:07:04+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 303,
+ "remaining_min": 292,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "lanes": [
   {
@@ -326,7 +326,7 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "16:49"
+   "repo_last": "16:52"
   }
  ],
  "blockers": [],
@@ -336,6 +336,11 @@
   "MATLAB: field_season.csv"
  ],
  "merged_prs": [
+  {
+   "number": 47,
+   "title": "feat(model): Prithvi-EO 작물 분류 추론(CPU, 미세조정 없음) → vision_result",
+   "merged_at": "2026-11-15T07:52:11Z"
+  },
   {
    "number": 48,
    "title": "data(imerg,nldas): IMERG 일별 2001–2025 + NLDAS-2 월별 1995–2025 (12주 카운티)",
@@ -370,11 +375,6 @@
    "number": 41,
    "title": "fix(model): 전략이 물수지에 실제로 반영되게 수정 (QA P1 E1·E3·E4) + NLDAS 반영",
    "merged_at": "2026-11-15T06:14:42Z"
-  },
-  {
-   "number": 40,
-   "title": "feat(orchestrator): 디자인 채널은 사람이 쓴 모든 글에 답 + PRD 결정 메모",
-   "merged_at": "2026-11-15T06:05:22Z"
   }
  ],
  "ai_models": [
