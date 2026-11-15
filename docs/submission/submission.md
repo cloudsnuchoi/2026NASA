@@ -64,12 +64,14 @@ Outside the pilot fields the tool says: *"Deep analysis available in 4 pilot cou
 
 **Satellite AI check.** For 2024, Prithvi's most common class matched the USDA Cropland Data Layer crop on **19 of 20** pilot fields, with a mean pixel agreement of **0.883**. Most pilot fields are uniform corn or soybean fields, so this is not a general accuracy figure; the model card reports 60.64 % overall pixel accuracy on its own test set. Prithvi is a supporting layer; the crop label of record is the Cropland Data Layer.
 
-**MATLAB cross-checks (first results).** Our MATLAB members built the original formulas (prototype V8) and offline analyses. Two outputs are ready:
+**MATLAB cross-checks.** Our MATLAB members built the original formulas (prototype V8) and ran offline checks on the engine. The first comparison uses NASA data that the engine does not use in its calculation:
 
-- *2012 drought, county level* (`drought_compare_2012_summary.csv`). Across the 4 pilot counties, the May–September 2012 precipitation anomaly and the engine's 2012 water deficit for the current rotation (A, mean over the county's pilot fields) have Pearson **r = −0.87 (n = 4 counties)**: drier counties got larger deficits. Per county: Lancaster NE −49.8 % precipitation, 643 mm deficit; Story IA −49.0 %, 470 mm; McLean IL −32.2 %, 415 mm; Union OH −10.1 %, 307 mm. Maximum temperature was 1.4–3.5 °C above normal. With only four points, and with both sides built on NASA POWER weather, this is a consistency check, not an independent validation. The root-zone soil-moisture column is empty (information gap).
+- *2012 drought vs NASA NLDAS-2 soil moisture* (`nldas_vs_engine_2012.csv`). Across the 4 pilot counties, the May–September 2012 NLDAS-2 root-zone soil-moisture anomaly and the engine's 2012 water deficit for the current rotation (A, mean over the county's pilot fields) have Pearson **r = −0.96 (n = 4 counties)**: where the root zone dried more, the engine found larger deficits. NLDAS-2 anomaly vs engine deficit: Lancaster NE −79 kg/m², 643 mm; Story IA −65 kg/m², 470 mm; McLean IL −64 kg/m², 415 mm; Union OH −44 kg/m², 307 mm.
+- *2012 drought vs rainfall* (`drought_compare_2012_summary.csv`). The May–September 2012 precipitation anomaly against the same deficits gives r = −0.87 (n = 4): Lancaster −49.8 %, Story −49.0 %, McLean −32.2 %, Union −10.1 %. Both sides use NASA POWER weather, so this check is not independent. In the 1995–2025 May–September record (`season_anomaly_1995_2025.csv`), 2012 had the highest reference evapotranspiration (ET₀) in McLean, Story and Lancaster, and the lowest rainfall in Story and Lancaster.
 - *Bare-soil days from HLS NDVI* (`baresoil_days_20fields.csv`). For all **20 pilot fields, 2023–2025** (60 field-years), the median is **81 bare-soil days per year** (range 19–139) and **43 winter bare days** (range 10–59; 59 field-years with a value). Cloud-free HLS observations covered 27–67 % of days. These years do not overlap the 2012 replay, so they are not compared with the engine's 2012 winter bare days.
+- *Slide figures* (`fig_backtest2012.png`, `fig_p10p90.png`). These plot the engine's 2012 replay and P10–P90 ranges for three McLean IL fields. We checked the 2012 bars against the live model API, and they match.
 
-**In progress:** the V8 annual crop water demand and the engine's seasonal water deficit use different definitions, so that comparison is not reported as agreement.
+With only four counties, these are consistency checks, not statistical proof. **In progress:** the V8 prototype now runs on all 20 pilot fields (80 rotation cards, 0 failures; `v8_cards_20fields.csv`). Its annual crop water demand uses a different definition from the engine's seasonal water deficit, so we do not report that comparison as agreement.
 
 ### Team
 
@@ -79,8 +81,6 @@ Outside the pilot fields the tool says: *"Deep analysis available in 4 pilot cou
 - **고지은** — UI/UX + MATLAB slide figures
 - **하지민** — UI/UX + MATLAB NDVI bare-soil analysis
 - **강다은** — 3D simulation (planned) + demo video
-
-<!-- Demo video owner: TODO(Hylē) -->
 
 ### Links
 
@@ -131,7 +131,8 @@ Live model_api: http://127.0.0.1:8090 (health ok, db true).
 - "Prithvi 19 of 20, mean pixel agreement 0.883, model card 60.64 % aAcc": docs/PRITHVI.md 요약 + 주의 1.
 - "12 Corn Belt states" (MATLAB drought analysis): /srv/hackathon/data/processed/v1/matlab/drought_2012_county.csv(.manifest.json, 13,464 rows, script matlab/climate/drought_2012_analysis.m).
 - MATLAB cross-checks (20:20 KST): /srv/hackathon/data/processed/v1/matlab/outputs/yoonsung/drought_compare_2012_summary.csv (pearson_r_precip_vs_deficit -0.8653, n_for_r 4; per-county engine_A_deficit_2012_mm 414.77/469.93/643.3/306.5, precip_anomaly_pct_2012_MJJAS -32.21/-49.02/-49.85/-10.06, tmax 1.42–3.51; rzsm_z NaN). outputs/jimin/baresoil_days_20fields.csv: 60 rows, 20 fields, 2023–2025; bare_days median 81 min 19 max 139; winter_bare_days median 43 min 10 max 59, 1 NaN (171825006923844 2023); coverage 0.274–0.666.
-- Team roles: Hylē directive to SUB lane 2026-11-15 20:15 KST. Demo video owner not assigned -> TODO(Hylē).
+- Team roles: Hylē directive to SUB lane 2026-11-15 20:15 KST; 강다은 demo video added by Hylē (#68).
+- v2 MATLAB (21:00 KST): outputs/yoonsung/nldas_vs_engine_2012.csv pearson_r -0.9578, n 4; anomaly_2012_kg_m2 -64.17 McLean / -65.20 Story / -79.17 Lancaster / -43.92 Union. season_anomaly_1995_2025.csv: max ET0_anomaly year 2012 in 17113 (172 mm), 19169 (202), 31109 (235); 39159 max 1999; min precip year 2012 in 19169 and 31109. outputs/jieun/fig_backtest2012.png fields 171825001292309/171825006921423/171825006923844 = GET /validation/backtest 2012: 431/415/281/351, 384/369/332/403, 430/415/381/455 mm. outputs/woochan/v8_cards_20fields.csv 80 rows, 20 fields; v8_failures_20fields.csv header only (11:21 UTC run). python_smoke/ subfolders not cited (smoke tests).
 - Live server URL: /srv/hackathon/state/status/demo_url.txt (20:17 KST).
 - Old MATLAB validation status: /srv/hackathon/projects/2026NASA-mat/docs/MATLAB-VALIDATION.md (uncommitted, 2026-11-15T19:02 KST): V8 deficit not validated; NDVI bare days not validated; 2012 county check = same-source POWER cross-check only. docs/MATLAB-VALIDATION.md is not on main -> "in progress".
 - CVaR definition: /strategies/compare cvar_definition.
