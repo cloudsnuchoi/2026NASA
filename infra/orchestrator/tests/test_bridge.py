@@ -93,8 +93,8 @@ def test_hyle_mention_in_1on1_gets_reply(orch):
 
 
 def test_team_channel_requires_mention(orch):
-    assert orch.handle(inc("jimin", "uiux-design", "안녕")) == []
-    outs = orch.handle(inc("jimin", "uiux-design", "카드 디자인 질문", mentioned=True))
+    assert orch.handle(inc("jimin", "backend", "안녕")) == []
+    outs = orch.handle(inc("jimin", "backend", "카드 디자인 질문", mentioned=True))
     assert len(outs) == 1 and outs[0].root_id == "p1"  # replies in thread
 
 
@@ -599,9 +599,10 @@ def test_deep_placeholder_shows_tier_switches(orch):
 
 def test_design_channel_answers_questions_with_deep_by_default(orch):
     orch.deep = FakeDeep("sol design", label="Codex gpt-6.1-sol (VPS, 읽기 전용)")
-    assert orch.handle(inc("jieun", "uiux-design", "오늘 회의 몇 시죠")) == []  # no mention, no '?'
+    out0 = orch.handle(inc("jieun", "uiux-design", "수익 칸은 빼는 게 좋겠어요"))[0]  # no mention, no '?': still answered
+    assert out0.message.startswith("sol design")
     out = orch.handle(inc("jieun", "uiux-design", "S4에서 수익 % 칸 빼도 될까?"))[0]
-    assert out.message.startswith("sol design") and len(orch.deep.prompts) == 1
+    assert out.message.startswith("sol design") and len(orch.deep.prompts) == 2
     out2 = orch.handle(inc("jimin", "uiux-design", "안녕", mentioned=True))[0]
     assert "gpt-6.1-sol" in out2.message  # even short greetings use the deep model here
 
@@ -610,3 +611,21 @@ def test_onboarding_order_in_static_context_without_ip(orch):
     sysmsg = orch.build_system()
     assert "공개키" in sysmsg and "자동" in sysmsg and "서버 주소를 모른다" in sysmsg
     assert not re.search(r"\b\d{1,3}(\.\d{1,3}){3}\b", sysmsg.split("## 저장소 문서")[0])
+
+
+def test_design_channel_ignores_bot_and_agent_posts():
+    mm = Mattermost.__new__(Mattermost)
+    mm.cfg, mm.me, mm._users = Config(), {"id": "bot"}, {"u": "jieun"}
+    own = {"event": "posted", "data": {"post": json.dumps({"id": "1", "user_id": "bot", "message": "답", "channel_id": "c"}), "channel_name": "uiux-design"}}
+    other_bot = {"event": "posted", "data": {"post": json.dumps({"id": "2", "user_id": "x", "message": "hi", "channel_id": "c", "props": {"from_bot": "true"}}),
+                                             "channel_name": "uiux-design"}}
+    assert mm.parse_event(own) is None and mm.parse_event(other_bot) is None
+
+
+def test_design_memo_prompt_tracks_decisions(tmp_path):
+    cfg = Config(state_path=tmp_path / "s.json", memory_dir=tmp_path / "m", memo_async=False, members_tsv=MEMBERS_TSV)
+    memo = MockLLM()
+    o = Orchestrator(cfg, MockLLM(), FakeGH(), FakeDocs(), load_members(MEMBERS_TSV), memo_llm=memo)
+    o.deep = FakeDeep("ok")
+    o.handle(inc("jimin", "uiux-design", "S5 배지 넣기로 해요"))
+    assert "PRD 논의방" in memo.calls[-1]["messages"][0]["content"]
