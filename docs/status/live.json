@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T23:01:58+09:00",
+ "generated_at": "2026-11-15T23:07:06+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -15,10 +15,10 @@
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 28
+   "remaining_min": 22
   }
  ],
- "remaining_min": 28,
+ "remaining_min": 22,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -349,22 +349,6 @@
    "waits_on": ""
   },
   {
-   "name": "paper",
-   "model": "?",
-   "task": "?",
-   "last_activity": "22:58",
-   "state": "running",
-   "waits_on": ""
-  },
-  {
-   "name": "port",
-   "model": "?",
-   "task": "?",
-   "last_activity": "22:58",
-   "state": "running",
-   "waits_on": ""
-  },
-  {
    "name": "rbatch",
    "model": "?",
    "task": "?",
@@ -560,14 +544,6 @@
   "nudge": {
    "state": "blocked",
    "waits_on": "프로세스 없음·완료 표시 없음"
-  },
-  "paper": {
-   "state": "running",
-   "waits_on": ""
-  },
-  "port": {
-   "state": "running",
-   "waits_on": ""
   },
   "prd": {
    "state": "waiting-merge",
