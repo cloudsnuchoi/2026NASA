@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T19:30:40+09:00",
+ "generated_at": "2026-11-15T19:31:25+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 149,
+ "remaining_min": 148,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -70,7 +70,7 @@
   {
    "id": "engine",
    "name": "엔진·API",
-   "pct": 83,
+   "pct": 100,
    "items": [
     {
      "label": "model_api 상시 실행",
@@ -98,9 +98,9 @@
      "detail": "A P50 범위 [0.447, 0.504]"
     },
     {
-     "label": "공개 데모 배포 (#15)",
-     "status": "progress",
-     "detail": ""
+     "label": "공개 데모 배포",
+     "status": "done",
+     "detail": "https://watts-astrology-asus-blessed.trycloudflare.com"
     }
    ]
   },
@@ -176,30 +176,40 @@
   {
    "id": "ui",
    "name": "UI",
-   "pct": 0,
+   "pct": 86,
    "items": [
     {
-     "label": "frontend/package.json",
-     "status": "progress",
+     "label": "frontend/ 코드 (main)",
+     "status": "done",
      "detail": ""
     },
     {
-     "label": "S0–S3 (#12)",
-     "status": "progress",
+     "label": "공개 데모 접속 200 (로그인 없음)",
+     "status": "done",
+     "detail": "https://watts-astrology-asus-blessed.trycloudflare.com"
+    },
+    {
+     "label": "공개 API /fields (20필지)",
+     "status": "done",
      "detail": ""
     },
     {
-     "label": "S4 전략 탭 (#13)",
-     "status": "progress",
+     "label": "1층 /quick (screening estimate)",
+     "status": "done",
+     "detail": "HTTP 200"
+    },
+    {
+     "label": "2층 전략 비교 /strategies/compare",
+     "status": "done",
+     "detail": "HTTP 200"
+    },
+    {
+     "label": "화면 캡처 docs/screens",
+     "status": "done",
      "detail": ""
     },
     {
-     "label": "S5–S7 (#14)",
-     "status": "progress",
-     "detail": ""
-    },
-    {
-     "label": "공개 배포 (#15)",
+     "label": "공개 URL QA (docs/QA-FINAL.md)",
      "status": "progress",
      "detail": ""
     }
@@ -272,12 +282,6 @@
    "model": "DeepSeek Flash + Codex sol/terra + Claude",
    "task": "Mattermost 오케스트레이터 봇",
    "last_activity": "16:01"
-  },
-  {
-   "name": "l5",
-   "model": "codex gpt-6.1-terra",
-   "task": "L5 공개 URL QA",
-   "last_activity": "19:27"
   },
   {
    "name": "live",
@@ -428,6 +432,6 @@
   "l2": true,
   "prd": true,
   "l4": true,
-  "l5": false
+  "l5": true
  }
 }

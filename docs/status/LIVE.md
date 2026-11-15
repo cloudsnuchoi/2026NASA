@@ -1,14 +1,14 @@
-# 아몰라 실시간 현황 · 19:30 KST
+# 아몰라 실시간 현황 · 19:31 KST
 
-제출 목표 22:00 KST까지 **2시간 29분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **2시간 28분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
 | 데이터 | 100% | 11/11 |
-| 엔진·API | 83% | 5/6 |
+| 엔진·API | 100% | 6/6 |
 | AI 모델 | 100% | 5/5 |
 | MATLAB | 50% | 3/6 |
-| UI | 0% | 0/5 |
+| UI | 86% | 6/7 |
 | 시뮬 | 0% | 0/2 |
 | 인프라·봇 | 83% | 5/6 |
 
@@ -25,13 +25,13 @@
 - ✅ GEOS-S2S 다음 시즌 (API) — 멤버 10
 - ✅ 대비 데모 필지 (3개 카운티 이상) — 데모 필지 20개, 4개 카운티
 
-## 엔진·API 83%
+## 엔진·API 100%
 - ✅ model_api 상시 실행
 - ✅ Story 데모 필지 목록 /fields
 - ✅ 전략 비교 MC·CVaR
 - ✅ 2012 백테스트 전략별 차이 — 서로 다른 물 부족 값 4개
 - ✅ 필지별 결과 차이 (A P50 범위 > 0.02) — A P50 범위 [0.447, 0.504]
-- 🟡 공개 데모 배포 (#15)
+- ✅ 공개 데모 배포 — https://watts-astrology-asus-blessed.trycloudflare.com
 
 ## AI 모델 100%
 - ✅ Prithvi 작물 분류 — crop_pred=Soybeans, agreement_with_cdl=0.95
@@ -48,12 +48,14 @@
 - ✅ climate_annual.csv
 - ✅ calibration_params.csv
 
-## UI 0%
-- 🟡 frontend/package.json
-- 🟡 S0–S3 (#12)
-- 🟡 S4 전략 탭 (#13)
-- 🟡 S5–S7 (#14)
-- 🟡 공개 배포 (#15)
+## UI 86%
+- ✅ frontend/ 코드 (main)
+- ✅ 공개 데모 접속 200 (로그인 없음) — https://watts-astrology-asus-blessed.trycloudflare.com
+- ✅ 공개 API /fields (20필지)
+- ✅ 1층 /quick (screening estimate) — HTTP 200
+- ✅ 2층 전략 비교 /strategies/compare — HTTP 200
+- ✅ 화면 캡처 docs/screens
+- 🟡 공개 URL QA (docs/QA-FINAL.md)
 
 ## 시뮬 0%
 - 🟡 sim/ 코드
@@ -87,7 +89,6 @@
 | --- | --- | --- | --- |
 | api | — | model_api 상시 실행 (:8090) | 19:27 |
 | bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | 16:01 |
-| l5 | codex gpt-6.1-terra | L5 공개 URL QA | 19:27 |
 | live | — | 이 현황 생성기 (5분) | 15:54 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | 12:11 |
 | runner | — | GitHub Actions 러너 | 13:09 |
