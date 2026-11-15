@@ -22,7 +22,7 @@ from pathlib import Path
 KST = dt.timezone(dt.timedelta(hours=9))
 DEADLINE = dt.datetime(2026, 11, 15, 22, 0, tzinfo=KST)
 REPO = "cloudsnuchoi/2026NASA"
-API = os.environ.get("API_URL", "http://127.0.0.1:8099")
+API = os.environ.get("API_URL", "http://127.0.0.1:8090")
 MM = os.environ.get("MM_URL", "http://127.0.0.1:8065")
 ENV_FILE = os.environ.get("MM_BOT_TOKEN_FILE", "/srv/hackathon/projects/2026NASA/infra/orchestrator/.env")
 MATLAB_DIR = Path(os.environ.get("FS_MATLAB_DIR", "/srv/hackathon/data/processed/v1/matlab"))
@@ -33,7 +33,7 @@ PEOPLE = [("김우찬", "woochan", "flyingbear-code"), ("김윤성", "yoonsung",
 TMUX_INFO = {  # what each lane is; model names are the ones the lanes were started with
     "imerg": ("claude-sonnet-5-5", "IMERG·NLDAS-2 카운티 적재"), "fields2": ("claude-opus-5-5", "대비 데모 필지 추가"),
     "site": ("claude-opus-5-5", "사이트 live 현황·내보내기·채팅 버튼"), "prithvi": ("claude-opus-5-5", "Prithvi 작물 분류 추론"),
-    "bot": ("DeepSeek Flash + Codex sol/terra + Claude", "Mattermost 오케스트레이터 봇"), "api": ("—", "model_api 상시 실행 (:8099)"),
+    "bot": ("DeepSeek Flash + Codex sol/terra + Claude", "Mattermost 오케스트레이터 봇"), "api": ("—", "model_api 상시 실행 (:8090)"),
     "live": ("—", "이 현황 생성기 (5분)"), "nudge": ("DeepSeek Flash", "타임라인 독촉 봇"), "runner": ("—", "GitHub Actions 러너"),
     "mm-tunnel": ("—", "Mattermost Cloudflare 터널"), "keywatch": ("—", "SSH 공개키 자동 등록 (root)"),
     "qa": ("claude-opus-5-5", "QA·E2E"), "fix": ("claude-opus-5-5", "엔진 P1 수정"),
