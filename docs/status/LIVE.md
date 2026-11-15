@@ -1,6 +1,6 @@
-# 아몰라 실시간 현황 · 16:00 KST
+# 아몰라 실시간 현황 · 16:05 KST
 
-제출 목표 22:00 KST까지 **5시간 59분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **5시간 54분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -20,7 +20,7 @@
 - ✅ HLS NDVI 데모 필지
 - ✅ SMAP L3 (맥락)
 - ✅ NLDAS-2 월별
-- ✅ IMERG 일별 2010–2025 (16개 연도) — 19개 연도 적재
+- ✅ IMERG 일별 2010–2025 (16개 연도) — 20개 연도 적재
 - ✅ NEX-GDDP 2개 모델 이상 (API) — 2개 모델
 - ✅ GEOS-S2S 다음 시즌 (API) — 멤버 10
 - ✅ 대비 데모 필지 (3개 카운티 이상) — 데모 필지 20개, 4개 카운티
@@ -86,7 +86,7 @@
 | 세션 | 모델 | 하는 일 | 마지막 활동 |
 | --- | --- | --- | --- |
 | api | — | model_api 상시 실행 (:8090) | 15:50 |
-| bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | 15:29 |
+| bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | 16:01 |
 | fields2 | claude-opus-5-5 | 대비 데모 필지 추가 | 15:20 |
 | imerg | claude-sonnet-5-5 | IMERG·NLDAS-2 카운티 적재 | 13:59 |
 | live | — | 이 현황 생성기 (5분) | 15:54 |
@@ -102,14 +102,14 @@
 | 고지은 | 15:50 | — |
 | 하지민 | 14:56 | — |
 | 강다은 | 13:47 | — |
-| Hylē | 15:30 | 15:28 |
+| Hylē | 16:01 | 16:04 |
 
 ## 최근 머지된 PR
+- #45 feat(site): live 현황 패널(dashboard·roadmap), 모든 탭 내보내기, 팀 채팅 버튼
+- #44 feat(orchestrator): 끊어 보낸 메시지 묶기(4초) + 답변 중 추가 메시지 대기열
+- #43 feat(status): 실시간 현황 생성기 (docs/status/live.json, LIVE.md)
 - #42 fix(orchestrator): 봇 답변 품질 (MATLAB 경로·TASKS 맥락·툴박스/토큰 규칙·안내 템플릿·캡처 읽기)
 - #41 fix(model): 전략이 물수지에 실제로 반영되게 수정 (QA P1 E1·E3·E4) + NLDAS 반영
 - #40 feat(orchestrator): 디자인 채널은 사람이 쓴 모든 글에 답 + PRD 결정 메모
 - #39 test(qa): model_api 라이브 E2E + DB 점검 SQL + QA 보고서
 - #38 feat(orchestrator): 답변 대기 표시·디자인 채널 봇·접속 순서 맥락 + docs/LANES.md
-- #36 data(spike): 두 층 데이터 적재 + go/no-go 보고서
-- #37 feat(model): model_api FastAPI 실제 DB 연결 (/simulate 등)
-- #35 feat(orchestrator): 방 메모·공유 대화 기록·재시작 복구 + 심화 모델 Codex sol→terra→Claude→DeepSeek
