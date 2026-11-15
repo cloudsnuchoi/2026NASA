@@ -118,3 +118,5 @@
 - **동결 (정직성).** 보장 문구·"Recommended"·순위 금지. 출처 없는 숫자 삭제. 경제 가정(목업 `CROP_DB`)은 "assumption" + USDA ERS/NASS 출처·연도, 확인 못 하면 정보 공백. Kc는 FAO-56 Table 12(옥수수 mid 1.20, 대두 1.15, 밀 1.15)로 바꾸거나 목업 값과의 차이를 툴팁에 보인다. "Water saving %"·"soil organic matter index"는 relative-index 툴팁. 결과 화면의 "MATLAB engine" 표기는 "FAO-56 engine (ported from team MATLAB prototype V8)"으로 바꾼다. 상세는 PRD 4절.
 - **확인 (구현 상태).** `/strategies/compare` 응답에 `rank` 필드가 남아 있다. UI는 표시·정렬에 쓰지 않는다. 필드 제거는 별도 이슈(계약 테스트 동반).
 - **원인 (MATLAB이 서버에서 안 돌던 문제).** 스크립트 **파일 이름이 파일 안의 로컬 함수 이름과 같았다**(`select_cornbelt_4vertices`). MATLAB에서 스크립트 파일 이름과 같은 이름의 로컬 함수를 두면 스크립트로 실행되지 않는다. **서버(VPS MATLAB) 문제가 아니다.** 해결: 파일 이름이나 함수 이름 중 하나를 바꾼다(V8 `FieldShift_LiveAPI_Engineeee.m`의 함수는 `select_cornbelt_4vertices_noaddon`). MATLAB은 계속 오프라인 전용이고, V8 수식은 Tier 1 엔진으로 이식한다.
+
+- **2026-11-15 23:20 KST 결정 (L4 /explain 제공자 교체).** 제품 `/explain`은 OpenAI `gpt-4o-mini`(`OPENAI_MODEL`, 키 `OPENAI_API_KEY`)로 바꾼다. LLM은 설명 문장만 쓰고 숫자는 엔진이 계산한다. OpenAI 오류 시 DeepSeek로 넘어가지 않고 엔진 숫자와 "explanation unavailable"을 돌려준다. 위 96–102행 DeepSeek 결정은 오케스트레이터 봇에만 남는다.

@@ -53,7 +53,7 @@ Source of truth: `frontend/index.html` script/link tags, `model_api/requirements
 | Pydantic | MIT | model_api | https://docs.pydantic.dev/ | 200 / 200 |
 | NumPy | BSD-3-Clause | model_api (Monte Carlo), data_pipeline | https://numpy.org/ | 200 / 200 |
 | pg8000 | BSD-3-Clause | model_api (Postgres driver) | https://codeberg.org/tlocke/pg8000 | 200 / 200 (github.com/tlocke/pg8000 is 404; project moved to Codeberg) |
-| openai-python (OpenAI-compatible client, used for DeepSeek) | Apache-2.0 | model_api, infra/orchestrator | https://github.com/openai/openai-python | 200 / 200 |
+| openai-python (OpenAI-compatible client, used for OpenAI gpt-4o-mini) | Apache-2.0 | model_api, infra/orchestrator | https://github.com/openai/openai-python | 200 / 200 |
 | HTTPX | BSD-3-Clause | model_api, infra/web, data_pipeline | https://www.python-httpx.org/ | 200 / 200 |
 | Requests | Apache-2.0 | infra/orchestrator, data_pipeline | https://requests.readthedocs.io/ | 200 / 200 |
 | websockets | BSD-3-Clause | infra/orchestrator | https://websockets.readthedocs.io/ | 200 / 200 |
@@ -77,7 +77,7 @@ Source of truth: `frontend/index.html` script/link tags, `model_api/requirements
 | Name | Official public URL | Check | Used in ART FARM for … |
 | --- | --- | --- | --- |
 | MATLAB (MathWorks; team members' student licences) | https://www.mathworks.com/products/matlab.html | 403 / 403 from our server (MathWorks blocks server clients; opens in a browser) | … team prototype V8 (FAO-56 Quick Screen) and offline build-stage validation figures/CSVs; never in the live request path. |
-| DeepSeek API — model `deepseek-flash` | https://api-docs.deepseek.com/ | 200 / 200 | … `/explain`: plain-language explanation of strategy cards via tool calls; numbers only from model_api JSON. |
+| OpenAI gpt-4o-miniAPI — model `gpt-4o-mini` | https://api-docs.OpenAI.com/ | 200 / 200 | … `/explain`: plain-language explanation of strategy cards via tool calls; numbers only from model_api JSON. |
 | Claude Code (Anthropic) — coding assistant | https://code.claude.com/docs/en/overview | 200 / 200 | … SI coding assistance (code, docs, tests), logged in docs/si-log.md. (www.anthropic.com/claude-code also 200 / 200.) |
 | Codex CLI (OpenAI) — coding assistant | https://github.com/openai/codex | 200 / 200 | … SI coding assistance, logged in docs/si-log.md. (openai.com/codex returns 403 to our server.) |
 | AI-generated images and the "ART FARM" logo | TODO(Hylē): tool name | — | … all site photos (`frontend/assets/img01–img12`) and the logo are AI-generated (confirmed by Hylē 2026-11-15); each photo carries an "AI-generated image" watermark. Generation tool not recorded in the repo. |
@@ -145,7 +145,7 @@ pgvector (PostgreSQL Licence) | https://github.com/pgvector/pgvector
 pytest (MIT) | https://docs.pytest.org/
 Ruff (MIT) | https://docs.astral.sh/ruff/
 MATLAB (MathWorks, student licences) | https://www.mathworks.com/products/matlab.html
-DeepSeek API (deepseek-flash) | https://api-docs.deepseek.com/
+OpenAI gpt-4o-miniAPI (gpt-4o-mini) | https://api-docs.OpenAI.com/
 Claude Code coding assistant (Anthropic) | https://code.claude.com/docs/en/overview
 Codex CLI coding assistant (OpenAI) | https://github.com/openai/codex
 AI-generated images and logo (tool: TODO(Hylē): tool name) | TODO(Hylē): tool URL

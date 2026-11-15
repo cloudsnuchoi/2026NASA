@@ -829,7 +829,7 @@ GEOS-S2S가 스파이크에서 실패하면 `next_season`은 `null`이고 `info_
 - 숫자는 위 엔드포인트 응답에 있는 것만 사용한다.
 - RAG는 인용 문장과 DOI/URL 전용이다.
 - 없는 값은 “정보 공백”이다. 추정 숫자를 채우지 않는다.
-- 제공자 DeepSeek(OpenAI 호환, `https://api.deepseek.com`), 모델 id **`deepseek-flash`**(DeepSeek-V4.1-Flash, 2026-11-15 공식 문서 확인). 설정 변수 `LLM_API_KEY`·`LLM_BASE_URL`·`LLM_MODEL`.
+- 제공자 OpenAI(`https://api.openai.com`), 모델 id **`gpt-4o-mini`**(2026-11-15 `GET /v1/models`로 확인, 환경 변수 `OPENAI_MODEL`로 변경 가능). 키는 `OPENAI_API_KEY`(파일 `/srv/hackathon/secrets/openai.key`에서 런타임 주입). OpenAI 오류 시 다른 제공자로 넘어가지 않고 엔진 숫자와 "explanation unavailable"을 반환한다.
 
 ---
 

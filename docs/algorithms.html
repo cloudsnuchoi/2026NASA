@@ -42,7 +42,7 @@
       </article>
       <article class="info-card layer-card">
         <p class="n">L4 설명</p>
-        <h3>LLM tool-call (DeepSeek <code>deepseek-flash</code>)</h3>
+        <h3>LLM tool-call (OpenAI <code>gpt-4o-mini</code>)</h3>
         <p>API JSON → 설명 문장. 숫자는 tool JSON 값만, 대응 없는 숫자는 <code>unverified_numbers</code>. 근거 색인 <code>evidence_chunk</code>는 0행이라 인용은 대체 경로(<code>insufficient_evidence: true</code>).</p>
       </article>
     </div>
@@ -109,7 +109,7 @@
         <h3>LLM tool-call <code>/explain</code> · 근거 검색 <code>/evidence/search</code></h3>
         <div class="algo-meta"><span class="tag p0">L4</span><span class="tag">화면 S6 · /explain</span><span class="tag">Hylē · rag/</span></div>
         <div class="io"><div><strong>입력</strong> 사용자 질문, FastAPI 도구(<code>get_profile</code>, <code>compare_strategies</code>, 기후, <code>search_evidence</code>)</div><div><strong>출력</strong> 설명 문장. 모든 숫자는 도구 JSON 경로 각주. 짧은 인용+DOI</div></div>
-        <p>모델은 DeepSeek <code>deepseek-flash</code>입니다. 근거 검색은 인용 전용입니다. 2026-11-15 확인: <code>evidence_chunk</code> 0행, <code>/evidence/search?q=cover crop</code> → hits 0, <code>insufficient_evidence: true</code>. 그래서 설명에는 인용이 붙지 않고 그 사실을 표시합니다(대체 경로).</p>
+        <p>모델은 OpenAI <code>gpt-4o-mini</code>입니다. 근거 검색은 인용 전용입니다. 2026-11-15 확인: <code>evidence_chunk</code> 0행, <code>/evidence/search?q=cover crop</code> → hits 0, <code>insufficient_evidence: true</code>. 그래서 설명에는 인용이 붙지 않고 그 사실을 표시합니다(대체 경로).</p>
       </article>
 
       <article class="card algo-card" id="matlab-algos">

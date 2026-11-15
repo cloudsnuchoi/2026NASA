@@ -114,7 +114,7 @@ With only four counties, these are consistency checks, not statistical proof. **
 - **Languages and tools:** Python (FastAPI, NumPy, pandas, psycopg, rasterio, earthaccess, PyTorch CPU), PostgreSQL + PostGIS + pgvector, MATLAB (offline prototype and analysis), JavaScript/HTML (Leaflet, Chart.js, Tailwind CSS).
 - **NASA data:** NASA POWER, HLS (Landsat/Sentinel-2) v2.0, SMAP L3, GPM IMERG Final V07, NLDAS-2 Noah, GEOS-S2S-3, NEX-GDDP-CMIP6, Prithvi-EO-1.0 crop classification model.
 - **Other data:** USDA NASS Cropland Data Layer, Crop Sequence Boundaries, Quick Stats bulk county yields; USDA NRCS SSURGO (Soil Data Access); USGS 3DEP elevation; OpenET; US Census county boundaries; NOAA NWS API, Open-Meteo climate API and Esri World Imagery (Quick Screen). Full list with links: `data-links.md`.
-- **AI:** Prithvi-EO-1.0 (inference only); DeepSeek API for the explainer; coding assistants for software development. Details: `si-use.md`.
+- **AI:** Prithvi-EO-1.0 (inference only); OpenAI gpt-4o-miniAPI for the explainer; coding assistants for software development. Details: `si-use.md`.
 
 **Planned, not built for this submission:** a three.js voxel 3D field simulation, economic (revenue) comparison with cited prices, more pilot counties, and an evidence library with DOI citations in explanations (the explainer currently returns `insufficient_evidence` when no citation exists).
 

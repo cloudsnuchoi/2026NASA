@@ -30,7 +30,7 @@ def fake_client(script):
     return NS(chat=NS(completions=comp)), comp
 
 
-def test_explain_numbers_traced_and_thinking_disabled(client, fake_repo):
+def test_explain_numbers_traced_openai(client, fake_repo):
     from model_api.main import app
 
     llm, comp = fake_client([
@@ -46,11 +46,8 @@ def test_explain_numbers_traced_and_thinking_disabled(client, fake_repo):
     assert out["unverified_numbers"] == ["12345"]
     assert out["insufficient_evidence"] is True and out["citations"] == []
     first = comp.calls[0]
-    assert first["extra_body"] == {"thinking": {"type": "disabled"}}
+    assert "extra_body" not in first
     assert first["model"] == "test-model"
-    # reasoning_content is passed back with the assistant tool-call message
-    assistant = [m for m in comp.calls[1]["messages"] if m["role"] == "assistant"][0]
-    assert assistant["reasoning_content"] == "r1"
     tool = [m for m in comp.calls[1]["messages"] if m["role"] == "tool"][0]
     assert "geometry" not in json.loads(tool["content"])
 
@@ -77,3 +74,18 @@ def test_trace_numbers_handles_rounding():
     calls, unv = explain.trace_numbers("deficit 72.3 mm and 0.59", [("compare_strategies", {"a": {"b": 72.31}, "c": 0.586})])
     assert unv == ["0.59"] or unv == []  # 0.586 -> "0.59" accepted via 2-dp variant
     assert "$.a.b" in calls[0]["json_paths_used"]
+
+
+def test_explain_provider_error_returns_engine_numbers(client):
+    from model_api.main import app
+
+    class Boom:
+        def create(self, **kw):
+            raise RuntimeError("openai down")
+
+    app.state.llm_client, app.state.llm_model = NS(chat=NS(completions=Boom())), "gpt-4o-mini"
+    r = client.post("/explain", json={"field_id": "TEST-FIELD-0001", "question": "hi"})
+    assert r.status_code == 200, r.text
+    out = r.json()
+    assert out["answer"] == "explanation unavailable" and out["model"] == "gpt-4o-mini"
+    assert "engine" in out

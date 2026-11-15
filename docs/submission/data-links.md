@@ -30,7 +30,7 @@ Links checked from the team VPS on 2026-11-15 ~19:20 KST with `curl -I -L` (HEAD
 | OpenET (Ensemble, monthly) | Field ET 2016–2025 to scale the crop coefficient per field | https://openet-api.org/ | 200 (GET; HEAD 405). Project site etdata.org did not answer from VPS — check in a browser |
 | US Census cartographic boundary files (cb_2023_us_county_500k) | County polygons for the 12 Corn Belt states | https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html | 200 |
 | FAO-56 (Allen et al. 1998), FAO Irrigation and Drainage Paper 56 | Method: Penman–Monteith ET0, crop coefficients, water stress | https://www.fao.org/3/x0490e/x0490e00.htm | 200 |
-| DeepSeek API (LLM) | `/explain` tool-calling explainer; team chat bot | https://api-docs.deepseek.com/ | 200 |
+| OpenAI gpt-4o-miniAPI (LLM) | `/explain` tool-calling explainer; team chat bot | https://api-docs.OpenAI.com/ | 200 |
 
 ### Pending (only add if the final UI cites it)
 

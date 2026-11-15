@@ -62,7 +62,7 @@
           <li>적재: NASA POWER, GPM IMERG, NLDAS-2, SMAP L3(맥락), HLS NDVI, CDL, CSB, SSURGO, GEOS-S2S, NEX-GDDP-CMIP6</li>
           <li>Prithvi-EO-1.0 작물 분류 추론(미세조정 없음), 20개 필지: 2024년 기준 Prithvi 필지 최빈 클래스가 USDA CDL 작물과 같은 필지는 20개 중 19개이고, 필지별 CDL 픽셀 일치율은 0.193–0.997(중앙값 0.934, 평균 0.883)이다. 대부분 옥수수·콩 단작 필지라 일반 정확도가 아니다(모델 카드 aAcc 60.64 %).</li>
           <li>몬테카를로 물수지 + P10/P50/P90 + CVaR(하위 10 %), 전략 A–D</li>
-          <li>2012 가뭄 백테스트, <code>/explain</code>(DeepSeek <code>deepseek-flash</code>, 엔진 숫자만 인용)</li>
+          <li>2012 가뭄 백테스트, <code>/explain</code>(OpenAI <code>gpt-4o-mini</code>, 엔진 숫자만 인용)</li>
           <li>Tier 1 <code>POST /quick</code>(FAO-56 엔진, screening estimate)</li>
           <li>ART FARM 프론트엔드, 로그인 없는 공개 데모</li>
           <li>MATLAB: 빌드 단계 검증(오프라인) — <a href="./matlab-results/">결과 그림·CSV</a></li>
@@ -127,7 +127,7 @@
       </article>
       <article class="info-card">
         <h3>숫자는 모델 API, 설명은 LLM</h3>
-        <p>AI는 네 층입니다. 비전(Prithvi 추론만, 작물 라벨 기준은 CDL) → 시나리오 분포 → 몬테카를로 물수지와 CVaR, 7축 점수 → LLM(DeepSeek <code>deepseek-flash</code>)이 API를 tool-call 하여 받은 숫자만 설명합니다. LLM은 숫자를 만들지 않습니다. 근거 인용 색인은 비어 있어 지금은 인용 없이 <code>insufficient_evidence</code>로 표시합니다.</p>
+        <p>AI는 네 층입니다. 비전(Prithvi 추론만, 작물 라벨 기준은 CDL) → 시나리오 분포 → 몬테카를로 물수지와 CVaR, 7축 점수 → LLM(OpenAI <code>gpt-4o-mini</code>)이 API를 tool-call 하여 받은 숫자만 설명합니다. LLM은 숫자를 만들지 않습니다. 근거 인용 색인은 비어 있어 지금은 인용 없이 <code>insufficient_evidence</code>로 표시합니다.</p>
       </article>
     </div>
 

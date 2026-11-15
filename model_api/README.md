@@ -26,8 +26,8 @@ export PGHOST=127.0.0.1 PGPORT=5433 PGUSER=hk PGDATABASE=fieldshift   # 비밀�
 | `PGHOST` `PGPORT` `PGUSER` `PGDATABASE` `PGPASSWORD` | `127.0.0.1` `5433` `hk` `fieldshift` (비밀번호는 `~/.pgpass`) | DB (읽기 전용) |
 | `FS_MATLAB_DIR` | `/srv/hackathon/data/processed/v1/matlab` | MATLAB CSV 입력(`field_dekad.csv`, `field_season.csv`, `climate_annual.csv`, `scenario_climate.csv`, `calibration_params.csv`, `coefficients.csv`). 파일이 없으면 그 항목은 건너뛰고 `notes`에 적는다. `calibration_params.csv`와 `coefficients.csv`의 `param,value`는 같은 이름의 기본 계수를 덮어쓴다 |
 | `LLM_API_KEY` | 없음 | `/explain`. 없으면 503 `llm_unavailable`. 키는 env에서만 읽고 로그로 남기지 않는다 |
-| `LLM_BASE_URL` | `https://api.deepseek.com` | OpenAI 호환 엔드포인트 |
-| `LLM_MODEL` | `deepseek-flash` | 모델 id |
+| `LLM_BASE_URL` | `https://api.openai.com` | OpenAI 호환 엔드포인트 |
+| `LLM_MODEL` | `gpt-4o-mini` | 모델 id |
 
 ## 엔드포인트
 
@@ -48,7 +48,7 @@ export PGHOST=127.0.0.1 PGPORT=5433 PGUSER=hk PGDATABASE=fieldshift   # 비밀�
 | `GET /validation/backtest?field_id=&year=` | 그해와 앞 3년(스핀업)의 실제 POWER 날씨로 돌린 결정론적 물수지(A–D)와 CDL·NASS 카운티 수량(bu/ac). A = 관측 CDL 작물, B = 같은 작물 + 호밀, C·D = 윤작 위상 전체 평균(`metrics.phases`) |
 | `GET /evidence/search?q=&strategy=` | `evidence_chunk` 전문 검색. 비어 있으면 `insufficient_evidence: true` |
 | `GET /glossary` | S6 용어 카드 |
-| `POST /explain` | DeepSeek tool-calling 설명(아래 참고) |
+| `POST /explain` | OpenAI gpt-4o-minitool-calling 설명(아래 참고) |
 
 오류는 SOT 형식을 따른다: `{"error": {"code": "not_found", "message": "Unknown field_id"}}`. 입력 오류는 `invalid_request`(422), DB 장애는 `db_unavailable`(503)이다.
 

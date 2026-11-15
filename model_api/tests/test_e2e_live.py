@@ -446,7 +446,7 @@ def test_explain_one_field():
     st, d = post("/explain", {"field_id": DEMO[0], "strategy_code": "B", "lang": "en",
                               "question": "Why might strategy B reduce winter erosion on this field?"})
     if st == 503 and d["error"]["code"] == "llm_unavailable":
-        pytest.skip("LLM_API_KEY not configured on the server")
+        pytest.skip("OPENAI_API_KEY not configured on the server")
     assert st == 200, d
     for k in ("answer", "tool_calls", "citations", "insufficient_evidence", "unverified_numbers"):
         assert k in d, k

@@ -1,4 +1,4 @@
-"""L4: LLM explanation via tool calls over the model API (OpenAI-compatible client, DeepSeek by default).
+"""L4: LLM explanation via tool calls over the model API (OpenAI client; model from OPENAI_MODEL, default gpt-4o-mini).
 
 Rules (SOT 6 "LLM rules"): numbers only from tool responses; RAG (search_evidence) for citations only;
 missing values are information gaps. Every number in the answer is checked against the tool JSON and
@@ -60,10 +60,10 @@ class LLMUnavailable(RuntimeError):
 def make_client():
     s = config.llm_settings()
     if not s["api_key"]:
-        raise LLMUnavailable("LLM_API_KEY is not set")
+        raise LLMUnavailable("OPENAI_API_KEY is not set")
     from openai import OpenAI
 
-    return OpenAI(api_key=s["api_key"], base_url=s["base_url"], max_retries=2, timeout=60.0), s["model"]
+    return OpenAI(api_key=s["api_key"], max_retries=2, timeout=60.0), s["model"]
 
 
 def _walk(obj, path="$"):
@@ -126,7 +126,6 @@ def explain(req: dict, tools: dict[str, Callable[[dict], dict]], client=None, mo
     for _ in range(5):
         resp = client.chat.completions.create(
             model=model, messages=messages, tools=TOOLS, tool_choice="auto", temperature=0.2,
-            extra_body={"thinking": {"type": "disabled"}},
         )
         msg = resp.choices[0].message
         calls = getattr(msg, "tool_calls", None) or []
@@ -136,9 +135,6 @@ def explain(req: dict, tools: dict[str, Callable[[dict], dict]], client=None, mo
         am = {"role": "assistant", "content": msg.content or "",
               "tool_calls": [{"id": c.id, "type": "function", "function": {"name": c.function.name, "arguments": c.function.arguments}}
                              for c in calls]}
-        rc = getattr(msg, "reasoning_content", None)
-        if rc:
-            am["reasoning_content"] = rc  # required by DeepSeek when thinking is enabled
         messages.append(am)
         for c in calls:
             name = c.function.name
