@@ -1,6 +1,6 @@
 # ART FARM — Space Apps submission form (copy-paste)
 
-Fields in the order of the Space Apps project submission form. Copy the text inside each block. Generated 2026-11-15 20:30 KST, v2 updated 21:10 KST, v3 updated 22:15 KST (links, data usage check `DATA-USAGE-CHECK.md`) from `submission.md`, `si-use.md`, `data-links.md`; numbers and sources are in the `SOURCES` comment at the end of `submission.md`.
+Fields in the order of the Space Apps project submission form. Copy the text inside each block. Generated 2026-11-15 20:30 KST, v2 updated 21:10 KST, v3 updated 22:00 KST (links, data usage check `DATA-USAGE-CHECK.md`) from `submission.md`, `si-use.md`, `data-links.md`; numbers and sources are in the `SOURCES` comment at the end of `submission.md`.
 
 Open items before pressing Submit:
 - TODO(founder): replace `<VIDEO_URL>` in §3 with the demo video link (recording plan in `demo-script.md`).
@@ -15,7 +15,7 @@ Open items before pressing Submit:
 ART FARM
 ```
 
-## 2. Summary (162 words, counted with whitespace split; rechecked 22:15 KST for v3, text unchanged)
+## 2. Summary (162 words, counted with whitespace split; rechecked 22:00 KST for v3, text unchanged)
 
 ```
 ART FARM (Field Shift: Adapting Farms with NASA Data) helps Corn Belt farmers compare crop rotations for soil health and weather and water resilience without being told what to plant. It has two tiers. Quick Screen works anywhere in the Corn Belt: the farmer clicks four corners and gets a screening estimate built from ten years of NASA POWER weather, USGS elevation and FAO-56 crop water formulas. Deep Analysis covers 20 pilot fields in four counties (Iowa, Illinois, Nebraska, Ohio). There, a Monte Carlo water-balance engine compares four strategies: corn-soybean, plus a rye cover, plus a small grain, or plus alfalfa. Results come as P10–P90 ranges with a worst-10% tail (CVaR), a replay of the real 2012 drought, and climate ranges from NASA GEOS-S2S and NEX-GDDP-CMIP6. NASA's Prithvi model checks crop labels against USDA maps. An AI explainer may only quote numbers that the engine returned. Every card lists drawbacks, information gaps and a reminder to confirm with a field soil test.

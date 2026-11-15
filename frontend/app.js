@@ -96,6 +96,17 @@
       if (st?.demo_url) LIVE.url = String(st.demo_url).replace(/\/$/, "");
     }).catch(() => {}).finally(modeBadge);
     modeBadge();
+    // "Live version →" header link: URL read at runtime from live_url.json ({"url","updated"}, tools/update_live_url.py).
+    // The quick-tunnel URL changes on restart; missing/invalid file → no link.
+    fetch("live_url.json", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
+      const u = typeof j?.url === "string" ? j.url.trim().replace(/\/$/, "") : "";
+      const a = document.getElementById("live-version-link");
+      if (!a || !/^https:\/\/[^\s"'<>]+$/.test(u)) return;
+      a.href = u;
+      if (j.updated) a.title += ` · URL updated ${String(j.updated).slice(0, 16)}`;
+      a.hidden = false;
+      if (!LIVE.url) { LIVE.url = u; modeBadge(); }
+    }).catch(() => {});
   }
 
   async function api(path, opts = {}) {

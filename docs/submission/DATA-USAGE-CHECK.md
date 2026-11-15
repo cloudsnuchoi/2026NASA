@@ -1,4 +1,4 @@
-# Data usage check: submission form §7 / §8 (FINAL lane, 2026-11-15 22:10 KST)
+# Data usage check: submission form §7 / §8 (FINAL lane, 2026-11-15 22:00 KST)
 
 Method: `grep -rnE` over the code we ship (`model_api/`, `data_pipeline/`, `frontend/`, `infra/`, `docs/demo/`), with `tests/` and the generated `data-sources.js` excluded. A resource stays listed only if the shipped code calls it, or its data was loaded into a table that the model API reads. Evidence is one `file:line` per call site, at commit `3e88ea6` plus this branch.
 

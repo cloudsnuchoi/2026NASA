@@ -12,7 +12,7 @@ ART FARM
 
 ## Summary
 
-<!-- word count: 162 words (counted with `wc -w` on the paragraph below; rechecked 22:15 KST, v3) -->
+<!-- word count: 162 words (counted with `wc -w` on the paragraph below; rechecked 22:00 KST, v3) -->
 
 ART FARM (Field Shift: Adapting Farms with NASA Data) helps Corn Belt farmers compare crop rotations for soil health and weather and water resilience without being told what to plant. It has two tiers. Quick Screen works anywhere in the Corn Belt: the farmer clicks four corners and gets a screening estimate built from ten years of NASA POWER weather, USGS elevation and FAO-56 crop water formulas. Deep Analysis covers 20 pilot fields in four counties (Iowa, Illinois, Nebraska, Ohio). There, a Monte Carlo water-balance engine compares four strategies: corn-soybean, plus a rye cover, plus a small grain, or plus alfalfa. Results come as P10–P90 ranges with a worst-10% tail (CVaR), a replay of the real 2012 drought, and climate ranges from NASA GEOS-S2S and NEX-GDDP-CMIP6. NASA's Prithvi model checks crop labels against USDA maps. An AI explainer may only quote numbers that the engine returned. Every card lists drawbacks, information gaps and a reminder to confirm with a field soil test.
 

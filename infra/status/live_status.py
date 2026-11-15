@@ -484,6 +484,22 @@ def to_md(d: dict) -> str:
     return "\n".join(L) + "\n"
 
 
+
+def write_live_url(out: Path) -> None:
+    """Mirror demo_url.txt into {out}/live_url.json ({"url", "updated"}), rewritten only when the URL changes.
+    Same content as docs/demo/live_url.json (tools/update_live_url.py); the supervisor commits it to main."""
+    import importlib.util
+
+    try:
+        src = Path(__file__).resolve().parents[2] / "tools" / "update_live_url.py"
+        spec = importlib.util.spec_from_file_location("update_live_url", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        mod.update(mod.DEFAULT_SRC, out / "live_url.json")
+    except Exception as e:  # the status loop must keep running
+        print(f"live_url skipped: {e}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="/srv/hackathon/state/status")
@@ -493,6 +509,7 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
     (out / "live.json").write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
     (out / "LIVE.md").write_text(to_md(d), encoding="utf-8")
+    write_live_url(out)
     print(f"live {d['generated_at']} " + " ".join(f"{ln['id']}={ln['pct']}" for ln in d["lanes"]))
     return 0
 
