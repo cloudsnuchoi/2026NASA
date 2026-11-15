@@ -1,7 +1,24 @@
 {
- "generated_at": "2026-11-15T20:27:29+09:00",
- "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 92,
+ "generated_at": "2026-11-15T20:33:40+09:00",
+ "deadline": "2026-11-15T23:30:00+09:00",
+ "schedule": [
+  {
+   "name": "1차 제출",
+   "at": "2026-11-15T21:00:00+09:00",
+   "remaining_min": 26
+  },
+  {
+   "name": "동결",
+   "at": "2026-11-15T23:00:00+09:00",
+   "remaining_min": 146
+  },
+  {
+   "name": "최종 제출",
+   "at": "2026-11-15T23:30:00+09:00",
+   "remaining_min": 176
+  }
+ ],
+ "remaining_min": 176,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -278,12 +295,6 @@
    "last_activity": "15:54"
   },
   {
-   "name": "mat2",
-   "model": "?",
-   "task": "?",
-   "last_activity": "20:17"
-  },
-  {
    "name": "mfixq",
    "model": "?",
    "task": "?",
@@ -300,6 +311,12 @@
    "model": "—",
    "task": "GitHub Actions 러너",
    "last_activity": "13:09"
+  },
+  {
+   "name": "site2",
+   "model": "?",
+   "task": "?",
+   "last_activity": "20:31"
   },
   {
    "name": "sub2",
@@ -330,7 +347,7 @@
   {
    "name": "김우찬",
    "user": "woochan",
-   "mattermost_last": "20:26",
+   "mattermost_last": "20:32",
    "repo_last": null
   },
   {
@@ -342,7 +359,7 @@
   {
    "name": "고지은",
    "user": "jieun",
-   "mattermost_last": "20:22",
+   "mattermost_last": "20:32",
    "repo_last": null
   },
   {
