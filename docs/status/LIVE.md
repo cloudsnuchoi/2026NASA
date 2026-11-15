@@ -1,6 +1,6 @@
-# 아몰라 실시간 현황 · 19:35 KST
+# 아몰라 실시간 현황 · 19:41 KST
 
-제출 목표 22:00 KST까지 **2시간 24분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **2시간 18분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -10,7 +10,7 @@
 | MATLAB | 50% | 3/6 |
 | UI | 86% | 6/7 |
 | 시뮬 | 0% | 0/2 |
-| 인프라·봇 | 83% | 5/6 |
+| 인프라·봇 | 100% | 6/6 |
 
 ## 데이터 100%
 - ✅ POWER 일별 12주 1995–2025
@@ -61,12 +61,12 @@
 - 🟡 sim/ 코드
 - 🟡 복셀 시뮬 (#30)
 
-## 인프라·봇 83%
+## 인프라·봇 100%
 - ✅ Mattermost
 - ✅ 봇 (tmux bot)
 - ✅ 러너 (tmux runner)
 - ✅ SSH 공개키 자동 등록 (keywatch) — root 프로세스로 확인
-- 🟡 main CI 최근 성공
+- ✅ main CI 최근 성공 — success
 - ✅ live 현황 (tmux live)
 
 ## 막힌 점
@@ -98,19 +98,19 @@
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 19:34 | — |
+| 김우찬 | 19:38 | — |
 | 김윤성 | 16:35 | — |
-| 고지은 | 19:31 | — |
-| 하지민 | 19:35 | — |
+| 고지은 | 19:40 | — |
+| 하지민 | 19:38 | — |
 | 강다은 | 17:18 | — |
-| Hylē | 16:01 | 19:24 |
+| Hylē | 16:01 | 19:31 |
 
 ## 최근 머지된 PR
+- #55 fix(status): UI 레인 진행률을 공개 데모 실동작 점검으로
+- #53 docs(submission): 제출 초안 — 문구·데이터 링크·SI·슬라이드 7장·영상 대본
 - #54 docs: DECISIONS·si-log 충돌 표시 제거
 - #52 feat(web): ART FARM 프론트(1층 Quick Screen /quick + 2층 Deep Analysis) + 공개 배포
 - #51 feat(matlab): L2 사전계산 파이프라인 + 사람별 가이드 (우찬·윤성·지민·지은)
 - #50 docs(prd): PRD 확정 — ART FARM, 2층 구조(Quick Screen / Deep Analysis), 정직성 규칙
 - #49 feat(status,site): live.json demo_url + 사이트 '라이브 데모' 버튼 + 최종 레인 추적
 - #47 feat(model): Prithvi-EO 작물 분류 추론(CPU, 미세조정 없음) → vision_result
-- #48 data(imerg,nldas): IMERG 일별 2001–2025 + NLDAS-2 월별 1995–2025 (12주 카운티)
-- #46 data(fields): 대비 데모 필지 8개 추가 (IL·NE·OH) — 필지별 결과 차이 확대

@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T19:35:59+09:00",
+ "generated_at": "2026-11-15T19:41:07+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 144,
+ "remaining_min": 138,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -235,7 +235,7 @@
   {
    "id": "infra",
    "name": "인프라·봇",
-   "pct": 83,
+   "pct": 100,
    "items": [
     {
      "label": "Mattermost",
@@ -259,8 +259,8 @@
     },
     {
      "label": "main CI 최근 성공",
-     "status": "progress",
-     "detail": null
+     "status": "done",
+     "detail": "success"
     },
     {
      "label": "live 현황 (tmux live)",
@@ -318,7 +318,7 @@
   {
    "name": "김우찬",
    "user": "woochan",
-   "mattermost_last": "19:34",
+   "mattermost_last": "19:38",
    "repo_last": null
   },
   {
@@ -330,13 +330,13 @@
   {
    "name": "고지은",
    "user": "jieun",
-   "mattermost_last": "19:31",
+   "mattermost_last": "19:40",
    "repo_last": null
   },
   {
    "name": "하지민",
    "user": "jimin",
-   "mattermost_last": "19:35",
+   "mattermost_last": "19:38",
    "repo_last": null
   },
   {
@@ -349,7 +349,7 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "19:24"
+   "repo_last": "19:31"
   }
  ],
  "blockers": [],
@@ -359,6 +359,16 @@
   "MATLAB: field_season.csv"
  ],
  "merged_prs": [
+  {
+   "number": 55,
+   "title": "fix(status): UI 레인 진행률을 공개 데모 실동작 점검으로",
+   "merged_at": "2026-11-15T10:31:12Z"
+  },
+  {
+   "number": 53,
+   "title": "docs(submission): 제출 초안 — 문구·데이터 링크·SI·슬라이드 7장·영상 대본",
+   "merged_at": "2026-11-15T10:26:46Z"
+  },
   {
    "number": 54,
    "title": "docs: DECISIONS·si-log 충돌 표시 제거",
@@ -388,16 +398,6 @@
    "number": 47,
    "title": "feat(model): Prithvi-EO 작물 분류 추론(CPU, 미세조정 없음) → vision_result",
    "merged_at": "2026-11-15T07:52:11Z"
-  },
-  {
-   "number": 48,
-   "title": "data(imerg,nldas): IMERG 일별 2001–2025 + NLDAS-2 월별 1995–2025 (12주 카운티)",
-   "merged_at": "2026-11-15T07:49:14Z"
-  },
-  {
-   "number": 46,
-   "title": "data(fields): 대비 데모 필지 8개 추가 (IL·NE·OH) — 필지별 결과 차이 확대",
-   "merged_at": "2026-11-15T07:19:35Z"
   }
  ],
  "ai_models": [
