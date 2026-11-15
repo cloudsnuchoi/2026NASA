@@ -52,6 +52,12 @@ def post(job, text):
 
 def run_job(job: dict) -> None:
     user = job["user"]
+    try:  # only real Mattermost posts from a known MATLAB room (CI/test jobs are dropped)
+        src = api("GET", f"/posts/{job['post_id']}")
+        assert src["channel_id"] == job["channel_id"] and user in SCRIPT and job["room"] == f"1on1-{user}"
+    except Exception:
+        print("dropped job without a real source post", flush=True)
+        return
     wd = WORK / user
     wd.mkdir(parents=True, exist_ok=True)
     script = SCRIPT.get(user, "")
