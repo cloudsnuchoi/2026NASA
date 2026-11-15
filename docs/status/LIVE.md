@@ -1,7 +1,7 @@
-# 아몰라 실시간 현황 · 21:03 KST
+# 아몰라 실시간 현황 · 21:08 KST
 
-일정: 1차 제출 21:00 (지남) · 동결 23:00 (1시간 56분 남음) · 최종 제출 23:30 (2시간 26분 남음)
-최종 제출 23:30 KST까지 **2시간 26분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (1시간 51분 남음) · 최종 제출 23:30 (2시간 21분 남음)
+최종 제출 23:30 KST까지 **2시간 21분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -90,6 +90,7 @@
 | mm-tunnel | — | Mattermost Cloudflare 터널 | 12:11 |
 | mwatch | ? | ? | 20:40 |
 | rbatch | ? | ? | 21:00 |
+| restore | ? | ? | 21:07 |
 | runner | — | GitHub Actions 러너 | 13:09 |
 | sub2 | ? | ? | 20:17 |
 | web | — | 프론트+API 프록시 (:8095) | 20:09 |
@@ -98,9 +99,9 @@
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 21:03 | — |
-| 김윤성 | 20:45 | — |
-| 고지은 | 21:02 | — |
+| 김우찬 | 21:08 | — |
+| 김윤성 | 21:04 | — |
+| 고지은 | 21:04 | — |
 | 하지민 | 20:45 | — |
 | 강다은 | 17:18 | — |
 | Hylē | 16:01 | 20:57 |
