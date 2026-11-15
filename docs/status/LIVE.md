@@ -1,14 +1,14 @@
-# 아몰라 실시간 현황 · 21:44 KST
+# 아몰라 실시간 현황 · 21:49 KST
 
-일정: 1차 제출 21:00 (지남) · 동결 23:00 (1시간 15분 남음) · 최종 제출 23:30 (1시간 45분 남음)
-최종 제출 23:30 KST까지 **1시간 45분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (1시간 10분 남음) · 최종 제출 23:30 (1시간 40분 남음)
+최종 제출 23:30 KST까지 **1시간 40분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
 | 데이터 | 100% | 11/11 |
 | 엔진·API | 100% | 6/6 |
 | AI 모델 | 100% | 5/5 |
-| MATLAB | 86% | 6/7 |
+| MATLAB | 69% | 9/13 |
 | UI | 100% | 7/7 |
 | 인프라·봇 | 100% | 6/6 |
 
@@ -40,7 +40,7 @@
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
 - ✅ /explain (DeepSeek) — 5.8 s, deepseek-flash
 
-## MATLAB 86%
+## MATLAB 69%
 - ✅ 윤성 1차 CSV: drought_2012_county.csv
 - ✅ 윤성 1차 CSV: climate_annual.csv
 - ✅ 윤성 1차 CSV: calibration_params.csv
@@ -48,6 +48,12 @@
 - ✅ yoonsung: drought_compare_2012.png + drought_compare_2012_summary.csv — ✅ 결과 파일 있음
 - ✅ jimin: baresoil_days_20fields.csv — ✅ 결과 파일 있음
 - ✅ jieun: fig_p10p90.png + fig_backtest2012.png — ✅ 결과 파일 있음
+- ✅ yoonsung 추가: yoonsung_nldas_2012 — nldas_vs_engine_2012.png
+- ✅ yoonsung 추가: yoonsung_season_anomaly — season_anomaly_1995_2025.png
+- ✅ yoonsung 추가: yoonsung_s2s_box — s2s_vs_history_box.png
+- 🟡 jimin 추가: jimin_growing_season — growing_season_20fields.csv
+- 🟡 jimin 추가: jimin_ndvi_anomaly — ndvi_anomaly.png
+- 🟡 jimin 추가: jimin_bare_vs_rye — bare_vs_strategyB.csv
 
 ## UI 100%
 - ✅ frontend/ 코드 (main)
@@ -71,6 +77,8 @@
 
 ## 다음 할 일
 1. MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv
+2. MATLAB: jimin 추가: jimin_growing_season
+3. MATLAB: jimin 추가: jimin_ndvi_anomaly
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
@@ -80,19 +88,35 @@
 - ✅ /explain (DeepSeek) — 5.8 s, deepseek-flash
 
 ## 에이전트 레인 (tmux)
-| 세션 | 모델 | 하는 일 | 마지막 활동 |
-| --- | --- | --- | --- |
-| api | — | model_api 상시 실행 (:8090) | 19:27 |
-| bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | 21:20 |
-| live | — | 이 현황 생성기 (5분) | 15:54 |
-| mfixq | ? | ? | 19:53 |
-| mm-tunnel | — | Mattermost Cloudflare 터널 | 12:11 |
-| mwatch | ? | ? | 20:40 |
-| rbatch | ? | ? | 21:00 |
-| runner | — | GitHub Actions 러너 | 13:09 |
-| sub2 | ? | ? | 20:17 |
-| web | — | 프론트+API 프록시 (:8095) | 20:09 |
-| web-tunnel | — | 공개 데모 터널 | 19:00 |
+| 세션 | 모델 | 하는 일 | 상태 | 기다리는 것 | 마지막 활동 |
+| --- | --- | --- | --- | --- | --- |
+| api | — | model_api 상시 실행 (:8090) | — | — | 19:27 |
+| bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | running | — | 21:20 |
+| live | — | 이 현황 생성기 (5분) | — | — | 15:54 |
+| mfixq | ? | ? | running | — | 19:53 |
+| mm-tunnel | — | Mattermost Cloudflare 터널 | — | — | 12:11 |
+| mwatch | ? | ? | running | — | 20:40 |
+| rbatch | ? | ? | running | — | 21:00 |
+| runner | — | GitHub Actions 러너 | — | — | 13:09 |
+| sub2 | ? | ? | running | — | 20:17 |
+| web | — | 프론트+API 프록시 (:8095) | — | — | 20:09 |
+| web-tunnel | — | 공개 데모 터널 | — | — | 19:00 |
+
+## 레인 상태 (tmux 없음)
+| 레인 | 상태 | 기다리는 것 |
+| --- | --- | --- |
+| fields2 | waiting-merge | main에 없는 커밋 5개 (감독 머지) |
+| fix | waiting-merge | main에 없는 커밋 3개 (감독 머지) |
+| imerg | waiting-merge | main에 없는 커밋 11개 (감독 머지) |
+| l1 | done | — |
+| l2 | done | — |
+| l4 | done | — |
+| l5 | done | — |
+| nudge | blocked | 프로세스 없음·완료 표시 없음 |
+| prd | waiting-merge | main에 없는 커밋 1개 (감독 머지) |
+| prithvi | waiting-merge | main에 없는 커밋 1개 (감독 머지) |
+| qa | waiting-merge | main에 없는 커밋 3개 (감독 머지) |
+| site | waiting-merge | main에 없는 커밋 1개 (감독 머지) |
 
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |

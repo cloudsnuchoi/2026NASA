@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T21:44:38+09:00",
+ "generated_at": "2026-11-15T21:49:58+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -10,15 +10,15 @@
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 75
+   "remaining_min": 70
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 105
+   "remaining_min": 100
   }
  ],
- "remaining_min": 105,
+ "remaining_min": 100,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -156,7 +156,7 @@
   {
    "id": "matlab",
    "name": "MATLAB",
-   "pct": 86,
+   "pct": 69,
    "items": [
     {
      "label": "윤성 1차 CSV: drought_2012_county.csv",
@@ -192,6 +192,36 @@
      "label": "jieun: fig_p10p90.png + fig_backtest2012.png",
      "status": "done",
      "detail": "✅ 결과 파일 있음"
+    },
+    {
+     "label": "yoonsung 추가: yoonsung_nldas_2012",
+     "status": "done",
+     "detail": "nldas_vs_engine_2012.png"
+    },
+    {
+     "label": "yoonsung 추가: yoonsung_season_anomaly",
+     "status": "done",
+     "detail": "season_anomaly_1995_2025.png"
+    },
+    {
+     "label": "yoonsung 추가: yoonsung_s2s_box",
+     "status": "done",
+     "detail": "s2s_vs_history_box.png"
+    },
+    {
+     "label": "jimin 추가: jimin_growing_season",
+     "status": "progress",
+     "detail": "growing_season_20fields.csv"
+    },
+    {
+     "label": "jimin 추가: jimin_ndvi_anomaly",
+     "status": "progress",
+     "detail": "ndvi_anomaly.png"
+    },
+    {
+     "label": "jimin 추가: jimin_bare_vs_rye",
+     "status": "progress",
+     "detail": "bare_vs_strategyB.csv"
     }
    ]
   },
@@ -286,7 +316,9 @@
    "name": "bot",
    "model": "DeepSeek Flash + Codex sol/terra + Claude",
    "task": "Mattermost 오케스트레이터 봇",
-   "last_activity": "21:20"
+   "last_activity": "21:20",
+   "state": "running",
+   "waits_on": ""
   },
   {
    "name": "live",
@@ -298,7 +330,9 @@
    "name": "mfixq",
    "model": "?",
    "task": "?",
-   "last_activity": "19:53"
+   "last_activity": "19:53",
+   "state": "running",
+   "waits_on": ""
   },
   {
    "name": "mm-tunnel",
@@ -310,13 +344,17 @@
    "name": "mwatch",
    "model": "?",
    "task": "?",
-   "last_activity": "20:40"
+   "last_activity": "20:40",
+   "state": "running",
+   "waits_on": ""
   },
   {
    "name": "rbatch",
    "model": "?",
    "task": "?",
-   "last_activity": "21:00"
+   "last_activity": "21:00",
+   "state": "running",
+   "waits_on": ""
   },
   {
    "name": "runner",
@@ -328,7 +366,9 @@
    "name": "sub2",
    "model": "?",
    "task": "?",
-   "last_activity": "20:17"
+   "last_activity": "20:17",
+   "state": "running",
+   "waits_on": ""
   },
   {
    "name": "web",
@@ -383,7 +423,9 @@
  ],
  "blockers": [],
  "next": [
-  "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv"
+  "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv",
+  "MATLAB: jimin 추가: jimin_growing_season",
+  "MATLAB: jimin 추가: jimin_ndvi_anomaly"
  ],
  "merged_prs": [
   {
@@ -467,5 +509,75 @@
   "prd": true,
   "l4": true,
   "l5": true
+ },
+ "lane_states": {
+  "bot": {
+   "state": "running",
+   "waits_on": ""
+  },
+  "fields2": {
+   "state": "waiting-merge",
+   "waits_on": "main에 없는 커밋 5개 (감독 머지)"
+  },
+  "fix": {
+   "state": "waiting-merge",
+   "waits_on": "main에 없는 커밋 3개 (감독 머지)"
+  },
+  "imerg": {
+   "state": "waiting-merge",
+   "waits_on": "main에 없는 커밋 11개 (감독 머지)"
+  },
+  "l1": {
+   "state": "done",
+   "waits_on": ""
+  },
+  "l2": {
+   "state": "done",
+   "waits_on": ""
+  },
+  "l4": {
+   "state": "done",
+   "waits_on": ""
+  },
+  "l5": {
+   "state": "done",
+   "waits_on": ""
+  },
+  "mfixq": {
+   "state": "running",
+   "waits_on": ""
+  },
+  "mwatch": {
+   "state": "running",
+   "waits_on": ""
+  },
+  "nudge": {
+   "state": "blocked",
+   "waits_on": "프로세스 없음·완료 표시 없음"
+  },
+  "prd": {
+   "state": "waiting-merge",
+   "waits_on": "main에 없는 커밋 1개 (감독 머지)"
+  },
+  "prithvi": {
+   "state": "waiting-merge",
+   "waits_on": "main에 없는 커밋 1개 (감독 머지)"
+  },
+  "qa": {
+   "state": "waiting-merge",
+   "waits_on": "main에 없는 커밋 3개 (감독 머지)"
+  },
+  "rbatch": {
+   "state": "running",
+   "waits_on": ""
+  },
+  "site": {
+   "state": "waiting-merge",
+   "waits_on": "main에 없는 커밋 1개 (감독 머지)"
+  },
+  "sub2": {
+   "state": "running",
+   "waits_on": ""
+  }
  }
 }
