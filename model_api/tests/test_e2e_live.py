@@ -154,11 +154,12 @@ def test_health():
 
 def test_fields_demo_list():
     st, d = get("/fields")
-    assert st == 200 and d["demo_only"] is True and d["total"] == len(d["fields"]) == 12
+    # 12 Story fields + contrast demo fields in other Corn Belt counties (feat/contrast-fields)
+    assert st == 200 and d["demo_only"] is True and d["total"] == len(d["fields"]) >= 12
+    assert sum(f["county_fips"].strip() == STORY for f in d["fields"]) == 12
     for f in d["fields"]:
-        assert f["county_fips"].strip() == STORY and f["state_alpha"] == "IA"
         lon, lat = f["centroid"]["coordinates"]
-        assert -94.0 < lon < -93.0 and 41.8 < lat < 42.3
+        assert -105.0 < lon < -80.0 and 36.0 < lat < 49.5  # Corn Belt 12 states
         assert f["area_ha"] > 0
 
 
@@ -204,7 +205,7 @@ def test_profile(fid):
               "soil_summary", "disclaimer", "sources", "region_label", "precip_mm_yr", "et_mm_day", "et0_mm_day", "ndvi_peak",
               "ndvi_class", "t2m_mean_c", "cdl_history", "soil", "vision", "hero_state", "period", "info_gaps"):
         assert k in d, k
-    assert d["field_id"] == fid and d["county_fips"] == STORY
+    assert d["field_id"] == fid and len(d["county_fips"].strip()) == 5
     assert d["centroid"]["type"] == "Point" and d["geometry"]["type"] in ("Polygon", "MultiPolygon")
     assert d["ndvi_class"] in ("good", "fair", "low", None)
     assert d["hero_state"] in ("normal", "drought", "wet", "heat", "frost")
