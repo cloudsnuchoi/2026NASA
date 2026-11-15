@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T23:43:19+09:00",
+ "generated_at": "2026-11-15T23:48:28+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -420,7 +420,7 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "23:29"
+   "repo_last": "23:41"
   }
  ],
  "blockers": [],
@@ -428,6 +428,16 @@
   "MATLAB: jieun 추가: jieun_slide_fig3"
  ],
  "merged_prs": [
+  {
+   "number": 87,
+   "title": "docs: 라이브 진입점(README 배지, /demo/ 배너), Project 칸 순서, USDA ERS 재추가",
+   "merged_at": "2026-11-15T14:41:49Z"
+  },
+  {
+   "number": 86,
+   "title": "feat(explain): DeepSeek → OpenAI gpt-4o-mini (설명문만, 숫자는 엔진)",
+   "merged_at": "2026-11-15T14:39:15Z"
+  },
   {
    "number": 85,
    "title": "feat(landing): Research Paper 섹션, 제출서·README에 영상·논문 링크",
@@ -457,16 +467,6 @@
    "number": 80,
    "title": "docs(submission): 제출 양식 v3, 데이터 사용 확인, /demo/ Live 링크, 재부팅 점검",
    "merged_at": "2026-11-15T14:01:30Z"
-  },
-  {
-   "number": 78,
-   "title": "feat(matlab): 윤성 NASS 2012 비교 결과 반영(슬라이드, S5), 새 스크립트 2개",
-   "merged_at": "2026-11-15T13:34:42Z"
-  },
-  {
-   "number": 77,
-   "title": "fix(ui): 결과 화면에 'A decision aid — it does not replace your judgement' 문구",
-   "merged_at": "2026-11-15T13:01:36Z"
   }
  ],
  "ai_models": [

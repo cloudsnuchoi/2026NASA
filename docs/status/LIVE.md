@@ -1,4 +1,4 @@
-# 아몰라 실시간 현황 · 23:43 KST
+# 아몰라 실시간 현황 · 23:48 KST
 
 일정: 1차 제출 21:00 (지남) · 동결 23:00 (지남) · 최종 제출 23:30 (지남)
 최종 제출 23:30 KST까지 **0시간 0분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
@@ -125,14 +125,14 @@
 | 고지은 | 21:04 | — |
 | 하지민 | 22:38 | — |
 | 강다은 | 17:18 | — |
-| Hylē | 16:01 | 23:29 |
+| Hylē | 16:01 | 23:41 |
 
 ## 최근 머지된 PR
+- #87 docs: 라이브 진입점(README 배지, /demo/ 배너), Project 칸 순서, USDA ERS 재추가
+- #86 feat(explain): DeepSeek → OpenAI gpt-4o-mini (설명문만, 숫자는 엔진)
 - #85 feat(landing): Research Paper 섹션, 제출서·README에 영상·논문 링크
 - #84 docs(paper): ART FARM 해석 소논문(PDF, OpenAlex로 확인한 인용 40개)
 - #83 fix(ui): 목업 V8 결과 대시보드를 라이브 #results에 그대로 이식(엔진 값 연결)
 - #82 docs(matlab): 우찬 Kc ±10% 민감도 결과와 제출 문장 스니펫
 - #81 docs(validation): 윤성 NASS 2008–2023 다년 비교, 지민 NDVI·부족량 (22:50 전 run_log OK)
 - #80 docs(submission): 제출 양식 v3, 데이터 사용 확인, /demo/ Live 링크, 재부팅 점검
-- #78 feat(matlab): 윤성 NASS 2012 비교 결과 반영(슬라이드, S5), 새 스크립트 2개
-- #77 fix(ui): 결과 화면에 'A decision aid — it does not replace your judgement' 문구
