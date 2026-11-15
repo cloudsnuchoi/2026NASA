@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T18:44:27+09:00",
+ "generated_at": "2026-11-15T18:49:40+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 195,
+ "remaining_min": 190,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "lanes": [
   {
@@ -131,7 +131,7 @@
     {
      "label": "/explain (DeepSeek)",
      "status": "done",
-     "detail": "6.5 s, deepseek-flash"
+     "detail": "6.6 s, deepseek-flash"
     }
    ]
   },
@@ -401,7 +401,7 @@
   {
    "name": "/explain (DeepSeek)",
    "status": "done",
-   "detail": "6.5 s, deepseek-flash"
+   "detail": "6.6 s, deepseek-flash"
   }
  ],
  "lane_agents_done": {

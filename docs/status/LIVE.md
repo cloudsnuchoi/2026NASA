@@ -1,6 +1,6 @@
-# 아몰라 실시간 현황 · 18:44 KST
+# 아몰라 실시간 현황 · 18:49 KST
 
-제출 목표 22:00 KST까지 **3시간 15분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **3시간 10분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -38,7 +38,7 @@
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.584, 'C': 0.569, 'D': 0.533, 'A': 0.484}
-- ✅ /explain (DeepSeek) — 6.5 s, deepseek-flash
+- ✅ /explain (DeepSeek) — 6.6 s, deepseek-flash
 
 ## MATLAB 50%
 - 🟡 coefficients.csv
@@ -80,7 +80,7 @@
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.584, 'C': 0.569, 'D': 0.533, 'A': 0.484}
-- ✅ /explain (DeepSeek) — 6.5 s, deepseek-flash
+- ✅ /explain (DeepSeek) — 6.6 s, deepseek-flash
 
 ## 에이전트 레인 (tmux)
 | 세션 | 모델 | 하는 일 | 마지막 활동 |
