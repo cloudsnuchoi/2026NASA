@@ -36,7 +36,6 @@ Links checked from the team VPS on 2026-11-15 ~19:20 KST with `curl -I -L` (HEAD
 
 | Resource | Why pending | URL | Check |
 | --- | --- | --- | --- |
-| USDA ERS Commodity Costs and Returns | The Quick Screen price/yield/cost table must get a USDA ERS/NASS source and year (directive). Not cited in the UI yet. If L1 cites a different ERS or NASS table, replace this row. | https://www.ers.usda.gov/data-products/commodity-costs-and-returns/ | 200 |
 
 Searched but not used in the product: NAIP imagery (search only, no tiles stored). Not used: ECOSTRESS, hyperspectral data, drone data.
 

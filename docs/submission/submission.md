@@ -12,11 +12,16 @@ ART FARM
 
 ## Summary
 
-<!-- word count: 162 words (counted with `wc -w` on the paragraph below) -->
+<!-- word count: 162 words (counted with `wc -w` on the paragraph below; rechecked 22:00 KST, v3) -->
 
 ART FARM (Field Shift: Adapting Farms with NASA Data) helps Corn Belt farmers compare crop rotations for soil health and weather and water resilience without being told what to plant. It has two tiers. Quick Screen works anywhere in the Corn Belt: the farmer clicks four corners and gets a screening estimate built from ten years of NASA POWER weather, USGS elevation and FAO-56 crop water formulas. Deep Analysis covers 20 pilot fields in four counties (Iowa, Illinois, Nebraska, Ohio). There, a Monte Carlo water-balance engine compares four strategies: corn-soybean, plus a rye cover, plus a small grain, or plus alfalfa. Results come as P10–P90 ranges with a worst-10% tail (CVaR), a replay of the real 2012 drought, and climate ranges from NASA GEOS-S2S and NEX-GDDP-CMIP6. NASA's Prithvi model checks crop labels against USDA maps. An AI explainer may only quote numbers that the engine returned. Every card lists drawbacks, information gaps and a reminder to confirm with a field soil test.
 
 ## Project Details
+
+- Live (dynamic engine on our server): https://watts-astrology-asus-blessed.trycloudflare.com
+- Backup (static snapshot): https://cloudsnuchoi.github.io/2026NASA/demo/
+- Code: https://github.com/cloudsnuchoi/2026NASA
+- Slides: https://cloudsnuchoi.github.io/2026NASA/submission/slides/
 
 *"What should I plant next year so both my soil and my wallet survive?"*
 
@@ -70,6 +75,10 @@ Outside the pilot fields the tool says: *"Deep analysis available in 4 pilot cou
 - *2012 drought vs rainfall* (`drought_compare_2012_summary.csv`). The May–September 2012 precipitation anomaly against the same deficits gives r = −0.87 (n = 4): Lancaster −49.8 %, Story −49.0 %, McLean −32.2 %, Union −10.1 %. Both sides use NASA POWER weather, so this check is not independent. In the 1995–2025 May–September record (`season_anomaly_1995_2025.csv`), 2012 had the highest reference evapotranspiration (ET₀) in McLean, Story and Lancaster, and the lowest rainfall in Story and Lancaster.
 - *Bare-soil days from HLS NDVI* (`baresoil_days_20fields.csv`). For all **20 pilot fields, 2023–2025** (60 field-years), the median is **81 bare-soil days per year** (range 19–139) and **43 winter bare days** (range 10–59; 59 field-years with a value). Cloud-free HLS observations covered 27–67 % of days. These years do not overlap the 2012 replay, so they are not compared with the engine's 2012 winter bare days.
 - *Slide figures* (`fig_backtest2012.png`, `fig_p10p90.png`). These plot the engine's 2012 replay and P10–P90 ranges for three McLean IL fields. We checked the 2012 bars against the live model API, and they match.
+- *USDA NASS county yields* (`nass_compare_2012_corr.csv`, `nass_compare_multi_corr.csv`). The 2012 yield change against the engine's 2012 deficit for the current rotation (A) gives soy r = −0.85 and corn r = −0.49, but with n = 4 counties this is only a check of direction. Over 2008–2023 (4 counties × 16 years, n = 64), county corn yield change and the engine's seasonal water deficit have r = −0.42 (p = 0.0006); for soybean, r = −0.24 (p = 0.058, not significant). This is a correlation, not causation, and yield is not what the engine optimises.
+- *Next-season GEOS-S2S vs 31 years of history* (`s2s_vs_history_box.csv`). For spring (MAM) and June–July 2027, the 10-member GEOS-S2S precipitation and temperature anomalies are shown next to the 1995–2025 NASA POWER seasons for all 4 counties. The two products are different and not bias-corrected, so the comparison is shown as ranges only.
+- *Crop coefficient sensitivity* (`kc_sensitivity.csv`). In the V8 prototype, changing Kc by ±10 % changed the May–Sep water deficit by −19 % to +21 % across all 20 fields × 4 rotations, and the order of the rotations did not change on any field. The V8 Kc values themselves (1.08/0.86/0.75) still lack a table citation (`coefficients_sources.csv`), and validation is ongoing.
+- *NDVI vs deficit* (`ndvi_vs_deficit.csv`). Across 60 field-years from 2023–2025, the HLS NDVI anomaly and the engine's season water deficit show no significant relation (r = −0.09, p = 0.50). We report this as a null result.
 
 With only four counties, these are consistency checks, not statistical proof. **In progress:** the V8 prototype now runs on all 20 pilot fields (80 rotation cards, 0 failures; `v8_cards_20fields.csv`). Its annual crop water demand uses a different definition from the engine's seasonal water deficit, so we do not report that comparison as agreement.
 
@@ -81,12 +90,6 @@ With only four counties, these are consistency checks, not statistical proof. **
 - **고지은** — UI/UX + MATLAB slide figures
 - **하지민** — UI/UX + MATLAB NDVI bare-soil analysis
 - **강다은** — 3D simulation (planned) + demo video
-
-### Links
-
-- Project (static snapshot): https://cloudsnuchoi.github.io/2026NASA/demo/
-- Live server (team VPS; may go offline after judging): https://watts-astrology-asus-blessed.trycloudflare.com
-- Slides: https://cloudsnuchoi.github.io/2026NASA/submission/slides/
 
 ### Benefits & Impact
 
@@ -141,5 +144,6 @@ Live model_api: http://127.0.0.1:8090 (health ok, db true).
 - Strategy highlight rule (A,B / +C / D reference) and "Deep analysis available in 4 pilot counties": /srv/hackathon/inbox/DIRECTIVE.md.
 - Quick Screen implementation status: L1 lane (feat/artfarm-web) in progress at 20:00 KST; re-check wording before final submission.
 - 3D voxel sim: docs/status/live.json sim lane 0 % -> listed as planned.
+- MATLAB v3 additions (outputs/ mtime before 22:50 KST): yoonsung/nass_compare_2012_corr.csv, nass_compare_multi_corr.csv (22:35), s2s_vs_history_box.csv (20:43); woochan/kc_sensitivity.csv (22:39; script work/woochan/woochan_kc_sensitivity.m, Kc x0.9/1.0/1.1, pct_change -19.21..-17.24 / +18.27..+21.06, rank_changed 0/80), coefficients_sources.csv (22:23, identical to coefficients_draft_from_V9.csv); jimin/ndvi_vs_deficit.csv (22:38).
 - Removed from team draft (unsupported): 20 %/25 % claims, ECOSTRESS, hyperspectral, locusts/drones.
 -->
