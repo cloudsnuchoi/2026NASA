@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import re
 from pathlib import Path
 
 import pytest
@@ -50,6 +49,10 @@ def _load_mwatch(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "STATE", tmp_path / "state" / "mwatch.json")
     monkeypatch.setattr(m, "FIXQ", tmp_path / "fixq")
     monkeypatch.setattr(m, "HOST_ROOT", str(tmp_path / "host"))
+    monkeypatch.setattr(m, "WORK", tmp_path / "work")
+    monkeypatch.setattr(m, "VERIFIED", tmp_path / "status" / "mauto_verified.json")
+    monkeypatch.setattr(m.notify, "LOG", tmp_path / "notify.log")
+    monkeypatch.setattr(m.notify, "SENT", tmp_path / "notify_sent.json")
     m._channels.clear()
     calls = []
 

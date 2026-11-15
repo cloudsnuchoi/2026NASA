@@ -14,9 +14,13 @@ import json
 import os
 import re
 import subprocess
+import sys
 import time
 import urllib.request
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import notify  # noqa: E402  (notify.log + dedupe for every member notice)
 
 Q = Path("/srv/hackathon/state/fixq")
 DONE = Q / "done"
@@ -46,8 +50,12 @@ def api(method, path, body=None):
         return json.load(r)
 
 
-def post(job, text):
-    api("POST", "/posts", {"channel_id": job["channel_id"], "root_id": job.get("root_id") or "", "message": text})
+def post(job, text, kind="fixed", file=""):
+    """Reply in the job's thread through notify: one line in notify.log, deduped per (user, kind, file@job)."""
+    def _post(msg, root_id):
+        return api("POST", "/posts", {"channel_id": job["channel_id"], "root_id": root_id, "message": msg})["id"]
+    notify.notify(job["user"], job.get("room") or f"1on1-{job['user']}", text, kind=kind,
+                  file=f"{file}@{job.get('post_id', '')}", root_id=job.get("root_id") or "", post_fn=_post)
 
 
 def run_job(job: dict) -> None:
@@ -109,7 +117,8 @@ Finish with ONE final line of JSON only: {{"status":"fixed"|"refused"|"no_change
     else:
         msg = f"@{user} ⚠️ 자동 수정이 실패했어요. Hylē가 확인할게요. (사유: {res.get('reason', '')})"
         log = f"- {time.strftime('%H:%M')} 자동 수정 실패: {res.get('reason', '')}"
-    post(job, msg)
+    kind = {"fixed": "fixed", "refused": "fix-refused", "no_change": "fix-no-change"}.get(res.get("status"), "fix-error")
+    post(job, msg, kind=kind, file=name)
     with open(wd / "CHANGELOG.md", "a", encoding="utf-8") as f:
         f.write(log + "\n")
     mp = MEM / f"{job['room']}.md"
