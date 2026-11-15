@@ -27,5 +27,5 @@ Tested 2026-11-15: 7 pages, no slide overflow. Do not commit the PDF if the subm
 
 - All numbers on slide 5 come from the live model API; sources are in the comment block at the end of `../submission.md`.
 - MATLAB figures: `/srv/hackathon/data/processed/v1/matlab/outputs/jieun/*.png` did not exist at 20:00 KST, so no MATLAB figures are included. If they appear, add them to slide 4 or 5 as base64 `<img>` so the file stays self-contained.
-- Team slide: the role of 강다은 is marked "to confirm" in AGENTS.md; check before final export.
+- Team slide roles set by Hylē directive 2026-11-15 20:15 KST. Demo video owner: TODO(Hylē).
 - No NASA logos, flags or mission insignia.
