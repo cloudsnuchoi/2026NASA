@@ -234,6 +234,16 @@ MATLAB_PEOPLE = [
     ("jieun", "matlab-4", ("fig_p10p90.png", "fig_backtest2012.png")),
 ]
 
+# 20:15 extra sets (n/3 per person); done = main result file exists in outputs/<who>/
+EXTRA_SETS = [
+    ("yoonsung", "yoonsung_nldas_2012", "nldas_vs_engine_2012.png"),
+    ("yoonsung", "yoonsung_season_anomaly", "season_anomaly_1995_2025.png"),
+    ("yoonsung", "yoonsung_s2s_box", "s2s_vs_history_box.png"),
+    ("jimin", "jimin_growing_season", "growing_season_20fields.csv"),
+    ("jimin", "jimin_ndvi_anomaly", "ndvi_anomaly.png"),
+    ("jimin", "jimin_bare_vs_rye", "bare_vs_strategyB.csv"),
+]
+
 
 def matlab_connected(user: str, container: str) -> bool:
     """Connected = an SSH tunnel session for the user now, or a MATLAB process running in their container
@@ -369,6 +379,9 @@ def build() -> dict:
         else:
             stage, ok = "🔑 접속 전", False
         matlab.append(item(f"{who}: " + " + ".join(outs), ok, stage))
+    for who, script, out in EXTRA_SETS:
+        f = MATLAB_DIR / "outputs" / who / out
+        matlab.append(item(f"{who} 추가: {script}", f.exists(), out))
     ui = [
         item("frontend/ 코드 (main)", "frontend/index.html" in paths),
         item("공개 데모 접속 200 (로그인 없음)", pub.get("home") == 200, f"{demo or '데모 URL 없음'}"),
