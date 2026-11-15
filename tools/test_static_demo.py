@@ -41,13 +41,16 @@ with sync_playwright() as p:
     ctx.route("**/*trycloudflare.com/**", block)
     ctx.route("http://127.0.0.1:8090/**", block)
     ctx.route("http://127.0.0.1:8095/**", block)
+    # any cross-origin request other than tiles/CDNs would be a CORS risk on github.io
+    reqs = []
+    ctx.on("request", lambda r: reqs.append(r.url))
     page = ctx.new_page()
     errs = []
     page.on("pageerror", lambda e: errs.append(str(e)))
 
     def start():
         page.goto(f"http://127.0.0.1:{PORT}/demo/")
-        page.wait_for_selector("#static-banner", timeout=15000)
+        page.wait_for_selector(".mode-badge-slot span", timeout=15000)
         page.click("#btn-skip-to-map")
         page.wait_for_function("document.querySelectorAll('.leaflet-interactive').length > 5", timeout=15000)
 
@@ -58,12 +61,12 @@ with sync_playwright() as p:
             page.click("#btn-to-crops")
             for c in crops:
                 page.click(f"[data-crop='{c}']")
-            page.click("#btn-run")
+            page.click("#btn-confirm-crops")
             page.wait_for_selector("#page-results.active", timeout=30000)
             t1, t2 = page.inner_text("#tier1"), page.inner_text("#tier2")
-            banner = page.inner_text("#static-banner")
+            banner = page.inner_text(".mode-badge-slot")
             ok = ("screening estimate" in t1.lower() and "Strategy A" in t2 and "unavailable" not in (t1 + t2)
-                  and "static snapshot, generated 2026-11-15" in banner)
+                  and "static snapshot" in banner)
             tag = f"{slug}-{'-'.join(c.lower() for c in crops)}"
             if i == 0 and len(crops) == 2:
                 page.click("[data-explain='A']")
@@ -86,7 +89,7 @@ with sync_playwright() as p:
     page.click("#btn-to-crops")
     page.click("[data-crop='Corn']")
     page.click("[data-crop='Soy']")
-    page.click("#btn-run")
+    page.click("#btn-confirm-crops")
     page.wait_for_selector("#page-results.active", timeout=30000)
     t1 = page.inner_text("#tier1")
     ok = "needs the live server" in t1
@@ -96,6 +99,9 @@ with sync_playwright() as p:
         fails.append("custom")
     b.close()
 
-print("blocked live-API requests:", len(blocked), "page errors:", errs)
+api_calls = [u for u in reqs if "/api/" in u]
+print("blocked live-API requests:", len(blocked), "api calls:", len(api_calls), "page errors:", errs)
+if blocked or api_calls:
+    fails.append("live-api-called")
 srv.shutdown()
 sys.exit(1 if fails or errs else 0)

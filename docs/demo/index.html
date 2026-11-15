@@ -175,8 +175,9 @@
     .vtx-label { background: #173a2b; color: #fff; border: none; font-weight: 800; font-size: 10px; padding: 1px 5px; }
     .leaflet-container { font-family: Inter, system-ui, sans-serif; }
     /* UX audit F4/F9: touch targets, focus, reduced motion */
-    .app-page button, #page-story button { min-height: 44px; }
+    /* 44px targets on touch screens only, so desktop keeps the mockup v8 button sizes */
     @media (pointer: coarse) {
+      .app-page button, #page-story button { min-height: 44px; }
       .leaflet-touch .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; font-size: 22px; }
     }
     :focus-visible { outline: 3px solid #f2c46d; outline-offset: 2px; }
@@ -218,6 +219,7 @@
           <div class="text-[11px] md:text-xs font-semibold text-amber-200">Field Shift: Adapting Farms with NASA Data</div>
         </div>
       </div>
+      <span class="mode-badge-slot ml-auto mr-3"></span>
       <button id="btn-skip-to-map"
               class="px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-sm font-semibold border border-white/25 transition">
         Launch Tool →
@@ -493,93 +495,201 @@
 <!-- ===================================================================== -->
 <section id="page-map" class="app-page bg-[#f7f6f0] py-6 px-4 sm:px-8">
   <div class="max-w-7xl mx-auto">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+    <!-- Top Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
       <div class="flex items-center gap-3">
-        <img src="assets/logo.svg" alt="ART FARM logo" class="w-11 h-11" />
+        <button id="btn-back-story" data-goto="page-story" class="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition whitespace-nowrap">
+          ← Story
+        </button>
         <div>
-          <h1 class="text-xl sm:text-2xl font-extrabold text-[#173a2b]">Step 1 · Draw your field</h1>
-          <p class="text-sm text-slate-600"><span class="pointer-word">Click</span> the <strong>4 corners</strong> of a field anywhere in the US Corn Belt, or pick a pilot-county preset for Deep Analysis.</p>
+          <h1 class="text-xl sm:text-2xl font-extrabold text-[#173a2b]">Step 1 · Draw your field <span class="mode-badge-slot align-middle"></span></h1>
+          <p class="text-xs sm:text-sm text-slate-600">
+            <span class="pointer-word">Click</span> <strong>4 corners</strong> of your field <strong>inside the clear screening area</strong>. The translucent blue area is outside the zone.
+          </p>
         </div>
       </div>
-      <button data-goto="page-story" class="px-4 py-2 rounded-full bg-white border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50">← Story</button>
+      <div class="flex flex-wrap items-center gap-2" id="preset-buttons">
+        <button data-preset="19169" class="px-3.5 py-2 rounded-xl bg-[#24543e] hover:bg-[#173a2b] text-white text-xs font-bold transition shadow-sm">
+          Story, IA Pilot Field
+        </button>
+        <button data-preset="17113" class="px-3.5 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold transition shadow-sm">
+          McLean, IL Preset
+        </button>
+        <button data-preset="31109" class="px-3.5 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold transition shadow-sm">
+          Lancaster, NE Preset
+        </button>
+        <button data-preset="39159" class="px-3.5 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold transition shadow-sm">
+          Union, OH Preset
+        </button>
+        <button id="btn-zoom-circle" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold transition shadow-sm">
+          🔍 Zoom to field / screening area
+        </button>
+        <button id="btn-sample-outside" class="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition shadow-sm">
+          Test Outside Zone
+        </button>
+        <button id="btn-clear-poly" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold transition">
+          Clear Points
+        </button>
+      </div>
     </div>
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-      <div class="lg:col-span-8">
-        <div class="relative">
-          <div id="map" role="application" aria-label="Satellite map: place the 4 corners of your field"></div>
-          <div id="map-hint" aria-live="polite" class="absolute left-1/2 -translate-x-1/2 bottom-14 z-[500] whitespace-nowrap px-3 py-1.5 rounded-full bg-[#173a2b]/90 text-white text-xs font-bold shadow pointer-events-none">Place corner 1 of 4</div>
-          <div class="absolute top-3 right-3 z-[500] flex gap-2">
-            <button id="btn-undo" class="min-h-[44px] px-4 py-2 rounded-lg bg-white/90 text-xs font-bold text-slate-700 shadow">Undo</button>
-            <button id="btn-clear" class="min-h-[44px] px-4 py-2 rounded-lg bg-white/90 text-xs font-bold text-slate-700 shadow">Clear</button>
+
+    <!-- Main Grid: Left Metrics + Right Map -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+      <!-- Left Environmental & Measurement Panel -->
+      <div class="lg:col-span-4 bg-[#173a2b] text-white rounded-2xl p-5 shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-bold">Regional Baseline (NASA POWER)</h2>
+            <p id="preset-region-label" class="text-[11px] text-emerald-200/80">Draw a field or pick a preset — values load for its centroid</p>
+          </div>
+          <span id="zone-badge" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+            No field yet
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="bg-[#214d3a] rounded-xl p-3">
+            <div class="text-[11px] text-emerald-200/80">Mean Temp (10-yr)</div>
+            <div id="env-temp" class="text-lg font-extrabold mt-0.5">—</div>
+          </div>
+          <div class="bg-[#214d3a] rounded-xl p-3">
+            <div class="text-[11px] text-emerald-200/80">Annual Precip</div>
+            <div id="env-precip" class="text-lg font-extrabold mt-0.5">—</div>
+          </div>
+          <div class="bg-[#214d3a] rounded-xl p-3">
+            <div class="text-[11px] text-emerald-200/80">Reference ET (ET₀, FAO-56)</div>
+            <div id="env-et" class="text-lg font-extrabold mt-0.5">—</div>
+          </div>
+          <div class="bg-[#214d3a] rounded-xl p-3">
+            <div class="text-[11px] text-emerald-200/80">Root-zone wetness</div>
+            <div id="env-ndvi" class="text-lg font-extrabold mt-0.5">—</div>
           </div>
         </div>
-        <div class="flex flex-wrap items-center gap-4 mt-2 text-[11px] text-slate-600">
-          <span class="inline-flex items-center gap-1.5"><span class="w-4 h-3 rounded-sm" style="background:rgba(125,211,168,.45);border:2px solid #f7f6f0"></span> Your field</span>
-          <span class="inline-flex items-center gap-1.5"><span class="w-4 h-3 rounded-sm" style="background:rgba(242,196,109,.25);border:2px dashed #f2c46d"></span> Pilot demo field (Deep Analysis)</span>
-          <span class="ml-auto">Basemap: Esri World Imagery (display only)</span>
+
+        <!-- Measurement Readout (WGS84 Ellipsoid + USGS 3DEP) -->
+        <div class="bg-[#24543e] rounded-xl p-4 space-y-2 border border-emerald-400/20">
+          <div class="flex items-center justify-between">
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-300">Parcel Measurement (WGS84 + USGS 3DEP)</div>
+            <span id="api-terrain-badge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-950/70 text-emerald-200 font-semibold">WGS84 geodesic</span>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-emerald-100/80">Vertices placed:</span>
+            <span id="meas-verts" class="font-bold">0 / 4</span>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-emerald-100/80">Centroid (Lat, Lon):</span>
+            <span id="meas-coords" class="font-bold font-mono">—</span>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-emerald-100/80">Area (WGS84):</span>
+            <span id="meas-area" class="font-bold">—</span>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-emerald-100/80">Perimeter:</span>
+            <span id="meas-perim" class="font-bold">—</span>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-emerald-100/80">USGS 3DEP elevation (centroid):</span>
+            <span id="meas-elev" class="font-bold">—</span>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-emerald-100/80">Analysis tier:</span>
+            <span id="meas-tier" class="font-bold">—</span>
+          </div>
+        </div>
+
+        <div id="map-guide" class="rounded-xl bg-[#122c20] p-3 text-[11px] text-emerald-100/80 leading-relaxed border border-emerald-500/20">
+          💡 <strong>Measurement guide:</strong> click or tap corners only inside the <strong>clear zone</strong> (US Corn Belt, 36–48°N · 80–104°W). Gold dashed outlines = 20 pilot demo fields (USDA CSB, not parcels); overlap one for Deep Analysis.
+        </div>
+
+        <button id="btn-to-crops" disabled
+                class="w-full py-3.5 rounded-xl bg-[#66b888] hover:bg-[#57a879] disabled:opacity-40 disabled:cursor-not-allowed text-[#0f291e] font-extrabold text-sm transition shadow-md flex items-center justify-center gap-2">
+          <span>Select Crops</span>
+          <span>→</span>
+        </button>
+      </div>
+
+      <!-- Right Map Panel -->
+      <div class="lg:col-span-8 bg-white rounded-2xl p-3 shadow-xl border border-slate-200 relative">
+        <div id="map" role="application" aria-label="Satellite map: place the 4 corners of your field"></div>
+        <div id="map-hint" aria-live="polite" class="absolute left-1/2 -translate-x-1/2 top-6 z-[500] whitespace-nowrap px-3 py-1.5 rounded-full bg-[#173a2b]/90 text-white text-xs font-bold shadow pointer-events-none">Click corner 1 of 4</div>
+        <div class="mt-2.5 flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-slate-600">
+          <div class="flex flex-wrap items-center gap-4">
+            <span class="inline-flex items-center gap-1.5 font-semibold text-emerald-900">
+              <span class="w-3.5 h-3.5 rounded-full border-2 border-amber-400 bg-transparent inline-block shadow-sm"></span>
+              Clear screening area (US Corn Belt)
+            </span>
+            <span class="inline-flex items-center gap-1.5 font-semibold text-blue-800">
+              <span class="w-3.5 h-3.5 rounded-sm bg-blue-600/45 border border-blue-500 inline-block"></span>
+              Translucent blue: outside zone mask
+            </span>
+            <span class="inline-flex items-center gap-1.5 font-semibold text-amber-800">
+              <span class="w-3.5 h-3.5 rounded-sm inline-block" style="background:rgba(242,196,109,.25);border:2px dashed #f2c46d"></span>
+              Pilot demo field
+            </span>
+          </div>
+          <span class="font-medium text-slate-500">Esri World Imagery basemap (display only) + WGS84 ellipsoid geodesic polygon</span>
         </div>
       </div>
-      <aside class="lg:col-span-4 space-y-4">
-        <div class="rounded-2xl bg-[#173a2b] text-white p-5 shadow-xl">
-          <div class="text-xs font-bold uppercase tracking-widest text-amber-300 mb-3">Pilot-county presets · Deep Analysis</div>
-          <div class="grid grid-cols-2 gap-2" id="preset-buttons">
-            <button data-preset="19169" class="preset-btn">Story, IA</button>
-            <button data-preset="17113" class="preset-btn">McLean, IL</button>
-            <button data-preset="31109" class="preset-btn">Lancaster, NE</button>
-            <button data-preset="39159" class="preset-btn">Union, OH</button>
-          </div>
-          <p class="text-[11px] text-emerald-100/75 mt-3">A preset draws one of our 20 demo fields (USDA Crop Sequence Boundaries — not ownership parcels).</p>
-        </div>
-        <div class="rounded-2xl bg-white p-5 shadow border border-slate-200 text-sm">
-          <div class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Field geometry (WGS84)</div>
-          <div class="flex justify-between py-1"><span class="text-slate-500">Vertices</span><strong id="m-vertices">0 / 4</strong></div>
-          <div class="flex justify-between py-1"><span class="text-slate-500">Area</span><strong id="m-area">—</strong></div>
-          <div class="flex justify-between py-1"><span class="text-slate-500">Perimeter</span><strong id="m-perim">—</strong></div>
-          <div class="flex justify-between py-1"><span class="text-slate-500">Analysis tier</span><strong id="m-tier">—</strong></div>
-          <p id="m-tier-note" class="text-[11px] text-slate-500 mt-2"></p>
-        </div>
-        <button id="btn-to-crops" disabled class="w-full px-6 py-3.5 rounded-2xl bg-[#82c341] enabled:hover:bg-[#93d450] disabled:opacity-40 text-[#0f291e] font-extrabold shadow-lg">Next: choose crops →</button>
-      </aside>
     </div>
   </div>
 </section>
 
 <!-- ===================================================================== -->
-<!-- PAGE 3: CROPS                                                          -->
+<!-- PAGE 3: CROP SELECTION                                                -->
 <!-- ===================================================================== -->
 <section id="page-crops" class="app-page bg-[#f7f6f0] py-8 px-4 sm:px-8">
   <div class="max-w-5xl mx-auto">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
-      <h1 class="text-2xl sm:text-3xl font-extrabold text-[#173a2b]">Step 2 · Choose 2–3 crops for your rotation</h1>
-      <button data-goto="page-map" class="px-4 py-2 rounded-full bg-white border border-slate-300 text-sm font-semibold text-slate-700">← Map</button>
+    <!-- Top Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-slate-200">
+      <div>
+        <div class="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-1">Step 2 of 3 · FAO-56 engine inputs <span class="mode-badge-slot align-middle"></span></div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-[#173a2b]">Select your crops for the rotation</h1>
+        <p class="text-sm text-slate-600 mt-1">
+          Choose <strong>2 to 3 crops</strong> (no monoculture, no crop back-to-back). Results are <strong>unranked</strong>.
+        </p>
+      </div>
+      <button id="btn-back-map" data-goto="page-map" class="px-4 py-2 rounded-full border border-[#173a2b]/30 bg-white hover:bg-slate-50 text-xs font-bold text-[#173a2b] transition">
+        ← Back to Field Map
+      </button>
     </div>
-    <p class="text-sm text-slate-600 mb-6">A rotation needs at least 2 different crops. ART FARM builds sequences with no crop repeated back-to-back and shows them <strong>unranked</strong> — the choice stays yours.</p>
-    <div id="crop-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-5"></div>
-    <div class="mt-6 flex flex-wrap items-center gap-3 sticky bottom-0 z-20 -mx-4 px-4 py-3 bg-[#f7f6f0]/95 backdrop-blur border-t border-slate-200 sm:static sm:mx-0 sm:px-0 sm:py-0 sm:bg-transparent sm:border-0">
-      <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Selected:</span>
-      <span id="crop-selected" class="text-sm font-semibold text-[#173a2b]">none</span>
-      <button id="btn-run" disabled class="ml-auto px-8 py-3.5 rounded-2xl bg-[#173a2b] enabled:hover:bg-[#24543e] disabled:opacity-40 text-white font-extrabold shadow-lg">Run screening →</button>
+
+    <!-- 3 Crop Cards -->
+    <div id="crop-cards-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-7">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Compact Selected Crop Slots + Cancel + Confirm Selection -->
+    <div class="mt-8 bg-white rounded-2xl p-4 sm:p-5 shadow-md border border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-2.5">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 mr-1">Selected (2–3 required):</span>
+        <div id="selected-slots" class="flex flex-wrap items-center gap-2"></div>
+        <button id="btn-reset-crops" title="Reset crop selection" aria-label="Reset crop selection"
+                class="w-8 h-8 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-sm flex items-center justify-center transition">
+          ↺
+        </button>
+      </div>
+
+      <button id="btn-confirm-crops" disabled
+              class="px-7 py-3 rounded-xl bg-[#173a2b] hover:bg-[#24543e] disabled:opacity-40 disabled:cursor-not-allowed text-white font-extrabold text-sm transition shadow-md whitespace-nowrap">
+        Confirm Selection →
+      </button>
     </div>
   </div>
 </section>
-
 
 <!-- ===================================================================== -->
 <!-- PAGE 4: SUNFLOWER DATA LOADING SCREEN                                 -->
 <!-- ===================================================================== -->
 <section id="page-loading" class="app-page bg-[#f7f6f0]">
   <div class="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-    <!-- Animated Symmetrical Sunflower SVG with Crisp Botanical Stem & Leaves -->
     <div class="relative w-48 h-52 flex items-center justify-center mb-6">
       <svg viewBox="0 0 200 220" class="w-full h-full drop-shadow-md">
-        <!-- Balanced stem and symmetrical leaves -->
         <path d="M 100,130 L 100,210" stroke="#2e6f40" stroke-width="6" stroke-linecap="round" fill="none" />
         <path d="M 98,172 C 72,162 56,144 64,132 C 78,132 94,148 98,166 Z" fill="#4d9b58" stroke="#2e6f40" stroke-width="2" stroke-linejoin="round" />
         <path d="M 102,172 C 128,162 144,144 136,132 C 122,132 106,148 102,166 Z" fill="#4d9b58" stroke="#2e6f40" stroke-width="2" stroke-linejoin="round" />
         <g id="sunflower-rotator">
-          <g id="sunflower-petals" transform="translate(100,100)">
-            <!-- Symmetrical outer & inner petals generated by JS -->
-          </g>
+          <g id="sunflower-petals" transform="translate(100,100)"></g>
         </g>
         <circle cx="100" cy="100" r="32" fill="#5c3d1e" stroke="#422a12" stroke-width="3" />
         <circle cx="100" cy="100" r="24" fill="#422a12" opacity="0.75" />
@@ -588,35 +698,57 @@
     </div>
     <div class="text-sm font-extrabold tracking-[0.35em] text-[#173a2b] uppercase mb-2">RUNNING FAO-56 ENGINE…</div>
     <p id="loading-status" class="text-sm text-slate-600 max-w-md font-medium">
-      Fetching USGS 3DEP elevation · NASA POWER 10-year daily weather · NWS forecast · Open-Meteo climate ranges, then running the FAO-56 water balance…
+      USGS 3DEP elevation · NASA POWER 10-year daily weather · NOAA/NWS forecast · Open-Meteo CMIP6 climate range, then the FAO-56 water balance…
     </p>
   </div>
 </section>
 
 <!-- ===================================================================== -->
-<!-- PAGE 5: RESULTS                                                        -->
+<!-- PAGE 5: RESULTS DASHBOARD                                              -->
 <!-- ===================================================================== -->
 <section id="page-results" class="app-page bg-[#f3f5ee] py-6 px-4 sm:px-8">
-  <div class="max-w-7xl mx-auto">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-      <div class="flex items-center gap-3">
-        <img src="assets/logo.svg" alt="ART FARM logo" class="w-11 h-11" />
-        <div>
-          <h1 class="text-xl sm:text-2xl font-extrabold text-[#173a2b]">Results</h1>
-          <p class="text-xs text-slate-600">FAO-56 engine (ported from team MATLAB prototype V8) · <span class="font-bold text-amber-700">screening estimate</span> · does not replace your judgement</p>
-        </div>
+  <div class="max-w-7xl mx-auto space-y-5">
+
+    <!-- Top Data Source Attribution Bar -->
+    <div class="bg-[#173a2b] text-white rounded-2xl px-5 py-3.5 shadow-lg border border-emerald-400/30 flex flex-wrap items-center justify-between gap-3">
+      <div class="text-xs sm:text-sm font-bold leading-snug">
+        <span class="text-amber-300 font-extrabold">[Data sources]</span>
+        Terrain: USGS 3DEP (EPQS, centroid) | Past climate: NASA POWER (10 yr) | Near-term: NOAA/NWS forecast | Scenario range: Open-Meteo Climate API (CMIP6) | Agronomy: FAO-56
+        <button type="button" data-open-data-sources class="ml-1 underline text-amber-200 font-extrabold">Data &amp; Sources</button>
       </div>
-      <div class="flex gap-2">
-        <button data-goto="page-crops" class="px-4 py-2 rounded-full bg-white border border-slate-300 text-sm font-semibold text-slate-700">← Crops</button>
-        <button data-goto="page-map" class="px-4 py-2 rounded-full bg-white border border-slate-300 text-sm font-semibold text-slate-700">New field</button>
+      <span id="live-api-status-pill" class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-300/30 text-emerald-200 text-[11px] font-bold whitespace-nowrap">
+        FAO-56 engine (ported from team MATLAB prototype V8)
+      </span>
+    </div>
+
+    <!-- Top Header & Navigation Controls -->
+    <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-300">
+      <div>
+        <div class="text-xs font-bold uppercase tracking-widest text-emerald-800">
+          ART FARM · past observations + possible range (scenario) · rotation results (unranked) <span class="mode-badge-slot align-middle"></span>
+        </div>
+        <h1 id="results-title" class="text-2xl sm:text-3xl font-extrabold text-[#173a2b] mt-0.5">
+          Tailored Crop Rotation Scenarios
+        </h1>
+        <p class="text-xs text-slate-600"><span class="font-bold text-amber-700">Screening estimate</span> · does not replace your judgement</p>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <button id="btn-back-crops" data-goto="page-crops" class="px-4 py-2 rounded-full border border-[#173a2b]/30 bg-white hover:bg-slate-50 text-xs font-bold text-[#173a2b] transition">
+          ← Change Crops
+        </button>
+        <button id="btn-restart" data-goto="page-map" class="px-4 py-2 rounded-full bg-[#173a2b] hover:bg-[#24543e] text-white text-xs font-bold transition">
+          Start Over
+        </button>
       </div>
     </div>
-    <nav id="results-nav" aria-label="Jump to section" class="sticky top-0 z-30 -mx-4 sm:mx-0 px-4 py-2 mb-4 bg-[#f3f5ee]/95 backdrop-blur border-b border-slate-200 flex gap-2 overflow-x-auto text-sm font-bold"></nav>
-    <div id="tier2" class="mb-8 scroll-mt-16"></div>
-    <div id="tier1" class="scroll-mt-16"></div>
-    <footer class="mt-10 text-xs text-slate-600 leading-relaxed border-t border-slate-300 pt-4">
+
+    <div id="tier1"></div>
+    <div id="tier2" class="scroll-mt-4"></div>
+
+    <footer class="mt-6 text-xs text-slate-600 leading-relaxed border-t border-slate-300 pt-4">
       ART FARM supports, and does not replace, farmer and agronomist judgement. Strategy comparison percentages are relative indices versus strategy A (current practice) and are not guarantees. Future climate is shown only as a possible range (scenario).
       Basemap © Esri, Maxar, Earthstar Geographics, and the GIS User Community. Data: NASA POWER, USGS 3DEP, NOAA NWS, Open-Meteo, USDA CDL/CSB/gSSURGO, Prithvi-EO (IBM/NASA). Parts of this site and its explanations were produced with AI assistance (SI); explanation numbers come only from model_api tool responses. <strong>All photos (img01–img12) and the ART FARM logo are AI-generated images (SI).</strong>
+      <button type="button" data-open-data-sources class="underline font-bold text-[#173a2b]">Data &amp; Sources</button>
     </footer>
   </div>
 </section>
@@ -624,6 +756,7 @@
 <div id="toast" class="pointer-events-none px-5 py-3 rounded-xl shadow-2xl font-semibold text-sm flex items-center gap-2.5 bg-[#173a2b] text-white border border-emerald-400/40">
   <span id="toast-msg"></span>
 </div>
+<script>window.ARTFARM_STATIC = true;</script>
 <script src="app.js"></script>
 <script src="data-sources.js"></script>
 <script>

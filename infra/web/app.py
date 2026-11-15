@@ -4,7 +4,9 @@
 - Proxies an allow-list of model_api paths under /api/* (GET/POST only)
 - POST /api/quick is computed in-process (model_api.quick) so the live 8090
   server does not need a restart.
-- Simple per-IP sliding-window rate limit (RATE_PER_MIN, default 60 req/min).
+- Per-IP sliding-window rate limit on /api/* only (RATE_PER_MIN, default 300 req/min);
+  static assets are never counted.
+- Cache headers: css/js/images/fonts "public, max-age=600"; HTML "public, max-age=60".
 
 Run: infra/web/run_web.sh  (127.0.0.1:8095). Starlette + httpx (BSD-3).
 """
@@ -31,7 +33,8 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 FRONTEND = ROOT / "frontend"
 UPSTREAM = os.environ.get("MODEL_API", "http://127.0.0.1:8090")
-RATE_PER_MIN = int(os.environ.get("RATE_PER_MIN", "60"))
+RATE_PER_MIN = int(os.environ.get("RATE_PER_MIN", "300"))
+STATIC_EXT = re.compile(r"\.(css|js|mjs|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|map|json)$", re.I)
 
 GET_ALLOW = [
     r"/health",
@@ -73,9 +76,18 @@ class RateLimit(BaseHTTPMiddleware):
             while q and now - q[0] > 60:
                 q.popleft()
             if len(q) >= RATE_PER_MIN:
-                return JSONResponse({"detail": "rate limit: 60 requests/min"}, status_code=429)
+                return JSONResponse({"detail": f"rate limit: {RATE_PER_MIN} requests/min"}, status_code=429)
             q.append(now)
-        return await call_next(request)
+            return await call_next(request)
+        # static files: not rate limited, cacheable
+        resp = await call_next(request)
+        if resp.status_code == 200 and "cache-control" not in resp.headers:
+            path = request.url.path
+            if STATIC_EXT.search(path):
+                resp.headers["cache-control"] = "public, max-age=600"
+            elif path.endswith("/") or path.endswith(".html"):
+                resp.headers["cache-control"] = "public, max-age=60"
+        return resp
 
 
 async def quick(request: Request) -> Response:
