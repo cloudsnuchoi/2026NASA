@@ -1,6 +1,6 @@
 # ART FARM slides
 
-`index.html` is a self-contained 7-slide deck (no external fonts, scripts or images; 1280×720 px per slide). Open it in any browser to present (scroll between slides).
+`index.html` is a self-contained 7-slide deck (no external fonts or scripts; images embedded as base64; 1280×720 px per slide). Open it in any browser to present (scroll between slides).
 
 ## Export to PDF
 
@@ -26,6 +26,6 @@ Tested 2026-11-15: 7 pages, no slide overflow. Do not commit the PDF if the subm
 ## Notes
 
 - All numbers on slide 5 come from the live model API; sources are in the comment block at the end of `../submission.md`.
-- MATLAB figures: `/srv/hackathon/data/processed/v1/matlab/outputs/jieun/*.png` did not exist at 20:00 KST, so no MATLAB figures are included. If they appear, add them to slide 4 or 5 as base64 `<img>` so the file stays self-contained.
-- Team slide roles set by Hylē directive 2026-11-15 20:15 KST. Demo video owner: TODO(Hylē).
+- v2 (2026-11-15 21:10 KST): slide 3 embeds 390 px screenshots from `docs/screens/mobile/after/` (UX lane, branch feat/ux-mobile); slide 6 embeds `outputs/yoonsung/nldas_vs_engine_2012.png` and `outputs/jieun/fig_backtest2012.png` (background darkened from white for legibility; data unchanged). Images are downscaled JPEG base64, so the file stays self-contained. Slide 7 merges the honesty and team slides. Rebuild script: not committed (one-off).
+- Team roles: Hylē directive 2026-11-15 20:15 KST; 강다은 + demo video (#68).
 - No NASA logos, flags or mission insignia.
