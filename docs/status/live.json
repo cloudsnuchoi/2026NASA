@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T16:31:04+09:00",
+ "generated_at": "2026-11-15T16:36:12+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 328,
+ "remaining_min": 323,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "lanes": [
   {
@@ -47,7 +47,7 @@
     {
      "label": "IMERG 일별 2010–2025 (16개 연도)",
      "status": "done",
-     "detail": "24개 연도 적재"
+     "detail": "25개 연도 적재"
     },
     {
      "label": "NEX-GDDP 2개 모델 이상 (API)",
@@ -224,7 +224,7 @@
   {
    "id": "infra",
    "name": "인프라·봇",
-   "pct": 83,
+   "pct": 100,
    "items": [
     {
      "label": "Mattermost",
@@ -248,8 +248,8 @@
     },
     {
      "label": "main CI 최근 성공",
-     "status": "progress",
-     "detail": "기록 없음"
+     "status": "done",
+     "detail": "success"
     },
     {
      "label": "live 현황 (tmux live)",
@@ -271,12 +271,6 @@
    "model": "DeepSeek Flash + Codex sol/terra + Claude",
    "task": "Mattermost 오케스트레이터 봇",
    "last_activity": "16:01"
-  },
-  {
-   "name": "imerg",
-   "model": "claude-sonnet-5-5",
-   "task": "IMERG·NLDAS-2 카운티 적재",
-   "last_activity": "13:59"
   },
   {
    "name": "live",
@@ -313,7 +307,7 @@
   {
    "name": "김윤성",
    "user": "yoonsung",
-   "mattermost_last": "16:15",
+   "mattermost_last": "16:35",
    "repo_last": null
   },
   {
@@ -338,7 +332,7 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": null
+   "repo_last": "16:19"
   }
  ],
  "blockers": [],
@@ -347,7 +341,48 @@
   "MATLAB: field_dekad.csv",
   "MATLAB: field_season.csv"
  ],
- "merged_prs": [],
+ "merged_prs": [
+  {
+   "number": 46,
+   "title": "data(fields): 대비 데모 필지 8개 추가 (IL·NE·OH) — 필지별 결과 차이 확대",
+   "merged_at": "2026-11-15T07:19:35Z"
+  },
+  {
+   "number": 45,
+   "title": "feat(site): live 현황 패널(dashboard·roadmap), 모든 탭 내보내기, 팀 채팅 버튼",
+   "merged_at": "2026-11-15T07:04:12Z"
+  },
+  {
+   "number": 44,
+   "title": "feat(orchestrator): 끊어 보낸 메시지 묶기(4초) + 답변 중 추가 메시지 대기열",
+   "merged_at": "2026-11-15T06:59:17Z"
+  },
+  {
+   "number": 43,
+   "title": "feat(status): 실시간 현황 생성기 (docs/status/live.json, LIVE.md)",
+   "merged_at": "2026-11-15T06:53:25Z"
+  },
+  {
+   "number": 42,
+   "title": "fix(orchestrator): 봇 답변 품질 (MATLAB 경로·TASKS 맥락·툴박스/토큰 규칙·안내 템플릿·캡처 읽기)",
+   "merged_at": "2026-11-15T06:28:12Z"
+  },
+  {
+   "number": 41,
+   "title": "fix(model): 전략이 물수지에 실제로 반영되게 수정 (QA P1 E1·E3·E4) + NLDAS 반영",
+   "merged_at": "2026-11-15T06:14:42Z"
+  },
+  {
+   "number": 40,
+   "title": "feat(orchestrator): 디자인 채널은 사람이 쓴 모든 글에 답 + PRD 결정 메모",
+   "merged_at": "2026-11-15T06:05:22Z"
+  },
+  {
+   "number": 39,
+   "title": "test(qa): model_api 라이브 E2E + DB 점검 SQL + QA 보고서",
+   "merged_at": "2026-11-15T06:00:08Z"
+  }
+ ],
  "ai_models": [
   {
    "name": "Prithvi 작물 분류",
@@ -376,7 +411,7 @@
   }
  ],
  "lane_agents_done": {
-  "imerg": false,
+  "imerg": true,
   "fields2": true,
   "site": true,
   "prithvi": false
