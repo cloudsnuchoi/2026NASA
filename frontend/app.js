@@ -419,6 +419,42 @@
   const dist = (o, u = "") => (!o ? GAP : `<strong>${fmt(o.p50)}</strong>${u} ${rng(o.p10, o.p90)}`);
   const row = (k, v) => `<div class="flex justify-between gap-3 bg-[#214d3a] px-3.5 py-2 rounded-xl"><span class="text-emerald-100/80">${k}</span><span class="font-bold text-right">${v}</span></div>`;
   let charts = [];
+  // ------------------------------------------------------------------ PORT: team mockup V8 results dashboard (verbatim) + engine binding
+  let portedHtml = null;
+  async function renderPorted(el, q, d) {
+    if (portedHtml == null) portedHtml = await fetch("mockup_results.html").then((r) => r.text());
+    el.innerHTML = portedHtml;
+    const M = window.MockupV8, S = M.state;
+    const ring = (q.input?.polygon || state.vertices).map(([lon, lat]) => [lat, lon]);
+    M.setGeo(ring);
+    S.selectedCrops = [...state.crops].sort((x, y) => CROP_ORDER[x] - CROP_ORDER[y]);
+    const py = q.climate_history?.per_year || [];
+    window.__AF_BIND = py.length ? { years: py.map((r) => r.year), temp: py.map((r) => r.t2m_mean_c), precip: py.map((r) => r.precip_mm), et0: py.map((r) => r.et0_pm_mm), rzw: py.every((r) => r.root_zone_wetness_mean != null) ? py.map((r) => r.root_zone_wetness_mean) : null } : null;
+    await M.runFieldShiftLiveApiEngine();
+    if (q.geometry?.area_ha) S.geo.area_m2 = q.geometry.area_ha * 10000;
+    if (q.elevation?.value_m != null) { // engine has the centroid only: anchor the prototype relief grid to it
+      const off = q.elevation.value_m - S.dem.medianElev_m;
+      S.dem.medianElev_m = q.elevation.value_m;
+      S.dem.minElev_m = +(S.dem.minElev_m + off).toFixed(2); S.dem.maxElev_m = +(S.dem.maxElev_m + off).toFixed(2);
+      if (Array.isArray(S.dem.gridZ)) S.dem.gridZ = S.dem.gridZ.map((r) => (Array.isArray(r) ? r.map((z) => z + off) : r + off));
+    }
+    const cands = q.rotation_candidates || [];
+    S.scenarios.forEach((sc) => {
+      const seq = Array.isArray(sc.rotSeq) ? sc.rotSeq.join() : null;
+      const c = cands.find((k) => k.sequence.join() === seq);
+      if (c?.mean_season_etc_mm != null) sc.ETm_mm = c.mean_season_etc_mm;
+    });
+    M.renderResultsDashboard();
+    const tag = '<span class="af-proto ml-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold align-middle">prototype estimate (team V8)</span>';
+    ["#scen-profit-ac", "#kpi-som-idx", "#kpi-stab-all", "#opt-alloc-solver"].forEach((sel) => { const n = $(sel); if (n) n.insertAdjacentHTML("afterend", tag); });
+    const tb = $("#all-scenarios-tbody")?.closest("table");
+    if (tb) tb.insertAdjacentHTML("afterend", tag);
+    const sim = Array.isArray(d) ? d[0] : null;
+    const w = sim?.strategies?.[0]?.metrics?.season_water_deficit_mm;
+    if (tb && w && w.p10 != null) {
+      tb.insertAdjacentHTML("afterend", `<p id="pilot-engine-line" class="text-xs text-slate-700 font-semibold mt-2">Pilot-field engine: deficit P10–P90 ${fmt(w.p10)}–${fmt(w.p90)} mm, CVaR10% ${fmt(w.cvar)} mm (n=${sim.n ?? sim.n_seasons ?? 500} seasons)</p>`);
+    }
+  }
   function renderTier1(q, d) {
     const el = $("#tier1");
     charts.forEach((c) => c.destroy()); charts = [];
@@ -428,6 +464,7 @@
         : errBox("Quick Screen unavailable", q?.__error);
       return;
     }
+    if (window.MockupV8) { renderPorted(el, q, d); return; }
     const g = q.geometry || {}, ch = q.climate_history, fc = q.forecast_anomaly, pj = q.climate_projection;
     const cands = q.rotation_candidates || [];
     const cards = Object.fromEntries((q.crop_cards || []).map((c) => [c.crop, c]));
