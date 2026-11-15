@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>데이터셋 · 팀 아몰라 · Field Shift</title>
+  <meta name="description" content="SOT 데이터셋 표, 정규 ID·단위·CRS, 디렉터리와 DB 테이블.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="./dashboard/styles.css">
+  <link rel="stylesheet" href="./site/site.css">
+</head>
+<body class="explainer">
+  <nav id="site-nav" class="site-nav" aria-label="주요 메뉴"></nav>
+  <header class="page-header">
+    <div class="wrap">
+      <p class="kicker">Source of truth · SOT.md</p>
+      <h1>데이터셋과 계약</h1>
+      <p class="lead">받을 제품은 이미 SOT에 정해져 있습니다. 포털을 처음부터 조사하지 않고, 표의 이름과 층(1층 카운티 / 2층 Story)으로 받습니다. 상태 열은 실시간 다운로드가 아니라 문서 기준이며, 실제 적재는 이슈 #26과 현황판을 보세요.</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <p class="src-note">동결·갱신: 2026-11-15 11:10 Asia/Seoul (KST). Story County <code>19169</code>. QuickStats는 선택, 대체는 NASS 일괄 파일. DB 엔진은 최근 결정대로 <strong>Postgres 17</strong> + PostGIS + pgvector + pg_trgm (SOT 초안의 “16”보다 DECISIONS·ARCHITECTURE가 우선).</p>
+
+    <h2>공간 두 층 (SOT 1.6) · 데이터셋 표</h2>
+    <div class="tier-strip">
+      <div><span class="k">1층</span><strong>콘벨트 12주 · 카운티</strong> POWER, IMERG, SMAP 맥락, CDL 작물 비율, NEX-GDDP 카운티 평균. 어디든 1차 힌트.</div>
+      <div><span class="k">2층</span><strong>Story County 19169 · 30 m</strong> CDL 래스터, CSB, SSURGO, HLS NDVI, GEOS-S2S. 몬테카를로와 백테스트 본편.</div>
+    </div>
+
+    <form class="filter-bar" id="filters">
+      <label>층
+        <select id="f-tier">
+          <option value="">전체</option>
+          <option value="1">1층</option>
+          <option value="2">2층</option>
+          <option value="—">층 없음</option>
+        </select>
+      </label>
+      <label>제공
+        <select id="f-origin">
+          <option value="">전체</option>
+          <option value="NASA">NASA</option>
+          <option value="USDA">USDA</option>
+          <option value="기타">기타</option>
+        </select>
+      </label>
+      <label>MATLAB
+        <select id="f-matlab">
+          <option value="">전체</option>
+          <option value="예">처리함</option>
+          <option value="아니오">안 함</option>
+        </select>
+      </label>
+      <label>우선순위
+        <select id="f-priority">
+          <option value="">전체</option>
+          <option value="P0">P0</option>
+          <option value="P1">P1</option>
+          <option value="선택">선택</option>
+          <option value="후순위">후순위·컷</option>
+        </select>
+      </label>
+      <label>검색
+        <input type="search" id="f-q" placeholder="이름, ID, 용도" autocomplete="off">
+      </label>
+      <span class="filter-count" id="f-count"></span>
+    </form>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>이름</th><th>제공</th><th>층</th><th>변수</th><th>해상도·기간</th><th>접근</th><th>어디서 쓰나</th><th>MATLAB</th><th>담당</th><th>우선</th><th>상태</th>
+          </tr>
+        </thead>
+        <tbody id="dataset-body"></tbody>
+      </table>
+    </div>
+
+    <h2>정규 ID, 단위, 좌표계</h2>
+    <p class="src-note">아래는 SOT 2절을 렌더한 것입니다.</p>
+    <article id="sot-ids" class="prose wide"><div class="empty">불러오는 중…</div></article>
+
+    <h2>시간 집계 · 디렉터리 · 저장소 레이아웃</h2>
+    <article id="sot-dirs" class="prose wide"><div class="empty">불러오는 중…</div></article>
+
+    <h2>DB 테이블</h2>
+    <p>서비스 DB는 협업 도구(Mattermost)와 분리합니다. API가 읽는 값만 아래 테이블(또는 동등한 뷰)에 있어야 합니다. 분석 중간은 Parquet + DuckDB도 허용합니다.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>테이블</th><th>역할</th></tr></thead>
+        <tbody>
+          <tr><td><code>data_source</code></td><td>출처 메타(NASA 여부, 라이선스, 인용)</td></tr>
+          <tr><td><code>fields</code></td><td>CSB <code>field_id</code>, 카운티, 기하(EPSG:4326), 면적</td></tr>
+          <tr><td><code>field_season</code></td><td>계절 피처(NDVI, 맨땅, 강수, 기온, ET0, SMAP 아노말리)</td></tr>
+          <tr><td><code>field_dekad</code></td><td>10일 순 NDVI 평활, 맨땅 플래그</td></tr>
+          <tr><td><code>climate_daily</code></td><td>일 기후 입력</td></tr>
+          <tr><td><code>climate_annual</code></td><td>연 기후·작물 요약</td></tr>
+          <tr><td><code>scenario_climate</code></td><td>GEOS-S2S·NEX-GDDP 시나리오 분포</td></tr>
+          <tr><td><code>strategy_score</code></td><td>7축 점수, CVaR, 분위</td></tr>
+          <tr><td><code>backtest_result</code></td><td>CDL/CSB 백테스트 (수량 열은 선택)</td></tr>
+          <tr><td><code>vision_result</code></td><td>Prithvi 배치 추론 (실패 시 CDL)</td></tr>
+          <tr><td><code>evidence_chunk</code></td><td>RAG 인용·DOI (pgvector HNSW, 보조 pg_trgm)</td></tr>
+          <tr><td><code>calibration_param</code></td><td>MATLAB 보정 계수</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">VPS 경로 약칭: 원본 <code>/data/raw/&lt;dataset&gt;/</code> (실제 <code>/srv/hackathon/data/raw</code>, 불변). 가공 <code>/data/processed/vN</code>. Git에는 원본·가공 래스터를 넣지 않습니다. 작은 CSV·그림은 <a href="https://drive.google.com/drive/folders/1pUlXbE_VNiMGHVYSkHHT4Mr-nzo--Yqd" target="_blank" rel="noopener">팀 드라이브 DATA</a>에도 둘 수 있고, 대용량은 VPS에만 둡니다.</p>
+    <details>
+      <summary>SOT 5절 DDL 원문 보기</summary>
+      <article id="sot-ddl" class="prose wide"><div class="empty">펼치면 불러옵니다.</div></article>
+    </details>
+  </main>
+  <footer id="site-footer" class="site-footer"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.umd.js"></script>
+  <script src="./site/site.js"></script>
+  <script src="./site/datasets.js"></script>
+  <script>
+    FieldShiftSite.mount({ active: "data" });
+
+    function priClass(p) {
+      if (/P0/.test(p)) return "p0";
+      if (/P1/.test(p)) return "p1";
+      return "draft";
+    }
+    function renderTable() {
+      const tier = document.getElementById("f-tier").value;
+      const origin = document.getElementById("f-origin").value;
+      const pri = document.getElementById("f-priority").value;
+      const q = (document.getElementById("f-q").value || "").trim().toLowerCase();
+      const rows = (window.FIELDSHIFT_DATASETS || []).filter(function (d) {
+        if (tier === "1" && d.tier.indexOf("1") < 0) return false;
+        if (tier === "2" && d.tier.indexOf("2") < 0) return false;
+        if (tier === "—" && d.tier !== "—") return false;
+        const prov = d.provider || d.origin || "";
+        if (origin && prov !== origin) return false;
+        const mat = document.getElementById("f-matlab") ? document.getElementById("f-matlab").value : "";
+        if (mat && !(d.matlab || "").startsWith(mat)) return false;
+        if (pri === "P0" && d.priority.indexOf("P0") < 0) return false;
+        if (pri === "P1" && d.priority.indexOf("P1") < 0) return false;
+        if (pri === "선택" && d.priority.indexOf("선택") < 0) return false;
+        if (pri === "후순위" && !/후순위|컷|사용 안 함/.test(d.priority)) return false;
+        if (q) {
+          const blob = (d.name + " " + d.id + " " + (d.use||"") + " " + (d.used_in||"") + " " + (d.variables||"") + " " + (d.notes||"") + " " + (d.resolution||"") + " " + (d.owner||"")).toLowerCase();
+          if (blob.indexOf(q) < 0) return false;
+        }
+        return true;
+      });
+      document.getElementById("f-count").textContent = rows.length + "개 / " + (window.FIELDSHIFT_DATASETS || []).length;
+      document.getElementById("dataset-body").innerHTML = rows.map(function (d) {
+        const prov = d.provider || d.origin || "기타";
+        const ptag = prov === "NASA" ? "open" : (prov === "USDA" ? "review" : "");
+        return "<tr><td><strong>" + FieldShiftSite.escapeHtml(d.name) + "</strong><br><code>" +
+          FieldShiftSite.escapeHtml(d.id) + "</code></td><td><span class='tag " + ptag + "'>" + FieldShiftSite.escapeHtml(prov) +
+          "</span></td><td>" + FieldShiftSite.escapeHtml(d.tier) + "</td><td>" + FieldShiftSite.escapeHtml(d.variables || d.use || "") +
+          "</td><td>" + FieldShiftSite.escapeHtml(d.resolution) + "</td><td>" + FieldShiftSite.escapeHtml(d.access || "") +
+          "</td><td>" + FieldShiftSite.escapeHtml(d.used_in || d.use || "") +
+          (d.notes ? "<br><span class='muted'>" + FieldShiftSite.escapeHtml(d.notes) + "</span>" : "") +
+          "</td><td>" + FieldShiftSite.escapeHtml(d.matlab || "") + "</td><td>" + FieldShiftSite.escapeHtml(d.owner || "") +
+          "</td><td><span class='tag " + priClass(d.priority) + "'>" + FieldShiftSite.escapeHtml(d.priority) +
+          "</span></td><td>" + FieldShiftSite.escapeHtml(d.status) + "</td></tr>";
+      }).join("") || '<tr><td colspan="11" class="empty">조건에 맞는 행이 없습니다.</td></tr>';
+    }
+    ["f-tier", "f-origin", "f-matlab", "f-priority", "f-q"].forEach(function (id) {
+      document.getElementById(id).addEventListener("input", renderTable);
+      document.getElementById(id).addEventListener("change", renderTable);
+    });
+    renderTable();
+
+    (async function () {
+      try {
+        const md = await FieldShiftSite.fetchFirst(FieldShiftSite.docsUrls("SOT.md"));
+        const ids = FieldShiftSite.sectionBetween(md, /^## 2\. 정규 ID/m, /^## 3\. /m);
+        const mid = FieldShiftSite.sectionBetween(md, /^## 3\. 시간 집계/m, /^## 5\. /m);
+        const ddl = FieldShiftSite.sectionBetween(md, /^## 5\. DB 스키마/m, /^## 6\. /m);
+        await FieldShiftSite.renderMarkdownInto(document.getElementById("sot-ids"), ids || "절을 찾지 못했습니다.");
+        await FieldShiftSite.renderMarkdownInto(document.getElementById("sot-dirs"), mid || "절을 찾지 못했습니다.");
+        const ddlHost = document.getElementById("sot-ddl");
+        const details = ddlHost.closest("details");
+        let loaded = false;
+        details.addEventListener("toggle", async function () {
+          if (!details.open || loaded) return;
+          loaded = true;
+          await FieldShiftSite.renderMarkdownInto(ddlHost, ddl || "절을 찾지 못했습니다.");
+        });
+      } catch (e) {
+        document.getElementById("sot-ids").innerHTML = '<div class="md-error">SOT.md를 불러오지 못했습니다. <a href="https://github.com/cloudsnuchoi/2026NASA/blob/main/docs/SOT.md">GitHub에서 보기</a></div>';
+      }
+    })();
+  </script>
+</body>
+</html>

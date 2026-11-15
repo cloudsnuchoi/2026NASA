@@ -2,6 +2,10 @@
 
 **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · **Status dashboard:** [docs/dashboard/](docs/dashboard/index.html) ([GitHub Pages](https://cloudsnuchoi.github.io/2026NASA/dashboard/))
 
+Readable Pages (Korean): [현황판](https://cloudsnuchoi.github.io/2026NASA/dashboard/) · [로드맵·체크리스트](https://cloudsnuchoi.github.io/2026NASA/roadmap.html) · [데이터셋](https://cloudsnuchoi.github.io/2026NASA/data.html) · [아키텍처·파이프라인](https://cloudsnuchoi.github.io/2026NASA/architecture.html) · [AI 모델](https://cloudsnuchoi.github.io/2026NASA/models.html) · [개요/PRD](https://cloudsnuchoi.github.io/2026NASA/overview.html) · [팀](https://cloudsnuchoi.github.io/2026NASA/team.html)
+
+**팀 드라이브 (아몰라):** [Google Drive 공유 폴더](https://drive.google.com/drive/folders/1pUlXbE_VNiMGHVYSkHHT4Mr-nzo--Yqd) — subfolders `PRD`, `DESIGN`, `FRONT`, `BACK`, `DATA`.
+
 Team **아몰라** · [NASA Space Apps Challenge 2026](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/) (Seoul) · Challenge 07 *Field Shift: Adapting Farms with NASA Data*.
 
 A **decision-support** tool for Corn Belt corn–soy farmers. It compares crop-rotation strategies that may improve soil health and resilience to weather and water, using NASA Earth observations. It **supports, and does not replace**, farmer judgment and local agronomic expertise.
@@ -39,6 +43,7 @@ These documents are frozen in Korean. Identifiers in code stay English.
 | --- | --- |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, **build vs service pipelines**, decision model, collaboration workflow, AI 4 layers and algorithms |
 | [docs/dashboard/](docs/dashboard/index.html) | Live team board: per-member `STATUS:` comments, countdown, area bars, PR queue. Also on [GitHub Pages](https://cloudsnuchoi.github.io/2026NASA/dashboard/) |
+| GitHub Pages explainers | Korean tabs: [현황판](https://cloudsnuchoi.github.io/2026NASA/dashboard/), [로드맵·체크리스트](https://cloudsnuchoi.github.io/2026NASA/roadmap.html), [데이터셋](https://cloudsnuchoi.github.io/2026NASA/data.html), [아키텍처·파이프라인](https://cloudsnuchoi.github.io/2026NASA/architecture.html), [AI 모델](https://cloudsnuchoi.github.io/2026NASA/models.html), [개요/PRD](https://cloudsnuchoi.github.io/2026NASA/overview.html), [팀](https://cloudsnuchoi.github.io/2026NASA/team.html) |
 | [docs/TEAM_SPEC.md](docs/TEAM_SPEC.md) | Product lock status, user flow & screens, requirement traceability, data mapping, AI 4-layer architecture, data spike, roles & handoff contracts, CLI guide, timeline |
 | [docs/PRD.md](docs/PRD.md) | Problem, users, decision, scope, success criteria, demo, cut order |
 | [docs/SOT.md](docs/SOT.md) | Datasets, IDs/units/CRS, aggregation, directories, DB schema, API contract |
@@ -52,6 +57,23 @@ These documents are frozen in Korean. Identifiers in code stay English.
 
 ---
 
+
+---
+
+## Team Google Drive (아몰라)
+
+Shared folder: [drive.google.com/drive/folders/1pUlXbE_VNiMGHVYSkHHT4Mr-nzo--Yqd](https://drive.google.com/drive/folders/1pUlXbE_VNiMGHVYSkHHT4Mr-nzo--Yqd)
+
+| Folder | What goes here |
+| --- | --- |
+| `PRD` | Slides, pitch, submission materials |
+| `DESIGN` | Figma exports, images |
+| `FRONT` | Non-code frontend assets, screenshots |
+| `BACK` | Non-code backend assets, screenshots |
+| `DATA` | MATLAB outputs and small CSVs. Large rasters and bulk files stay on the VPS (`/srv/hackathon/data`) |
+
+**Code always stays in GitHub.** Do not upload source repositories to Drive.
+
 ## Repository layout
 
 ```text
@@ -63,7 +85,7 @@ matlab/          # Offline analysis only (fixed Parquet/CSV outputs)
 sim/             # three.js voxel simulation for the demo video
 infra/           # Docker Compose, Postgres + PostGIS + pgvector
 notebooks/       # EDA
-docs/            # PRD, SOT, architecture, checklist, decisions, status dashboard
+docs/            # PRD, SOT, architecture, checklist, decisions, status dashboard, explainer Pages
 ```
 
 Do not commit secrets or raw/processed rasters. See `.gitignore` and the directory rules in [docs/SOT.md](docs/SOT.md).

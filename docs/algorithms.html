@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>알고리즘 · 팀 아몰라 · Field Shift</title>
+  <meta name="description" content="AI 네 층과 규칙·지수 스코어링, 몬테카를로 물수지, CVaR, 백테스트, Prithvi, 시나리오, LLM tool-call.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="./dashboard/styles.css">
+  <link rel="stylesheet" href="./site/site.css">
+</head>
+<body class="explainer">
+  <nav id="site-nav" class="site-nav" aria-label="주요 메뉴"></nav>
+  <header class="page-header">
+    <div class="wrap">
+      <p class="kicker">Source of truth · ARCHITECTURE 6절 · PRD 9절 · TEAM_SPEC 5절</p>
+      <h1>AI 네 층과 알고리즘</h1>
+      <p class="lead">라이브 엔진은 <strong>규칙·지수 스코어링 + 몬테카를로 물수지 + CVaR</strong>입니다. 강화학습과 미세조정은 하지 않습니다. LLM은 숫자를 만들지 않고, MATLAB은 오프라인 보정만 합니다.</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <p class="src-note">요약 표는 <a href="./models.html">AI 모델</a> 탭에 있습니다. 이 페이지는 알고리즘 카드·수식입니다.</p>
+    <p class="src-note">수식은 문서에 적힌 최소 규격입니다. 축 가중치의 숫자 기본값은 문서에 고정되어 있지 않아 여기서 지어내지 않습니다. 슬라이더가 가중만 바꿉니다.</p>
+
+    <h2>AI 네 층</h2>
+    <div class="layer-grid">
+      <article class="info-card layer-card">
+        <p class="n">L1 비전</p>
+        <h3>Prithvi 추론만</h3>
+        <p>HLS 6밴드×3시점 → <code>vision_result</code> (작물·맨땅, CDL 일치율). 실패 시 CDL. 라이브 경로 아님(배치). 담당 Hylē.</p>
+      </article>
+      <article class="info-card layer-card">
+        <p class="n">L2 예측·시나리오</p>
+        <h3>GEOS-S2S · NEX-GDDP</h3>
+        <p>다음 시즌 앙상블 아노말리, 2030년대 다모델 delta 분포 → <code>scenario_climate</code>. 3년 예보 금지. 사전 계산. 김윤성(S2S), 김우찬(NEX).</p>
+      </article>
+      <article class="info-card layer-card">
+        <p class="n">L3 시뮬레이션</p>
+        <h3>7축 + MC + CVaR</h3>
+        <p>피처+슬라이더 → 전략 카드, P10/P50/P90, CVaR. 라이브는 사전 계산 + 재가중. Python/NumPy, FastAPI. 담당 Hylē.</p>
+      </article>
+      <article class="info-card layer-card">
+        <p class="n">L4 설명</p>
+        <h3>LLM tool-call + RAG</h3>
+        <p>API JSON + <code>evidence_chunk</code> → 설명 문장과 DOI. 숫자 생성 금지. 임베딩 실패 시 <code>pg_trgm</code>. 라이브. 담당 Hylē.</p>
+      </article>
+    </div>
+
+    <h2>알고리즘 목록</h2>
+    <div class="algo-list">
+
+      <article class="card algo-card" id="score7">
+        <h3>규칙·지수 7축 점수 <code>score7</code></h3>
+        <div class="algo-meta"><span class="tag p0">L3</span><span class="tag">화면 S4</span><span class="tag">Hylē · model_api/</span></div>
+        <div class="io"><div><strong>입력</strong> 필지·카운티 피처, 작물 특성(문헌 Kc 등), 전략 A–D</div><div><strong>출력</strong> 축별 점수 0–1, 슬라이더 가중 합, 기준 A 대비 %</div></div>
+        <p>일곱 축: 질소 순환, 침식, 유기물, 병해충 차단, 물 사용, 사료 가치, 시장 적합성(수량 옆축은 선택). 확정 kg/ha는 내지 않습니다.</p>
+        <div class="formula">\[ S = \sum_{k=1}^{7} w_k s_k, \quad s_k \in [0,1], \quad \sum_k w_k = 1 \]</div>
+        <p><code>reweight</code>: 우선순위 슬라이더(물·토양·회복력·소득/시장)는 <strong>가중 \(w_k\)만</strong> 바꿉니다. 원점수 \(s_k\)와 분포는 유지합니다. 단일 정답으로 순위를 강제하지 않습니다. 물 제한이면 물 축 가중을 올립니다.</p>
+      </article>
+
+      <article class="card algo-card" id="wb-mc">
+        <h3>몬테카를로 물수지 <code>wb_mc</code></h3>
+        <div class="algo-meta"><span class="tag p0">L3</span><span class="tag">화면 S4·S5</span><span class="tag">Hylē · 사전계산</span></div>
+        <div class="io"><div><strong>입력</strong> POWER 일 기후(1991–2020 또는 적재 창), IMERG, SSURGO AWC, FAO-56 \(K_c\), 시나리오 이동</div><div><strong>출력</strong> 생육기 물 부족(mm), 스트레스 일수, 겨울 맨땅 일수 → P10/P50/P90</div></div>
+        <p>연 단위 재표본 \(N=500\)–\(1000\). 일 물수지와 증발산:</p>
+        <div class="formula">\[
+          SM_t = SM_{t-1} + P_t - ET_{c,t} - R_t, \qquad
+          ET_c = ET_0 \times K_c, \qquad
+          \mathrm{cap} = \mathrm{AWC} \times z_{\mathrm{root}}
+        \]</div>
+        <p>\(ET_0\)는 FAO-56(<code>fao56</code>, POWER). \(K_c\)는 작물·생육 단계 문헌 범위. 용량을 넘으면 유출/배수 \(R_t\). MATLAB은 계수만 <code>calibration_params.csv</code>로 넘깁니다.</p>
+      </article>
+
+      <article class="card algo-card" id="cvar">
+        <h3>CVaR와 분위 <code>cvar</code></h3>
+        <div class="algo-meta"><span class="tag p0">L3</span><span class="tag">화면 S4·S5</span><span class="tag">Hylē</span></div>
+        <div class="io"><div><strong>입력</strong> 몬테카를로 표본(물 부족, 스트레스 일수 등)</div><div><strong>출력</strong> P10, P50, P90, 하위 10% 평균(CVaR). 단위는 응답 <code>unit</code></div></div>
+        <p>회복력·꼬리 위험을 봅니다. 하위 10% 평균:</p>
+        <div class="formula">\[ \mathrm{CVaR}_{0.10}(X) = \mathbb{E}\!\left[X \mid X \le q_{0.10}(X)\right] \]</div>
+        <p>P10/P50/P90은 같은 표본의 경험적 분위입니다. 화면의 %는 “기준 전략 A 대비 상대 지수, 보장값 아님”과 범위를 함께 보여 줍니다.</p>
+      </article>
+
+      <article class="card algo-card" id="backtest">
+        <h3>CDL/CSB 백테스트 <code>backtest_cdl</code></h3>
+        <div class="algo-meta"><span class="tag p0">검증</span><span class="tag">화면 S5 · /validation/backtest</span><span class="tag">Hylē, 김윤성</span></div>
+        <div class="io"><div><strong>입력</strong> CSB 필지 × CDL 연 서열, 가뭄해(예: 2012) 기후 피처. 카운티 수량은 선택</div><div><strong>출력</strong> 이력 대조, 가뭄해 구별 여부. 수량 열이 없으면 <code>null</code></div></div>
+        <p>본편 검증 장소는 Story County입니다. 수량은 옆축이라 없어도 백테스트는 CDL/CSB만으로 성립합니다.</p>
+      </article>
+
+      <article class="card algo-card" id="prithvi">
+        <h3>Prithvi 추론 <code>prithvi_infer</code></h3>
+        <div class="algo-meta"><span class="tag p0">L1</span><span class="tag">화면 S2 (보조)</span><span class="tag">Hylē · 배치</span></div>
+        <div class="io"><div><strong>입력</strong> HLS 6밴드 × 3시점, 224×224 칩</div><div><strong>출력</strong> 13클래스 분할, 필지 다수결, <code>agreement_with_cdl</code></div></div>
+        <p>체크포인트 <code>Prithvi-EO-1.0-100M-multi-temporal-crop-classification</code> (Apache-2.0, 카드 mIoU 0.4269). <strong>추론만</strong> 하고 미세조정하지 않습니다. Prithvi-EO-2.0 작물 공개본은 없어 쓰지 않습니다. 요청 경로 GPU 금지. 실패 시 CDL 라벨.</p>
+      </article>
+
+      <article class="card algo-card" id="scenarios">
+        <h3>시나리오 이동 <code>scenario_shift</code></h3>
+        <div class="algo-meta"><span class="tag p0">L2</span><span class="tag">화면 S5</span><span class="tag">김윤성(S2S), 김우찬(NEX)</span></div>
+        <div class="io"><div><strong>입력</strong> GEOS-S2S-3 월 앙상블, NEX-GDDP-CMIP6 SSP2-4.5/5-8.5 다모델</div><div><strong>출력</strong> <code>scenario_climate</code> 분포. 다음 시즌·2030년대</div></div>
+        <p>다음 시즌은 GEOS-S2S 아노말리(월 강수 비율, 기온 차)를 표본에 더합니다. 2030년대는 delta method (2031–2040 대비 1985–2014):</p>
+        <div class="formula">\[ \Delta = \overline{X}_{2031\text{–}2040} - \overline{X}_{1985\text{–}2014} \]</div>
+        <p>필지 정밀 값처럼 표시하지 않습니다(맥락 칸). WeatherNext는 선택 애드온이며 이번 주말 본편 의존이 아닙니다.</p>
+      </article>
+
+      <article class="card algo-card" id="llm">
+        <h3>LLM tool-call + RAG <code>toolcall</code> · <code>rag_hnsw</code></h3>
+        <div class="algo-meta"><span class="tag p0">L4</span><span class="tag">화면 S6 · /explain</span><span class="tag">Hylē · rag/</span></div>
+        <div class="io"><div><strong>입력</strong> 사용자 질문, FastAPI 도구(<code>get_profile</code>, <code>compare_strategies</code>, 기후, <code>search_evidence</code>)</div><div><strong>출력</strong> 설명 문장. 모든 숫자는 도구 JSON 경로 각주. 짧은 인용+DOI</div></div>
+        <p>RAG는 근거 카드 전용입니다(데이터 탐색용이 아님). 근거가 없으면 <code>insufficient_evidence: true</code>이고 문장을 만들지 않습니다. 임베딩은 pgvector HNSW, 실패 시 <code>pg_trgm</code> 키워드.</p>
+      </article>
+
+      <article class="card algo-card" id="matlab-algos">
+        <h3>오프라인 MATLAB 보조</h3>
+        <div class="algo-meta"><span class="tag">오프라인만</span><span class="tag">김윤성 · 김우찬</span></div>
+        <p><code>sg_smooth</code> Savitzky–Golay 평활, <code>seasonal_decomp</code> 계절·추세 분해, <code>anomaly</code> 같은 격자 평년 대비, <code>bare_detect</code> NDVI+CDL 맨땅 기간. 출력은 고정 스키마 Parquet/CSV만 DB로 적재됩니다. 라이브 경로에 MATLAB 런타임이 있으면 안 됩니다.</p>
+      </article>
+    </div>
+  </main>
+  <footer id="site-footer" class="site-footer"></footer>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script src="./site/site.js"></script>
+  <script>
+    FieldShiftSite.mount({ active: "models" });
+    function typeset() { FieldShiftSite.renderMath(document.querySelector("main")); }
+    if (window.renderMathInElement) typeset();
+    else window.addEventListener("load", typeset);
+  </script>
+</body>
+</html>

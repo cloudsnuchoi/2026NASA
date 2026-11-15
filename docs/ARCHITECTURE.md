@@ -284,6 +284,41 @@ flowchart LR
 
 ---
 
+
+---
+
+## 5.1 노트북 agent-loop와 중앙 오케스트레이터
+
+원문: [infra/agent-loop/README.md](../infra/agent-loop/README.md) (2026-11-15, 최신 커밋 `feat(infra): agent-loop 3-min check-ins`). GitHub이 상태의 원본이다.
+
+- 중앙: VPS Mattermost + `orchestrator` 봇. Hylē 또는 봇이 1:1 채널(`1on1-<아이디>`)에 `!task #이슈 할 일`을 보낸다. 선택적으로 `agent-status` 공유 채널에도 check-in을 모을 수 있다.
+- 각 팀원 노트북의 `agent-loop`가 그 채널을 **기본 약 4초마다** 폴링한다(`POLL_SEC=4`, README 도식은 “5초마다”). `!task`를 보면 Codex 또는 agy를 실행한다. 끝나면 PR(`Closes #N`)과 이슈 `STATUS:` 댓글을 남긴다. **머지는 하지 않는다** (Hylē만).
+- **3분마다** 중앙에 check-in을 한 글로 고쳐 쓴다(`HEARTBEAT_MIN=3`, README는 3–5분 권장). 지금 작업·브랜치·마지막 커밋·커밋 안 된 파일 수·바쁨/쉼을 담는다. 봇은 **10분**(`AGENT_SILENT_MIN=10`) 넘게 소식이 없으면 ⚠️로 표시한다.
+- MATLAB 담당은 git을 쓰지 않으므로 `!task` 자동 배정(`AUTO_DISPATCH`) 대상이 아니다. 설치와 check-in은 한다.
+
+```mermaid
+flowchart LR
+  subgraph VPS["VPS"]
+    BOT["orchestrator 봇\n!assign → !task"]
+    MM["Mattermost\n공개 채널 + 1on1-<이름>"]
+  end
+  subgraph PC["팀원 노트북"]
+    LOOP["agent-loop\n폴링 4초 · check-in 3분"]
+    CLI["Codex 또는 agy"]
+  end
+  GH["GitHub\nIssues · PR · STATUS 댓글"]
+  HY["Hylē 머지만"]
+
+  BOT --> MM
+  HY --> BOT
+  LOOP -->|채널 폴링| MM
+  LOOP --> CLI
+  LOOP -->|PR Closes · STATUS| GH
+  LOOP -->|check-in 3분| MM
+  HY --> GH
+  GH --> BOT
+```
+
 ## 6. AI 4층과 알고리즘
 
 ### 6.1 층
@@ -335,3 +370,5 @@ flowchart LR
 
 - [PRD.md](./PRD.md) · [SOT.md](./SOT.md) · [TEAM_SPEC.md](./TEAM_SPEC.md) · [CHECKLIST.md](./CHECKLIST.md) · [DECISIONS.md](./DECISIONS.md)
 - 현황 대시보드: [dashboard/index.html](./dashboard/index.html)
+- 설명 페이지(GitHub Pages): [개요](./overview.html) · [PRD](./prd.html) · [데이터](./data.html) · [아키텍처](./architecture.html) · [알고리즘](./algorithms.html) · [팀·역할](./team.html)
+- 팀 드라이브 (아몰라): https://drive.google.com/drive/folders/1pUlXbE_VNiMGHVYSkHHT4Mr-nzo--Yqd

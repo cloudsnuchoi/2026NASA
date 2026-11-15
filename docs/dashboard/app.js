@@ -740,6 +740,7 @@
   let mermaidReady = false;
   let mermaidBlocks = [];
   let mermaidTheme = "dark";
+  let mermaidIdx = 0;
 
   function currentTheme() {
     return document.documentElement.getAttribute("data-theme") || "dark";
@@ -813,6 +814,7 @@
     tabs.forEach(function (btn, i) { btn.classList.toggle("active", i === idx); });
     const box = $("mermaid-box");
     const block = mermaidBlocks[idx];
+    mermaidIdx = idx;
     if (!block) return;
     if (!window.mermaid) {
       box.innerHTML = '<div class="empty">mermaid CDN을 아직 불러오지 못했습니다. 아래 원본을 표시합니다.<pre>' +
@@ -841,8 +843,17 @@
   }
 
   function bindChrome() {
-    $("theme-toggle").addEventListener("click", function () {
-      applyTheme(currentTheme() === "dark" ? "light" : "dark");
+    const themeBtn = $("theme-toggle");
+    if (themeBtn) {
+      themeBtn.addEventListener("click", function () {
+        applyTheme(currentTheme() === "dark" ? "light" : "dark");
+      });
+    }
+    window.addEventListener("fieldshift:theme", function () {
+      if (mermaidBlocks.length) {
+        mermaidReady = false;
+        showDiagram(typeof mermaidIdx === "number" ? mermaidIdx : 0);
+      }
     });
     $("refresh-btn").addEventListener("click", function () { refresh("manual"); });
     $("token-save").addEventListener("click", function () {

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>로드맵·체크리스트 · 팀 아몰라 · Field Shift</title>
+  <meta name="description" content="오늘 해커톤 시간표와 CHECKLIST.md 체크박스, GitHub 이슈 진행률.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="./dashboard/styles.css">
+  <link rel="stylesheet" href="./site/site.css">
+</head>
+<body class="explainer">
+  <nav id="site-nav" class="site-nav" aria-label="주요 메뉴"></nav>
+  <header class="page-header">
+    <div class="wrap">
+      <p class="kicker">Source of truth · CHECKLIST.md · 이슈 라벨</p>
+      <h1>로드맵·체크리스트</h1>
+      <p class="lead">오늘(2026-11-15) 08:00–23:59 Asia/Seoul (KST) 시간표와, <code>docs/CHECKLIST.md</code>의 체크박스·GitHub 이슈 열림/닫힘으로 본 영역별 진행입니다. 체크박스와 이슈 상태가 다를 수 있습니다.</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="timeline" id="timeline">
+      <div class="timeline-meta">
+        <div><strong>오늘 시간표</strong><div class="muted">CHECKLIST 1–5절 + 23:30 업로드 창. 노란 칸이 지금 구간, 빨간 선이 현재 시각입니다.</div></div>
+        <div class="now" id="tl-now">--:--:-- KST</div>
+      </div>
+      <div class="track-wrap" id="tracks"></div>
+      <div class="hours" id="hours"></div>
+    </section>
+    <p class="src-note" id="sum"></p>
+    <div class="cat-grid" id="cats"><div class="empty">체크리스트를 불러오는 중…</div></div>
+  </main>
+  <footer id="site-footer" class="site-footer"></footer>
+  <script src="./site/site.js"></script>
+  <script>
+    FieldShiftSite.mount({ active: "roadmap" });
+
+    const DAY0 = new Date("2026-11-15T08:00:00+09:00");
+    const DAY1 = new Date("2026-11-15T23:59:00+09:00");
+    const SPAN = DAY1 - DAY0;
+    const BLOCKS = [
+      { label: "동결", start: "2026-11-15T08:00:00+09:00", end: "2026-11-15T10:00:00+09:00", row: 0 },
+      { label: "데이터·EDA", start: "2026-11-15T08:00:00+09:00", end: "2026-11-15T11:00:00+09:00", row: 1 },
+      { label: "병렬 구축", start: "2026-11-15T11:00:00+09:00", end: "2026-11-15T18:00:00+09:00", row: 0 },
+      { label: "기능 동결·E2E", start: "2026-11-15T18:00:00+09:00", end: "2026-11-15T20:00:00+09:00", row: 0 },
+      { label: "제출물", start: "2026-11-15T20:00:00+09:00", end: "2026-11-15T23:30:00+09:00", row: 0 },
+      { label: "업로드", start: "2026-11-15T23:30:00+09:00", end: "2026-11-15T23:55:00+09:00", row: 0 },
+      { label: "마감", start: "2026-11-15T23:55:00+09:00", end: "2026-11-15T23:59:00+09:00", row: 0 }
+    ];
+    const CATS = [
+      { id: "data", label: "데이터", area: ["area: data"], hint: "다운로드, EDA, 적재, CDL/CSB/SSURGO, NASA 소스" },
+      { id: "model", label: "모델·AI", area: ["area: model", "area: rag"], hint: "FastAPI, MC·CVaR, 7축, LLM/RAG, 백테스트" },
+      { id: "matlab", label: "MATLAB", area: ["area: matlab"], hint: "오프라인 평활·아노말리. 라이브 경로 없음" },
+      { id: "sim", label: "시뮬(three.js)", area: ["area: sim"], hint: "복셀·데모 영상. 체크리스트 본문에 항목이 거의 없으면 이슈만 표시" },
+      { id: "frontend", label: "프론트엔드/UIUX", area: ["area: frontend"], hint: "지도, 카드, 슬라이더, 로그인 없는 웹" },
+      { id: "infra", label: "인프라·채팅·에이전트", area: ["area: infra"], hint: "VPS, DB, Mattermost, agent-loop, 비밀값, 배포" },
+      { id: "pitch", label: "피치·제출", area: ["area: pitch", "area: docs"], hint: "영상·슬라이드, 제출 페이지, SI, NASA Data" }
+    ];
+
+    function pct(date) {
+      const t = date.getTime();
+      return Math.min(100, Math.max(0, (t - DAY0.getTime()) / SPAN * 100));
+    }
+    function kstNow() { return new Date(); }
+    function fmtKST(d) {
+      return new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(d)
+        + " Asia/Seoul (KST)";
+    }
+
+    function drawTimeline() {
+      const now = kstNow();
+      document.getElementById("tl-now").textContent = fmtKST(now);
+      const rows = [0, 1].map(function () {
+        const div = document.createElement("div");
+        div.className = "track-row";
+        return div;
+      });
+      BLOCKS.forEach(function (b) {
+        const s = new Date(b.start), e = new Date(b.end);
+        const el = document.createElement("div");
+        el.className = "tblock";
+        if (now >= e) el.classList.add("past");
+        if (now >= s && now < e) el.classList.add("current");
+        el.style.left = pct(s) + "%";
+        const w = Math.max(1.8, pct(e) - pct(s));
+        el.style.width = w + "%";
+        if (w < 6) {
+          el.classList.add("tiny");
+          el.textContent = ""; /* 짧은 칸은 겹치지 않게, 내용은 title로 */
+        } else {
+          el.textContent = b.label;
+        }
+        el.title = b.label + " " + b.start.slice(11, 16) + "–" + b.end.slice(11, 16);
+        rows[b.row].appendChild(el);
+      });
+      const wrap = document.getElementById("tracks");
+      wrap.innerHTML = "";
+      rows.forEach(function (r) { wrap.appendChild(r); });
+      const marker = document.createElement("div");
+      marker.className = "now-marker";
+      marker.style.left = pct(now) + "%";
+      const lab = document.createElement("span");
+      lab.textContent = "지금";
+      marker.appendChild(lab);
+      wrap.appendChild(marker);
+      const hours = document.getElementById("hours");
+      hours.style.position = "relative";
+      hours.style.height = "1.2rem";
+      hours.innerHTML = ["08:00","10:00","11:00","14:00","18:00","20:00","23:59"].map(function (h) {
+        const d = new Date("2026-11-15T" + h + ":00+09:00");
+        const left = pct(d);
+        const align = left > 92 ? "translateX(-100%)" : "translateX(-50%)";
+        return '<span style="position:absolute;left:' + left + '%;transform:' + align + '">' + h.replace(":00","") + "</span>";
+      }).join("");
+    }
+
+    function classify(text, section) {
+      /* 절 번호를 먼저 본다. 제목의 '동결과 병렬' 같은 문구에 속지 않는다. */
+      if (/^2\./.test(section)) return "data";
+      if (/^5\./.test(section) || /^6\./.test(section)) return "pitch";
+      if (/^4\./.test(section)) return "frontend";
+      const t = text;
+      if (/제출|슬라이드|영상|References|NASA Data|Use of AI|\bSI\b|Members|프로젝트 페이지|데모 한도|심사|자막|링크가 로그인|만 18|사전 작업|si-log|README 최종/.test(t)) return "pitch";
+      if (/MATLAB|matlab\/|평활|캘리브레이션|Savitzky/.test(t)) return "matlab";
+      if (/three\.js|복셀|sim\//.test(t)) return "sim";
+      if (/\bUI\b|frontend\/|슬라이더|카드\(|지도|로그인 없이 데모|필지 1개로 데모|알팔파|CSB는 소유/.test(t)) return "frontend";
+      if (/FastAPI|model_api|CVaR|몬테카를로|strategies|backtest|evidence|LLM|임베딩|pgvector|\/health|bare-periods|vulnerable|규칙·지수|계약 테스트/.test(t)) return "model";
+      if (/Earthdata|POWER|IMERG|SMAP|HLS|Landsat|SRTM|CDL|CSB|SSURGO|NASS|OpenET|PRISM|ECOSTRESS|\/data\/raw|processed|필지 ID|매니페스트|적재|data_pipeline/.test(t)) return "data";
+      if (/VPS|환경 변수|Compose|배포|Postgres|비밀값|GitHub 라벨|AGENTS|CONTRIBUTING|접속 정보|agent-loop|Mattermost/.test(t) || /^1\./.test(section)) return "infra";
+      return null;
+    }
+
+    function parseChecklist(md) {
+      const items = [];
+      let section = "";
+      md.split(/\n/).forEach(function (line) {
+        const h = line.match(/^##\s+(.+)/);
+        if (h) { section = h[1].trim(); return; }
+        const c = line.match(/^-\s+\[([ xX])\]\s+(.*)$/);
+        if (c) {
+          items.push({ done: /x/i.test(c[1]), text: c[2].replace(/<[^>]+>/g, ""), section: section, html: c[2] });
+        }
+      });
+      return items;
+    }
+
+    function barHtml(done, total, extra) {
+      const pctv = total ? Math.round(done / total * 100) : 0;
+      return '<div class="bar-row"><div class="bar"><span style="width:' + pctv + '%"></span></div><span class="pct">' +
+        done + "/" + total + " · " + pctv + "%</span></div>" + (extra || "");
+    }
+
+    async function loadIssues() {
+      const urls = [
+        "https://api.github.com/repos/cloudsnuchoi/2026NASA/issues?state=all&per_page=100&page=1",
+        "https://api.github.com/repos/cloudsnuchoi/2026NASA/issues?state=all&per_page=100&page=2"
+      ];
+      let all = [];
+      for (let i = 0; i < urls.length; i++) {
+        const res = await fetch(urls[i]);
+        if (!res.ok) throw new Error("issues_http_" + res.status);
+        const batch = await res.json();
+        all = all.concat(batch);
+        if (batch.length < 100) break;
+      }
+      return all.filter(function (it) { return !it.pull_request; });
+    }
+
+    function issueMatch(issue, cat) {
+      const labels = (issue.labels || []).map(function (l) { return (l.name || "").toLowerCase(); });
+      return cat.area.some(function (a) { return labels.indexOf(a.toLowerCase()) >= 0; });
+    }
+
+    function render(items, issues, issueErr) {
+      const host = document.getElementById("cats");
+      let doneAll = items.filter(function (i) { return i.done; }).length;
+      document.getElementById("sum").textContent =
+        "체크박스 " + doneAll + " / " + items.length + " 완료 (CHECKLIST.md 원문). " +
+        (issueErr ? "이슈 API를 읽지 못했습니다: " + issueErr : "이슈는 비인증 GitHub API, 열린/닫힌 이슈만 집계하고 PR은 뺍니다.");
+
+      host.innerHTML = CATS.map(function (cat) {
+        const mine = items.filter(function (it) { return classify(it.text, it.section) === cat.id; });
+        const done = mine.filter(function (it) { return it.done; }).length;
+        const iss = (issues || []).filter(function (is) { return issueMatch(is, cat); });
+        const closed = iss.filter(function (is) { return is.state === "closed"; }).length;
+        const checks = mine.map(function (it) {
+          return '<div class="check-item' + (it.done ? " done" : "") + '"><span class="box">' +
+            (it.done ? "☑" : "☐") + "</span><span>" + FieldShiftSite.escapeHtml(it.text) + "</span></div>";
+        }).join("") || '<p class="muted">이 영역에 해당하는 체크박스 항목이 문서에 거의 없습니다.</p>';
+        const issueLine = issueErr
+          ? '<p class="muted">이슈 집계 실패</p>'
+          : '<p class="issue-mini">GitHub 이슈(' + cat.area.join(", ") + "): 닫힘 " + closed + " / " + iss.length +
+            (iss.length ? " · " + Math.round(closed / iss.length * 100) + "%" : " (해당 라벨 없음)") +
+            ' · <a href="https://github.com/cloudsnuchoi/2026NASA/issues?q=label%3A%22' +
+            encodeURIComponent(cat.area[0]) + '%22" target="_blank" rel="noopener">목록</a></p>';
+        return '<section class="card cat-card"><h3>' + cat.label + "</h3><p class='muted'>" + cat.hint + "</p>" +
+          "<p class='task-label'>체크리스트</p>" + barHtml(done, mine.length) +
+          issueLine + checks + "</section>";
+      }).join("");
+    }
+
+    drawTimeline();
+    setInterval(drawTimeline, 1000);
+
+    (async function () {
+      let items = [];
+      try {
+        const md = await FieldShiftSite.fetchFirst(FieldShiftSite.docsUrls("CHECKLIST.md"));
+        items = parseChecklist(md);
+      } catch (e) {
+        document.getElementById("cats").innerHTML = '<div class="md-error">CHECKLIST.md를 불러오지 못했습니다. <a href="https://github.com/cloudsnuchoi/2026NASA/blob/main/docs/CHECKLIST.md">GitHub에서 보기</a></div>';
+        return;
+      }
+      let issues = [];
+      let issueErr = null;
+      try { issues = await loadIssues(); }
+      catch (e) { issueErr = String(e.message || e); }
+      render(items, issues, issueErr);
+    })();
+  </script>
+</body>
+</html>

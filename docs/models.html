@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 모델 · 팀 아몰라 · Field Shift</title>
+  <meta name="description" content="Prithvi, GEOS-S2S, NEX-GDDP, 몬테카를로·CVaR, LLM tool-call, RAG 임베딩. Chronos-Bolt는 선택.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="./dashboard/styles.css">
+  <link rel="stylesheet" href="./site/site.css">
+</head>
+<body class="explainer">
+  <nav id="site-nav" class="site-nav" aria-label="주요 메뉴"></nav>
+  <header class="page-header">
+    <div class="wrap">
+      <p class="kicker">Source of truth · ARCHITECTURE 6절 · PRD 9절 · SOT</p>
+      <h1>AI 모델과 계산</h1>
+      <p class="lead">라이브 엔진은 <strong>규칙·지수 스코어링 + 몬테카를로 물수지 + CVaR</strong>입니다. 강화학습과 미세조정은 하지 않습니다. 표의 상태·키 여부는 동결 문서 기준이며, 구현 완료 여부는 이슈를 보세요.</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <p class="src-note">GEOS-S2S와 NEX-GDDP는 우리가 학습하는 모델이 아니라 NASA가 제공하는 <strong>물리 예보·시나리오 데이터</strong>입니다. Chronos-Bolt는 동결 문서(PRD·SOT·DECISIONS)에 없어 <strong>선택·P1</strong>로만 적었습니다. 수확량 예측을 본편 목적함수로 두지 않습니다.</p>
+    <div class="table-wrap">
+      <table class="data-table" id="models">
+        <thead>
+          <tr>
+            <th>이름</th><th>역할</th><th>입력</th><th>출력</th><th>실행 위치</th><th>키 필요?</th><th>우선</th><th>상태</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h2>본편 수식 (문서 최소 규격)</h2>
+    <div class="card algo-card">
+      <p>물수지 · FAO-56 · CVaR. 가중치 숫자는 문서에 고정되어 있지 않아 지어내지 않습니다. 슬라이더가 \(w_k\)만 바꿉니다.</p>
+      <div class="formula">\[
+        SM_t = SM_{t-1} + P_t - ET_{c,t} - R_t,\quad
+        ET_c = ET_0 \times K_c,\quad
+        \mathrm{cap}=\mathrm{AWC}\times z_{\mathrm{root}}
+      \]</div>
+      <div class="formula">\[
+        S=\sum_{k=1}^{7} w_k s_k,\quad s_k\in[0,1],\quad
+        \mathrm{CVaR}_{0.10}(X)=\mathbb{E}[X\mid X\le q_{0.10}(X)]
+      \]</div>
+      <div class="formula">\[
+        \Delta=\overline{X}_{2031\text{–}2040}-\overline{X}_{1985\text{–}2014}
+      \]</div>
+    </div>
+    <p class="src-note">더 자세한 알고리즘 카드는 이전 페이지를 <a href="./algorithms.html">algorithms.html</a>에 남겨 두었습니다. 7축은 질소·침식·유기물·병해충·물·사료·시장(수량 옆축은 선택)입니다.</p>
+  </main>
+  <footer id="site-footer" class="site-footer"></footer>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script src="./site/site.js"></script>
+  <script>
+    FieldShiftSite.mount({ active: "models" });
+    const ROWS = [
+      { name: "Prithvi-EO-1.0 작물 분류", role: "L1 비전. 추론만 (미세조정 없음)", input: "HLS 6밴드 × 3시점, 224×224", output: "13클래스 분할, 필지 다수결, agreement_with_cdl", runs: "VPS 배치. 요청 경로 GPU 금지", key: "없음 (HF 공개, Apache-2.0)", pri: "P0 보조", status: "실패 시 CDL 라벨. 구현은 이슈 따름", note: "EO-2.0 작물 공개 체크포인트 없음. 카드 mIoU 0.4269, 화면에서는 보조" },
+      { name: "NASA GEOS-S2S-3", role: "L2 물리 계절 예보 데이터 (우리가 학습하지 않음)", input: "월 초기화 앙상블, 0.5° 칸", output: "다음 시즌 강수·기온 아노말리 분포 → scenario_climate", runs: "오프라인 사전 계산, 김윤성", key: "없음 (NCCS datashare 공개 목록)", pri: "P0", status: "실패 시 과거 30년 분포로 대체. Earthdata 키 불필요", note: "3년 결정론적 예보 금지. 필지 정밀 값처럼 표시하지 않음" },
+      { name: "NASA NEX-GDDP-CMIP6", role: "L2 기후 시나리오 데이터 (다모델, 우리가 학습하지 않음)", input: "SSP2-4.5/5-8.5, pr/tas/tasmax/tasmin", output: "2030s delta 분포 → scenario_climate", runs: "오프라인 사전 계산, 김우찬", key: "없음 (S3/THREDDS, CC0)", pri: "P0", status: "Earthdata 키 불필요", note: "기준 1985–2014, 미래 2031–2040" },
+      { name: "몬테카를로 물수지 + CVaR + 7축 점수", role: "L3 시뮬레이션 (라이브 엔진)", input: "POWER/IMERG 등 피처, SSURGO AWC, Kc, 시나리오 이동, 슬라이더", output: "P10/P50/P90, CVaR, 전략 카드 점수. 단일 정답 없음", runs: "사전 계산 + FastAPI 재가중, Hylē, model_api/", key: "없음", pri: "P0", status: "설계 동결. 구현은 이슈 따름", note: "연 재표본 N=500–1000. 확정 kg/ha 금지. 수확량은 본편 목적함수가 아님" },
+      { name: "LLM tool-calling", role: "L4 설명", input: "사용자 질문 + FastAPI JSON (profile, compare, evidence 등)", output: "설명 문장. 숫자는 도구 JSON 경로 각주만", runs: "런타임 /explain, Hylē", key: "예. OpenAI 호환 LLM API 키 1개 (공급자·모델명 미정, SOT 7절)", pri: "P0", status: "키·모델 미정", note: "숫자를 생성·수정하지 않음" },
+      { name: "임베딩 + pgvector RAG", role: "L4 근거 인용 전용", input: "evidence_chunk (가이드·NRCS·피복 문헌)", output: "짧은 인용 + DOI/URL. 없으면 insufficient_evidence", runs: "VPS Postgres 17, rag/", key: "임베딩 모델에 따라 다를 수 있음 (모델·차원 미정). 실패 시 pg_trgm 키워드", pri: "P0 (컷 가능)", status: "실패 시 키워드+DOI 테이블", note: "데이터 탐색용이 아님. 별도 Pinecone/Milvus 없음" },
+      { name: "Chronos-Bolt (시계열 기반 모델)", role: "선택: 수량·NDVI 시계열 예보 보조", input: "문서 미기재. 제안은 수량 또는 NDVI 시계열", output: "문서 미기재. 본편 목적함수로 쓰지 않음", runs: "제안: CPU 자체 호스팅 (키 없음). 동결 경로 아님", key: "없음 (제안)", pri: "선택·P1", status: "PRD·SOT·DECISIONS에 없음. 이번 주말 본편 전제 아님", note: "넣더라도 옆축·실험. 수확량 극대화로 승격하지 않음" }
+    ];
+    document.querySelector("#models tbody").innerHTML = ROWS.map(function (r) {
+      const opt = /선택|P1/.test(r.pri);
+      return "<tr" + (opt ? ' style="opacity:.95"' : "") + "><td><strong>" + FieldShiftSite.escapeHtml(r.name) +
+        "</strong>" + (opt ? ' <span class="tag p1">선택</span>' : "") +
+        "<br><span class='muted'>" + FieldShiftSite.escapeHtml(r.note) + "</span></td><td>" + FieldShiftSite.escapeHtml(r.role) +
+        "</td><td>" + FieldShiftSite.escapeHtml(r.input) + "</td><td>" + FieldShiftSite.escapeHtml(r.output) +
+        "</td><td>" + FieldShiftSite.escapeHtml(r.runs) + "</td><td>" + FieldShiftSite.escapeHtml(r.key) +
+        "</td><td><span class='tag " + (/P0/.test(r.pri) ? "p0" : "p1") + "'>" + FieldShiftSite.escapeHtml(r.pri) +
+        "</span></td><td>" + FieldShiftSite.escapeHtml(r.status) + "</td></tr>";
+    }).join("");
+    function typeset() { FieldShiftSite.renderMath(document.querySelector("main")); }
+    if (window.renderMathInElement) typeset();
+    else window.addEventListener("load", typeset);
+  </script>
+</body>
+</html>

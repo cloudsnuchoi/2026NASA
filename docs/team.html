@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>팀·역할 · 팀 아몰라 · Field Shift</title>
+  <meta name="description" content="역할, 담당, 인계 파일 형식, STATUS 보고, 팀 드라이브와 온보딩.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="./dashboard/styles.css">
+  <link rel="stylesheet" href="./site/site.css">
+</head>
+<body class="explainer">
+  <nav id="site-nav" class="site-nav" aria-label="주요 메뉴"></nav>
+  <header class="page-header">
+    <div class="wrap">
+      <p class="kicker">Source of truth · TEAM_SPEC 7절 · DECISIONS 09:30·11:10·11:40</p>
+      <h1>팀과 역할</h1>
+      <p class="lead">여섯 명이 역할을 나눕니다. 코드는 GitHub, 슬라이드·이미지·작은 결과 파일은 팀 드라이브, 대용량 데이터는 VPS입니다. git은 Codex/agy가 대행하고, 머지는 Hylē만 합니다.</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="drive-callout" id="drive">
+      <h2>팀 드라이브 (아몰라)</h2>
+      <p><a href="https://drive.google.com/drive/folders/1pUlXbE_VNiMGHVYSkHHT4Mr-nzo--Yqd" target="_blank" rel="noopener">Google Drive 공유 폴더</a> — 코드가 아닌 파일을 올립니다. <strong>소스 코드는 항상 GitHub</strong>에만 둡니다.</p>
+      <ul class="drive-folders">
+        <li><strong>PRD</strong> — 슬라이드, 피치, 제출 자료</li>
+        <li><strong>DESIGN</strong> — Figma 내보내기, 이미지</li>
+        <li><strong>FRONT</strong> — 프론트엔드용 코드가 아닌 자산, 화면 캡처</li>
+        <li><strong>BACK</strong> — 백엔드용 코드가 아닌 자산, 화면 캡처</li>
+        <li><strong>DATA</strong> — MATLAB 출력과 작은 CSV. 큰 데이터(래스터·일괄 파일)는 VPS <code>/srv/hackathon/data</code>에 둡니다</li>
+      </ul>
+    </section>
+
+    <h2>역할과 담당 (2026-11-15 09:30 확정, 강다은 11:10 확인)</h2>
+    <div class="role-grid">
+      <article class="info-card">
+        <p class="k">오케스트레이터 · 풀스택</p>
+        <h3>Hylē <code>@cloudsnuchoi</code></h3>
+        <p>FastAPI, DB, ETL 적재, Prithvi, MC, RAG/LLM, Mattermost 봇, Pages, 머지·배포. 폴더: <code>model_api/</code>, <code>data_pipeline/</code>, <code>rag/</code>, <code>infra/</code>, <code>docs/</code>.</p>
+      </article>
+      <article class="info-card">
+        <p class="k">MATLAB A · 기후</p>
+        <h3>김윤성 <code>@ssbb215356</code></h3>
+        <p>POWER, IMERG, SMAP, NLDAS, GEOS-S2S, 아노말리, 백테스트 보조. <code>matlab/climate/</code>. git 없이 VPS에 저장, Hylē가 커밋.</p>
+      </article>
+      <article class="info-card">
+        <p class="k">MATLAB B · 식생</p>
+        <h3>김우찬 <code>@flyingbear-code</code></h3>
+        <p>HLS NDVI 평활(SG), 맨땅, NEX-GDDP delta. <code>matlab/vegetation/</code>, <code>matlab/scenario/</code>. git 없이 VPS에 저장.</p>
+      </article>
+      <article class="info-card">
+        <p class="k">UI/UX A · S0–S3</p>
+        <h3>고지은 <code>@jieun-Ribby</code></h3>
+        <p>랜딩, 지도, 핀, 프로필, 작물·슬라이더, 디자인 시스템. <code>frontend/</code>.</p>
+      </article>
+      <article class="info-card">
+        <p class="k">UI/UX B · S4–S7</p>
+        <h3>하지민 <code>@hahah383</code></h3>
+        <p>전략 카드, 차트, 타임라인, 용어, 슬라이드 디자인. <code>frontend/</code>, 드라이브 PRD·DESIGN.</p>
+      </article>
+      <article class="info-card">
+        <p class="k">복셀 시뮬 · 데모 영상</p>
+        <h3>강다은 <code>@kangdaeun2005</code></h3>
+        <p>three.js 복셀 밭, 자동 재생. <code>sim/</code>. 영상 소스는 드라이브와 제출용.</p>
+      </article>
+    </div>
+
+    <h2>인계 파일 형식</h2>
+    <p>MATLAB → <code>/data/processed/vN/matlab/</code> (Parquet 우선, CSV면 UTF-8·쉼표·헤더 1줄, 결측은 빈칸, 0 금지). 파일마다 <code>{file}.manifest.json</code>. 적재는 <code>data_pipeline/load_matlab.py</code>. MATLAB은 DB에 직접 쓰지 않습니다.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>파일</th><th>담당</th><th>키</th><th>적재 테이블</th></tr></thead>
+        <tbody>
+          <tr><td><code>field_dekad.parquet</code></td><td>B 김우찬</td><td><code>field_id, year, dekad</code></td><td><code>field_dekad</code></td></tr>
+          <tr><td><code>field_season.parquet</code></td><td>A 김윤성</td><td><code>field_id, year, season</code></td><td><code>field_season</code></td></tr>
+          <tr><td><code>climate_annual.parquet</code></td><td>A 김윤성</td><td><code>field_id, year</code></td><td><code>climate_annual</code></td></tr>
+          <tr><td><code>scenario_climate.parquet</code></td><td>A(S2S) · B(NEX)</td><td><code>field_id, horizon, source_id, scenario, model, member, variable, period</code></td><td><code>scenario_climate</code></td></tr>
+          <tr><td><code>calibration_params.csv</code></td><td>A·B</td><td><code>param</code></td><td><code>calibration_param</code></td></tr>
+          <tr><td><code>method_compare.png</code> + CSV</td><td>B</td><td>—</td><td>DB 안 함 (발표·README)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>UI는 SOT 6절 예시 JSON(fixture)으로 먼저 붙입니다. 시뮬은 <code>sim_scene.json</code>만 읽습니다. CRS는 저장 <code>EPSG:4326</code>, 분석 <code>EPSG:5070</code>.</p>
+
+    <h2>상태 보고 (현황판이 읽는 방법)</h2>
+    <div class="status-box card">
+      <p>현황판은 노트북 화면에 직접 연결되어 있지 않습니다. Codex/agy가 맡은 이슈에 <code>STATUS:</code> 댓글을 남겨야 카드가 갱신됩니다. 시작·막힘·완료 때와 <strong>최소 30분마다</strong>. MATLAB 담당도 git 없이 이 댓글만 남깁니다. 형식은 <a href="https://github.com/cloudsnuchoi/2026NASA/blob/main/docs/PROMPTS.md">PROMPTS.md 0.1절</a>, <a href="https://github.com/cloudsnuchoi/2026NASA/blob/main/docs/ONBOARDING.md">ONBOARDING.md</a>.</p>
+      <pre>gh issue comment &lt;이슈번호&gt; --body "$(cat &lt;&lt;'EOF'
+STATUS: 🟢 진행 중
+작업: &lt;한 줄&gt;
+진행률: 30%
+막힌 점:
+다음:
+EOF
+)"</pre>
+      <p>첫 줄은 <code>STATUS: 🟢 진행 중</code> / <code>🔴 막힘</code> / <code>🟡 리뷰 대기</code> / <code>✅ 완료</code> 중 하나. 본문 첫 줄은 반드시 <code>STATUS:</code>로 시작합니다. 막히면 즉시, PR을 열면 리뷰 대기, 끝나면 완료로 바꿉니다.</p>
+    </div>
+
+    <h2>처음 읽을 문서</h2>
+    <div class="docs">
+      <a href="https://github.com/cloudsnuchoi/2026NASA/blob/main/docs/ONBOARDING.md">ONBOARDING.md · 10분 시작</a>
+      <a href="https://github.com/cloudsnuchoi/2026NASA/blob/main/docs/PROMPTS.md">PROMPTS.md · 붙여넣을 프롬프트</a>
+      <a href="./overview.html">개요</a>
+      <a href="./prd.html">PRD</a>
+      <a href="./data.html">데이터 (SOT)</a>
+      <a href="./architecture.html">아키텍처</a>
+      <a href="./algorithms.html">알고리즘</a>
+      <a href="./dashboard/">라이브 현황판</a>
+      <a href="https://drive.google.com/drive/folders/1pUlXbE_VNiMGHVYSkHHT4Mr-nzo--Yqd" target="_blank" rel="noopener">팀 드라이브 (아몰라)</a>
+    </div>
+
+    <h2>TEAM_SPEC 역할·인계 원문</h2>
+    <p class="src-note">아래는 <code>docs/TEAM_SPEC.md</code> 7절을 렌더한 화면입니다. 카운티는 11:10에 Story <code>19169</code>로 닫혔습니다(1.2절 O6는 구버전 열림 표기).</p>
+    <article id="spec-roles" class="prose wide"><div class="empty">불러오는 중…</div></article>
+  </main>
+  <footer id="site-footer" class="site-footer"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/lib/marked.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="./site/site.js"></script>
+  <script>
+    FieldShiftSite.mount({ active: "team" });
+    (async function () {
+      const el = document.getElementById("spec-roles");
+      try {
+        const md = await FieldShiftSite.fetchFirst(FieldShiftSite.docsUrls("TEAM_SPEC.md"));
+        const sec = FieldShiftSite.sectionBetween(md, /^## 7\. 역할과 인계 계약/m, /^## 8\. /m);
+        await FieldShiftSite.renderMarkdownInto(el, sec || "7절을 찾지 못했습니다.");
+      } catch (e) {
+        el.innerHTML = '<div class="md-error">TEAM_SPEC.md를 불러오지 못했습니다. <a href="https://github.com/cloudsnuchoi/2026NASA/blob/main/docs/TEAM_SPEC.md">GitHub에서 보기</a></div>';
+      }
+    })();
+    window.addEventListener("fieldshift:theme", function () { /* mermaid in 7.3 if any */ });
+  </script>
+</body>
+</html>
