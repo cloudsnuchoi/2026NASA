@@ -1,6 +1,6 @@
-# 아몰라 실시간 현황 · 16:20 KST
+# 아몰라 실시간 현황 · 16:25 KST
 
-제출 목표 22:00 KST까지 **5시간 39분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **5시간 34분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -20,7 +20,7 @@
 - ✅ HLS NDVI 데모 필지
 - ✅ SMAP L3 (맥락)
 - ✅ NLDAS-2 월별
-- ✅ IMERG 일별 2010–2025 (16개 연도) — 22개 연도 적재
+- ✅ IMERG 일별 2010–2025 (16개 연도) — 23개 연도 적재
 - ✅ NEX-GDDP 2개 모델 이상 (API) — 2개 모델
 - ✅ GEOS-S2S 다음 시즌 (API) — 멤버 10
 - ✅ 대비 데모 필지 (3개 카운티 이상) — 데모 필지 20개, 4개 카운티
