@@ -4,7 +4,6 @@ National zip is downloaded, processed, then the extracted tif and zip are delete
 import sys
 import os
 import zipfile
-import hashlib
 import json
 import time
 import numpy as np
