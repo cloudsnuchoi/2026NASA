@@ -297,6 +297,7 @@
     setT("#meas-elev", q.elevation ? `${fmt(q.elevation.value_m, 1)} m (centroid)` : "gap");
     setT("#api-terrain-badge", q.elevation ? "WGS84 + USGS 3DEP ✓" : "WGS84 geodesic");
   }
+  window.__artfarmTest = { addVertex: (lon, lat) => { if (!state.fields.length && !state.fieldsError) {} addVertex([lon, lat]); } };
   $("#btn-clear-poly").addEventListener("click", () => { state.vertices = []; state.preset = null; redraw(); });
   $("#btn-zoom-circle").addEventListener("click", () => {
     if (!map) return;
@@ -408,6 +409,7 @@
   const dist = (o, u = "") => (!o ? GAP : `<strong>${fmt(o.p50)}</strong>${u} ${rng(o.p10, o.p90)}`);
   const row = (k, v) => `<div class="flex justify-between gap-3 bg-[#214d3a] px-3.5 py-2 rounded-xl"><span class="text-emerald-100/80">${k}</span><span class="font-bold text-right">${v}</span></div>`;
   let charts = [];
+  const NE = '<span class="text-slate-400 font-bold">not estimated</span>';
   function renderTier1(q, d) {
     const el = $("#tier1");
     charts.forEach((c) => c.destroy()); charts = [];
@@ -426,49 +428,67 @@
     const periods = Object.entries(pj?.periods || {});
     const fid = state.hitField?.field_id;
     const prof = d && !d.__error ? d[1] : null, v = prof?.vision || {};
+    state.prof = prof;
     const cdl = (prof?.cdl_history || []).slice().sort((a, b) => b.year - a.year).slice(0, 6);
+    const nCrops = (q.input?.crops || state.crops).length;
+    const tEl = $("#results-title");
+    if (tEl) tEl.innerHTML = `맞춤형 윤작 시나리오 추천 결과 <span class="text-lg sm:text-xl text-emerald-800">(${cands.length}개 시나리오 · 순위 미적용)</span><span class="block text-sm font-bold text-slate-500 mt-0.5">Tailored crop rotation scenarios — ${cands.length} scenarios · unranked</span>`;
+    const eqHa = g.area_ha != null && nCrops ? g.area_ha / nCrops : null;
     el.innerHTML = `
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       <aside class="lg:col-span-4 space-y-5">
         <div class="bg-white rounded-2xl p-5 shadow-md border border-slate-200">
           <div class="flex items-center justify-between mb-3">
-            <h2 class="text-sm font-extrabold text-[#173a2b] uppercase tracking-wider">Selected Crops</h2>
-            <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-bold">2–3 crop rotation</span>
+            <h2 class="text-sm font-extrabold text-[#173a2b] uppercase tracking-wider">Selected Crops <span class="text-slate-500 normal-case">(선택 작물)</span></h2>
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-bold">2~3종 교호 윤작 · 2–3 crops</span>
           </div>
           <div class="flex flex-wrap gap-2">${(q.input?.crops || state.crops).map((c) => `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2c4e38] text-white text-xs font-bold">${CROP_DB[c]?.icon || ""} ${cname(c)}</span>`).join("")}</div>
-          <p class="text-xs text-slate-600 mt-3 leading-relaxed">Rotations with no crop repeated back-to-back, shown <strong class="text-[#173a2b]">unranked</strong> as [Result 1], [Result 2]…</p>
+          <p class="text-xs text-slate-600 mt-3 leading-relaxed">연속 동일 작물 없는 윤작 시나리오를 순위 없이 [1번 결과], [2번 결과]… 로 표시 · Rotations with no crop repeated back-to-back, shown <strong class="text-[#173a2b]">unranked</strong> as [Result 1], [Result 2]…</p>
         </div>
         <div class="bg-[#173a2b] text-white rounded-2xl p-5 shadow-xl space-y-3.5">
           <div class="flex items-center justify-between">
-            <div class="text-xs font-bold uppercase tracking-wider text-amber-300">🛰️ [Step 1–2] USGS 3DEP &amp; NASA POWER</div>
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-300">🛰️ [STEP 1~2] USGS 3DEP &amp; NASA POWER</div>
             <span class="text-[11px] text-emerald-300 font-mono">${fmt(g.centroid?.lat, 4)}, ${fmt(g.centroid?.lon, 4)}</span>
           </div>
           <p class="text-xs text-emerald-100/85 leading-relaxed">WGS84 ellipsoid area <strong>${fmt(g.area_ha, 2)} ha</strong> (${fmt(g.perimeter_km, 3)} km perimeter) · NASA POWER ${esc(ch?.period || "")} daily agro-weather at the centroid (~0.5° cell, not field-precise).</p>
           <div class="space-y-2 text-xs">
-            ${row("USGS 3DEP elevation (centroid)", q.elevation ? fmt(q.elevation.value_m, 1) + " m" : GAP)}
-            ${row("10-yr mean temp / precip", ch ? `${fmt(ch.mean?.t2m_c?.mean, 1)} °C / ${fmt(ch.mean?.precip_mm?.mean)} mm/yr` : GAP)}
-            ${row("10-yr mean reference ET₀", ch ? `${fmt(ch.mean?.et0_mm?.mean)} mm/yr` : GAP)}
-            ${row("Years with irrigation deficit", `<span class="text-amber-300">${deficitShare || "gap"}</span>`)}
-            ${row("Root-zone wetness (POWER, 0–1)", wet.length ? fmt(wet.reduce((a, b) => a + b, 0) / wet.length, 3) : GAP)}
+            ${row("USGS 3DEP 고도 · elevation (centroid)", q.elevation ? fmt(q.elevation.value_m, 1) + " m" : GAP)}
+            ${row("10년 평균 기온 / 강우량 · 10-yr temp / precip", ch ? `${fmt(ch.mean?.t2m_c?.mean, 1)} °C / ${fmt(ch.mean?.precip_mm?.mean)} mm/yr` : GAP)}
+            ${row("10년 평균 기준 증발산 · ref. ET₀", ch ? `${fmt(ch.mean?.et0_mm?.mean)} mm/yr` : GAP)}
+            ${row("한발 위험 연도 비율 · drought-year ratio (deficit yrs)", `<span class="text-amber-300">${deficitShare || "gap"}</span>`)}
+            ${row("NDVI / 뿌리 토양수분 · root-zone wetness (0–1)", `${prof?.ndvi_peak != null ? fmt(prof.ndvi_peak, 2) + " (HLS peak, pilot)" : "NDVI not estimated"} / ${wet.length ? fmt(wet.reduce((a, b) => a + b, 0) / wet.length, 3) : "gap"}`)}
           </div>
         </div>
         <div class="bg-white rounded-2xl p-5 shadow-md border border-slate-200 space-y-3">
-          <div class="text-xs font-extrabold uppercase tracking-wider text-[#173a2b]">🌦️ [Step 3] Possible range (scenario) · NOAA/NWS + CMIP6</div>
+          <div class="text-xs font-extrabold uppercase tracking-wider text-[#173a2b]">🌦️ [STEP 3] 기후 구간 · 가능한 범위(시나리오) <span class="block normal-case font-bold text-slate-500 tracking-normal">Climate: past / near-term / 2030s possible range · NOAA/NWS + CMIP6</span></div>
           <p class="text-[11px] text-slate-600 leading-relaxed">${esc(pj?.source || "Climate projection: information gap")}. ${esc(pj?.note || "")}</p>
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs border-collapse">
-              <thead><tr class="border-b border-slate-200 text-slate-500"><th class="py-1.5 font-bold">Period</th><th class="py-1.5 font-bold text-right">Temp</th><th class="py-1.5 font-bold text-right">Precip (P10–P90)</th><th class="py-1.5 font-bold text-right">ET₀</th></tr></thead>
+              <thead><tr class="border-b border-slate-200 text-slate-500"><th class="py-1.5 font-bold">기후 구간 · Period</th><th class="py-1.5 font-bold text-right">기온 · Temp</th><th class="py-1.5 font-bold text-right">강우량 · Precip (P10–P90)</th><th class="py-1.5 font-bold text-right">증발산 · ET₀</th></tr></thead>
               <tbody class="divide-y divide-slate-100 font-semibold text-slate-800">
                 ${ch ? `<tr><td class="py-1.5 text-slate-700">${esc(ch.period)} (POWER obs.)</td><td class="py-1.5 text-right">${fmt(ch.mean?.t2m_c?.mean, 2)} °C</td><td class="py-1.5 text-right">${fmt(ch.mean?.precip_mm?.p10)}–${fmt(ch.mean?.precip_mm?.p90)} mm</td><td class="py-1.5 text-right text-amber-800">${fmt(ch.mean?.et0_mm?.mean)} mm</td></tr>` : ""}
                 ${periods.map(([k, p]) => `<tr><td class="py-1.5 text-slate-700">${esc(k)} (scenario)</td><td class="py-1.5 text-right">${fmt(p.t2m_mean_c, 2)} °C</td><td class="py-1.5 text-right">${fmt(p.precip_mm_per_year?.p10)}–${fmt(p.precip_mm_per_year?.p90)} mm</td><td class="py-1.5 text-right text-amber-800">${fmt(p.et0_mm_per_year?.p50 ?? p.et0_mm_per_year?.mean)} mm</td></tr>`).join("")}
               </tbody>
             </table>
           </div>
-          <div class="text-[11px] text-emerald-800 bg-emerald-50 rounded-xl px-3 py-2 font-medium">NWS 7-day anomaly: ${fc && fc.anomaly_c != null ? `<strong>${fc.anomaly_c > 0 ? "+" : ""}${fmt(fc.anomaly_c, 1)} °C</strong> vs ${esc(fc.baseline)} — ${esc(fc.note)}` : "information gap"}</div>
+          <div class="text-[11px] text-emerald-800 bg-emerald-50 rounded-xl px-3 py-2 font-medium">단기 · Near-term NWS 7-day anomaly: ${fc && fc.anomaly_c != null ? `<strong>${fc.anomaly_c > 0 ? "+" : ""}${fmt(fc.anomaly_c, 1)} °C</strong> vs ${esc(fc.baseline)} — ${esc(fc.note)}` : "information gap"}</div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-md border border-slate-200 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-xs font-extrabold uppercase tracking-wider text-[#173a2b]">⚖️ [STEP 5] 작물 면적 배분 <span class="block normal-case font-bold text-slate-500 tracking-normal">Area allocation · unranked equal split</span></div>
+            <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-bold">not optimized</span>
+          </div>
+          <div class="flex h-3 rounded-full overflow-hidden border border-slate-200">${(q.input?.crops || state.crops).map((c, k) => `<div style="width:${100 / nCrops}%" class="${["bg-[#173a2b]", "bg-[#82c341]", "bg-amber-400"][k % 3]}"></div>`).join("")}</div>
+          <div class="space-y-1.5 text-xs">
+            ${(q.input?.crops || state.crops).map((c) => `<div class="flex justify-between"><span>${CROP_DB[c]?.icon || ""} ${cname(c)}</span><span class="font-bold">${eqHa != null ? fmt(eqHa, 2) + " ha" : "gap"} (${fmt(100 / nCrops, 0)}%)</span></div>`).join("")}
+            <div class="flex justify-between border-t border-slate-100 pt-1.5"><span class="text-slate-600">총 순수익 · Net profit ($/ac)</span>${NE}</div>
+            <div class="flex justify-between"><span class="text-slate-600">순 질소 요구량 · Net N need</span>${NE}</div>
+          </div>
+          <p class="text-[11px] text-slate-500 leading-relaxed">Equal split of the measured ${fmt(g.area_ha, 2)} ha across the selected crops (one rotation phase per crop each year). No profit or nitrogen optimizer is run — no economic numbers are shown.</p>
         </div>
         <div class="bg-[#173a2b] text-white rounded-2xl p-5 shadow-xl space-y-3 border border-amber-400/30">
           <div class="flex items-center justify-between">
-            <div class="text-xs font-extrabold uppercase tracking-wider text-amber-300">🧪 [Step 5] Deep Analysis · pilot field</div>
+            <div class="text-xs font-extrabold uppercase tracking-wider text-amber-300">🧪 Tier-2 심층 분석 · Deep Analysis (pilot field)</div>
             <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-200 text-[10px] font-bold">${fid ? "Monte Carlo · CVaR" : "4 pilot counties"}</span>
           </div>
           ${fid && prof ? `
@@ -488,7 +508,7 @@
       </aside>
       <div class="lg:col-span-8 space-y-5">
         <div class="bg-white rounded-2xl p-4 shadow-md border border-slate-200">
-          <div class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">📋 [Step 4] Unranked rotation scenarios (2–3 crops · no crop back-to-back)</div>
+          <div class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">📋 [STEP 4] 순위 미적용 윤작 시나리오 선택 <span class="normal-case font-bold tracking-normal">· Unranked rotation scenarios (2–3 crops · no crop back-to-back)</span></div>
           <div id="scenario-tabs" class="flex flex-wrap gap-2"></div>
         </div>
         <div id="scen-card" class="bg-white rounded-3xl p-6 shadow-xl border border-slate-200 space-y-6"></div>
@@ -501,8 +521,9 @@
     const i = Math.min(state.active, cands.length - 1), sc = cands[i];
     $("#scenario-tabs").innerHTML = cands.map((c, k) => `<button type="button" data-scen="${k}" class="${k === i
       ? "px-4 py-2.5 rounded-xl bg-[#173a2b] text-white text-xs font-extrabold shadow-md transition"
-      : "px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-emerald-50 text-[#173a2b] border border-slate-200 text-xs font-bold transition"}">[Result ${c.candidate}] ${c.sequence.map(cname).join(" → ")}</button>`).join("");
+      : "px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-emerald-50 text-[#173a2b] border border-slate-200 text-xs font-bold transition"}">[${c.candidate}번 결과] ${c.sequence.map(cname).join(" → ")}</button>`).join("");
     if (!sc) { $("#scen-card").innerHTML = GAP; return; }
+    const prof = state.prof;
     const crops = [...new Set(sc.sequence)];
     const cc = crops.map((c) => cards[c]).filter(Boolean);
     const ri = sc.relative_water_use_index;
@@ -513,51 +534,54 @@
       <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-4">
         <div>
           <div class="flex items-center gap-2 mb-2">
-            <span class="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-extrabold">[Result ${sc.candidate}] (${cands.length} scenarios · unranked)</span>
+            <span class="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-extrabold">[${sc.candidate}번 결과] (순위 미적용 · ${cands.length} scenarios · unranked)</span>
             <span class="inline-block px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-bold">${esc(sc.label)}</span>
           </div>
-          <h2 class="text-xl sm:text-2xl font-extrabold text-[#173a2b]">${sc.sequence.map(cname).join(" – ")} rotation</h2>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-[#173a2b]">${sc.sequence.map(cname).join(" – ")} 윤작 <span class="text-base text-slate-500">rotation</span></h2>
           <div class="text-sm font-extrabold text-emerald-700 mt-1">Sequence: ${sc.sequence.map(cname).join(" → ")}</div>
         </div>
         <div class="text-right bg-emerald-50/80 px-4 py-3 rounded-2xl border border-emerald-200">
-          <div class="text-[11px] text-slate-600 font-bold">Water-use index (continuous corn = 100)</div>
+          <div class="text-[11px] text-slate-600 font-bold">예상 연간 총 순수익 · Net profit (USDA ERS)</div>
+          <div class="text-sm">${NE}</div>
+          <div class="text-[11px] text-slate-600 font-bold mt-1.5">대신 · Water-use index (continuous corn = 100)</div>
           <div class="text-2xl font-extrabold text-[#173a2b] underline decoration-dotted cursor-help" title="${esc(ri?.tooltip || REL_TIP)}">${ri ? fmt(ri.value, 1) : "gap"}</div>
           <div class="text-xs text-emerald-800 font-bold">relative index, not a guarantee</div>
         </div>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5"><div class="text-[11px] text-slate-500 font-semibold">Mean season crop water demand (ETc)</div><div class="text-base font-extrabold text-[#173a2b] mt-0.5">${fmt(sc.mean_season_etc_mm)} mm</div><div class="text-[11px] text-slate-500 mt-0.5">FAO-56 Kc × ET₀</div></div>
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5"><div class="text-[11px] text-slate-500 font-semibold">Mean irrigation deficit</div><div class="text-base font-extrabold text-emerald-700 mt-0.5">${fmt(sc.mean_season_irrigation_deficit_mm)} mm</div><div class="text-[11px] text-slate-500 mt-0.5">max(0, ETc − Peff)</div></div>
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5"><div class="text-[11px] text-slate-500 font-semibold">Years with deficit (10 yr)</div><div class="text-sm font-extrabold text-[#173a2b] mt-0.5">${yrsDef}</div></div>
-        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5"><div class="text-[11px] text-slate-500 font-semibold">Scenario-range deficit P50</div><div class="text-sm font-extrabold text-amber-700 mt-0.5">${projDef}</div><div class="text-[11px] text-slate-500 mt-0.5">possible range, not a forecast</div></div>
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5"><div class="text-[11px] text-slate-500 font-semibold">연간 작물 수분 요구량 · ETm (season ETc)</div><div class="text-base font-extrabold text-[#173a2b] mt-0.5">${fmt(sc.mean_season_etc_mm)} mm</div><div class="text-[11px] text-slate-500 mt-0.5">FAO-56 Kc × ET₀ · deficit ${fmt(sc.mean_season_irrigation_deficit_mm)} mm</div></div>
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5"><div class="text-[11px] text-slate-500 font-semibold">단작 대비 물 사용 · vs continuous corn</div><div class="text-base font-extrabold text-emerald-700 mt-0.5">${ri ? (ri.value <= 100 ? "−" : "+") + fmt(Math.abs(100 - ri.value), 1) + "%" : "gap"}</div><div class="text-[11px] text-slate-500 mt-0.5">water-use index ${ri ? fmt(ri.value, 1) : "gap"} · relative, not a guarantee</div></div>
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5"><div class="text-[11px] text-slate-500 font-semibold">토양 유기물 지수 변화 · Soil OM change</div><div class="text-base font-extrabold text-slate-400 mt-0.5">not estimated</div><div class="text-[11px] text-slate-500 mt-0.5">${prof?.soil?.om_pct != null ? "current gSSURGO OM " + fmt(prof.soil.om_pct, 1) + "% (pilot field)" : "no soil-carbon model"}</div></div>
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5"><div class="text-[11px] text-slate-500 font-semibold">2030년대 수확 안정성 · 2030s stability</div><div class="text-base font-extrabold text-slate-400 mt-0.5">not estimated</div><div class="text-[11px] text-slate-500 mt-0.5">substitute — scenario-range deficit P50: ${projDef}</div></div>
       </div>
+      <div class="text-[11px] text-slate-600">10년 중 부족 연도 · Years with deficit (10 yr): <strong>${yrsDef}</strong></div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="rounded-2xl bg-emerald-50 border border-emerald-200 p-4"><div class="text-xs font-extrabold uppercase tracking-wider text-emerald-900 mb-1.5">✅ What the engine shows (FAO-56)</div>
+        <div class="rounded-2xl bg-emerald-50 border border-emerald-200 p-4"><div class="text-xs font-extrabold uppercase tracking-wider text-emerald-900 mb-1.5">✅ 장점 · Key advantage (FAO-56 engine)</div>
           <p class="text-xs sm:text-sm text-slate-800 font-medium leading-relaxed">Past 10-yr irrigation deficit P50: ${histDef}. Water-use index ${ri ? fmt(ri.value, 1) : "gap"} vs continuous corn (=100) at this location.</p></div>
-        <div class="rounded-2xl bg-amber-50 border border-amber-200 p-4"><div class="text-xs font-extrabold uppercase tracking-wider text-amber-900 mb-1.5">⚠️ Trade-offs / limits (scenario range)</div>
+        <div class="rounded-2xl bg-amber-50 border border-amber-200 p-4"><div class="text-xs font-extrabold uppercase tracking-wider text-amber-900 mb-1.5">⚠️ 단점 / 주의 · Trade-off (scenario range)</div>
           <p class="text-xs sm:text-sm text-slate-800 font-medium leading-relaxed">Scenario-range deficit P50: ${projDef}. Sequences with the same crops in a different order share the same seasonal averages here — order effects such as N credit are not modelled.</p></div>
       </div>
       <div class="rounded-2xl bg-slate-100 border border-slate-200 px-4 py-3.5 text-xs sm:text-sm text-slate-800 font-medium">
-        <strong class="text-[#173a2b]">🚜 Check locally (information gaps):</strong> ${(q.info_gaps || []).map(esc).join(" · ") || "—"}
+        <strong class="text-[#173a2b]">🚜 지형·시비 처방 · Prescription (USGS 3DEP &amp; NRCS):</strong> slope / fertilizer prescription <strong>not estimated</strong> (3DEP centroid elevation ${q.elevation ? fmt(q.elevation.value_m, 1) + " m" : "gap"} only). Check locally (information gaps): ${(q.info_gaps || []).map(esc).join(" · ") || "—"}
       </div>
       <div class="pt-2">
-        <div class="text-xs font-extrabold text-[#173a2b] mb-2">📊 All candidate rotations (unranked · click to switch)</div>
+        <div class="text-xs font-extrabold text-[#173a2b] mb-2">📊 전체 후보 윤작 시나리오 비교표 · All scenarios (unranked · click to switch)</div>
         <div class="overflow-x-auto rounded-2xl border border-slate-200">
           <table class="w-full text-left text-xs border-collapse">
-            <thead class="bg-slate-100 text-slate-700"><tr><th class="py-2.5 px-3 font-extrabold">No.</th><th class="py-2.5 px-3 font-extrabold">Rotation sequence</th><th class="py-2.5 px-3 font-extrabold text-right">Mean ETc</th><th class="py-2.5 px-3 font-extrabold text-right">Irrigation deficit</th><th class="py-2.5 px-3 font-extrabold text-right">Water-use index</th></tr></thead>
+            <thead class="bg-slate-100 text-slate-700"><tr><th class="py-2.5 px-3 font-extrabold">번호 · No.</th><th class="py-2.5 px-3 font-extrabold">윤작 순서 · Sequence</th><th class="py-2.5 px-3 font-extrabold text-right">ETm (mm)</th><th class="py-2.5 px-3 font-extrabold text-right">물 부족 · Deficit</th><th class="py-2.5 px-3 font-extrabold text-right">물 지수 · Water idx</th><th class="py-2.5 px-3 font-extrabold text-right">순수익 · Profit</th></tr></thead>
             <tbody class="divide-y divide-slate-200 bg-white">${cands.map((c, k) => `<tr data-scen="${k}" class="${k === i ? "bg-emerald-50/90 font-bold" : "hover:bg-slate-50"} cursor-pointer transition">
-              <td class="py-2.5 px-3 text-[#173a2b] font-extrabold">[Result ${c.candidate}]</td>
+              <td class="py-2.5 px-3 text-[#173a2b] font-extrabold">[${c.candidate}번 결과]</td>
               <td class="py-2.5 px-3"><div class="font-extrabold text-[#173a2b]">${c.sequence.map(cname).join(" → ")}</div></td>
               <td class="py-2.5 px-3 text-right">${fmt(c.mean_season_etc_mm)} mm</td>
               <td class="py-2.5 px-3 text-right text-emerald-800">${fmt(c.mean_season_irrigation_deficit_mm)} mm</td>
-              <td class="py-2.5 px-3 text-right font-mono">${c.relative_water_use_index ? fmt(c.relative_water_use_index.value, 1) : "gap"}</td></tr>`).join("")}</tbody>
+              <td class="py-2.5 px-3 text-right font-mono">${c.relative_water_use_index ? fmt(c.relative_water_use_index.value, 1) : "gap"}</td><td class="py-2.5 px-3 text-right text-slate-400">not estimated</td></tr>`).join("")}</tbody>
           </table>
         </div>
       </div>
       <div class="pt-2">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-          <span class="text-xs font-extrabold text-[#173a2b]">📸 Field visual comparison: monoculture (before) vs rotation (after) — illustrative</span>
-          <span class="text-[11px] text-slate-500">AI-generated images; illustrative, not your field</span>
+          <span class="text-xs font-extrabold text-[#173a2b]">📸 단작(Before) vs 윤작(After) 비교 · Field visual comparison — illustrative</span>
+          <span class="text-[11px] text-slate-500">AI-generated image (AI 생성 이미지) · illustrative, not your field</span>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-slate-100">
@@ -566,28 +590,28 @@
           </div>
           <div class="relative aspect-[4/3] rounded-2xl overflow-hidden border border-emerald-200 shadow-md bg-emerald-950/10">
             <div class="absolute inset-0 flex">${crops.map((c) => `<img src="${CROP_DB[c]?.img}" alt="Illustrative ${cname(c)} field" class="h-full object-cover" style="width:${100 / crops.length}%" />`).join("")}</div>
-            <div class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-emerald-900/85 text-white text-[11px] font-bold">After · [Result ${sc.candidate}] ${sc.sequence.map(cname).join(" → ")}</div>
+            <div class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-emerald-900/85 text-white text-[11px] font-bold">After · [${sc.candidate}번 결과] ${sc.sequence.map(cname).join(" → ")}</div>
             <div class="absolute bottom-2.5 left-2 right-2 flex items-center justify-around gap-1.5 pointer-events-none">${crops.map((c) => `<span class="px-2 py-1 rounded-md bg-black/65 text-white text-[11px] font-bold">${CROP_DB[c]?.icon || ""} ${cname(c)}</span>`).join("")}</div>
           </div>
         </div>
       </div>
       <div class="pt-3 border-t border-slate-200">
-        <div class="mb-4"><div class="text-xs font-extrabold uppercase tracking-wider text-emerald-800">📊 FAO-56 engine — 4-panel analysis</div>
+        <div class="mb-4"><div class="text-xs font-extrabold uppercase tracking-wider text-emerald-800">📊 4대 분석 차트 · FAO-56 engine 4-panel analysis</div>
           <p class="text-xs text-slate-600">Field outline (WGS84) · NASA POWER yearly water · unranked scenario comparison · possible range (scenario) for precipitation</p></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="rounded-2xl bg-[#f8faf5] border border-slate-200 p-4 shadow-sm"><div class="text-xs font-extrabold text-[#173a2b] mb-2">① Measured field boundary (WGS84) · 3DEP centroid ${q.elevation ? fmt(q.elevation.value_m, 1) + " m" : "gap"}</div>
+          <div class="rounded-2xl bg-[#f8faf5] border border-slate-200 p-4 shadow-sm"><div class="text-xs font-extrabold text-[#173a2b] mb-2">① 필지 경계 · USGS 3DEP elevation (centroid) ${q.elevation ? fmt(q.elevation.value_m, 1) + " m" : "gap"}</div>
             <div class="relative h-56 flex items-center justify-center"><canvas id="field-canvas" width="460" height="240" class="w-full h-full rounded-xl border border-slate-200 bg-white"></canvas></div></div>
-          <div class="rounded-2xl bg-[#f8faf5] border border-slate-200 p-4 shadow-sm"><div class="text-xs font-extrabold text-[#173a2b] mb-2">② NASA POWER ${esc(q.climate_history?.period || "")} yearly precip &amp; ET₀ (observed)</div>
+          <div class="rounded-2xl bg-[#f8faf5] border border-slate-200 p-4 shadow-sm"><div class="text-xs font-extrabold text-[#173a2b] mb-2">② 10년 강우 &amp; ET₀ · NASA POWER ${esc(q.climate_history?.period || "")} precip &amp; ET₀ (observed)</div>
             <div class="relative h-56"><canvas id="hydrology-chart"></canvas></div></div>
-          <div class="rounded-2xl bg-[#f8faf5] border border-slate-200 p-4 shadow-sm"><div class="text-xs font-extrabold text-[#173a2b] mb-2">③ Scenario comparison (unranked): ETc · irrigation deficit</div>
+          <div class="rounded-2xl bg-[#f8faf5] border border-slate-200 p-4 shadow-sm"><div class="text-xs font-extrabold text-[#173a2b] mb-2">③ 시나리오 비교 (순위 미적용) · ETm · deficit</div>
             <div class="relative h-56"><canvas id="scenario-bar-chart"></canvas></div></div>
-          <div class="rounded-2xl bg-[#f8faf5] border border-slate-200 p-4 shadow-sm"><div class="text-xs font-extrabold text-[#173a2b] mb-2">④ Possible range (scenario): annual precip P10–P90</div>
+          <div class="rounded-2xl bg-[#f8faf5] border border-slate-200 p-4 shadow-sm"><div class="text-xs font-extrabold text-[#173a2b] mb-2">④ 적응 추이 · Adaptation trend: precip P10–P90 past → scenario range</div>
             <div class="relative h-56"><canvas id="stability-chart"></canvas></div></div>
         </div>
       </div>
       <div class="pt-2">
         <details class="group rounded-2xl bg-[#102419] text-emerald-100 border border-emerald-500/30 overflow-hidden">
-          <summary class="cursor-pointer px-4 py-3 text-xs font-extrabold text-amber-300 flex items-center justify-between select-none"><span>🖥️ ${esc(q.engine)} — assumptions &amp; sources report</span><span class="text-emerald-300 group-open:rotate-180 transition-transform">▼</span></summary>
+          <summary class="cursor-pointer px-4 py-3 text-xs font-extrabold text-amber-300 flex items-center justify-between select-none"><span>🖥️ V8 엔진 리포트 · ${esc(q.engine)} — assumptions &amp; sources report</span><span class="text-emerald-300 group-open:rotate-180 transition-transform">▼</span></summary>
           <pre class="p-4 text-[11px] font-mono leading-relaxed text-emerald-100/95 overflow-x-auto bg-[#0b1911] border-t border-emerald-500/20 whitespace-pre-wrap">${esc([
             `engine: ${q.engine} · label: ${q.label} · generated ${q.generated_utc || ""}`,
             `geometry: ${q.geometry?.method || ""}`,
