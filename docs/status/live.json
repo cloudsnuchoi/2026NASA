@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T21:55:00+09:00",
+ "generated_at": "2026-11-15T22:00:10+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -10,15 +10,15 @@
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 64
+   "remaining_min": 59
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 94
+   "remaining_min": 89
   }
  ],
- "remaining_min": 94,
+ "remaining_min": 89,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -321,10 +321,26 @@
    "waits_on": ""
   },
   {
+   "name": "final",
+   "model": "?",
+   "task": "?",
+   "last_activity": "21:56",
+   "state": "running",
+   "waits_on": ""
+  },
+  {
    "name": "live",
    "model": "—",
    "task": "이 현황 생성기 (5분)",
    "last_activity": "15:54"
+  },
+  {
+   "name": "mat3",
+   "model": "?",
+   "task": "?",
+   "last_activity": "21:58",
+   "state": "running",
+   "waits_on": ""
   },
   {
    "name": "mfixq",
@@ -374,7 +390,7 @@
    "name": "web",
    "model": "—",
    "task": "프론트+API 프록시 (:8095)",
-   "last_activity": "20:09"
+   "last_activity": "21:56"
   },
   {
    "name": "web-tunnel",
@@ -393,7 +409,7 @@
   {
    "name": "김윤성",
    "user": "yoonsung",
-   "mattermost_last": "21:04",
+   "mattermost_last": "21:55",
    "repo_last": null
   },
   {
@@ -405,7 +421,7 @@
   {
    "name": "하지민",
    "user": "jimin",
-   "mattermost_last": "20:45",
+   "mattermost_last": "21:55",
    "repo_last": null
   },
   {
@@ -418,7 +434,7 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "21:16"
+   "repo_last": "21:55"
   }
  ],
  "blockers": [],
@@ -428,6 +444,16 @@
   "MATLAB: jimin 추가: jimin_ndvi_anomaly"
  ],
  "merged_prs": [
+  {
+   "number": 76,
+   "title": "fix(ui): 분석 화면을 목업 v8 기준으로 복원, 스냅샷 배지, Pages CORS 제거, 프록시 제한 조정",
+   "merged_at": "2026-11-15T12:55:37Z"
+  },
+  {
+   "number": 75,
+   "title": "docs(submission): v2 슬라이드(MATLAB 그림, 모바일 화면)와 V8 실행 로그 출처",
+   "merged_at": "2026-11-15T12:47:23Z"
+  },
   {
    "number": 74,
    "title": "docs(matlab): 가이드 Run 하나로 정리 + live.json 추가 세트 6개",
@@ -457,16 +483,6 @@
    "number": 69,
    "title": "docs(site): 모델 상태 정리, Data & Sources 패널, MATLAB 빌드 단계 결과",
    "merged_at": "2026-11-15T11:53:44Z"
-  },
-  {
-   "number": 68,
-   "title": "docs: 강다은 데모 영상 역할 + MATLAB UX 진단표",
-   "merged_at": "2026-11-15T11:51:24Z"
-  },
-  {
-   "number": 65,
-   "title": "docs(submission): 제출 패키지 v1 (역할·Project 링크·MATLAB 검증 문단)",
-   "merged_at": "2026-11-15T11:48:46Z"
   }
  ],
  "ai_models": [
@@ -519,6 +535,10 @@
    "state": "waiting-merge",
    "waits_on": "main에 없는 커밋 5개 (감독 머지)"
   },
+  "final": {
+   "state": "running",
+   "waits_on": ""
+  },
   "fix": {
    "state": "waiting-merge",
    "waits_on": "main에 없는 커밋 3개 (감독 머지)"
@@ -541,6 +561,10 @@
   },
   "l5": {
    "state": "done",
+   "waits_on": ""
+  },
+  "mat3": {
+   "state": "running",
    "waits_on": ""
   },
   "mfixq": {

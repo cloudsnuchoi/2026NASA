@@ -1,7 +1,7 @@
-# 아몰라 실시간 현황 · 21:55 KST
+# 아몰라 실시간 현황 · 22:00 KST
 
-일정: 1차 제출 21:00 (지남) · 동결 23:00 (1시간 4분 남음) · 최종 제출 23:30 (1시간 34분 남음)
-최종 제출 23:30 KST까지 **1시간 34분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (0시간 59분 남음) · 최종 제출 23:30 (1시간 29분 남음)
+최종 제출 23:30 KST까지 **1시간 29분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -92,14 +92,16 @@
 | --- | --- | --- | --- | --- | --- |
 | api | — | model_api 상시 실행 (:8090) | — | — | 19:27 |
 | bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | running | — | 21:20 |
+| final | ? | ? | running | — | 21:56 |
 | live | — | 이 현황 생성기 (5분) | — | — | 15:54 |
+| mat3 | ? | ? | running | — | 21:58 |
 | mfixq | ? | ? | running | — | 19:53 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | — | — | 12:11 |
 | mwatch | ? | ? | running | — | 20:40 |
 | rbatch | ? | ? | running | — | 21:00 |
 | runner | — | GitHub Actions 러너 | — | — | 13:09 |
 | sub2 | ? | ? | running | — | 20:17 |
-| web | — | 프론트+API 프록시 (:8095) | — | — | 20:09 |
+| web | — | 프론트+API 프록시 (:8095) | — | — | 21:56 |
 | web-tunnel | — | 공개 데모 터널 | — | — | 19:00 |
 
 ## 레인 상태 (tmux 없음)
@@ -122,18 +124,18 @@
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
 | 김우찬 | 21:51 | — |
-| 김윤성 | 21:04 | — |
+| 김윤성 | 21:55 | — |
 | 고지은 | 21:04 | — |
-| 하지민 | 20:45 | — |
+| 하지민 | 21:55 | — |
 | 강다은 | 17:18 | — |
-| Hylē | 16:01 | 21:16 |
+| Hylē | 16:01 | 21:55 |
 
 ## 최근 머지된 PR
+- #76 fix(ui): 분석 화면을 목업 v8 기준으로 복원, 스냅샷 배지, Pages CORS 제거, 프록시 제한 조정
+- #75 docs(submission): v2 슬라이드(MATLAB 그림, 모바일 화면)와 V8 실행 로그 출처
 - #74 docs(matlab): 가이드 Run 하나로 정리 + live.json 추가 세트 6개
 - #73 fix(bot): MATLAB 방 캡처 요구 금지 규칙
 - #71 feat(matlab): 서버 봇 직접 안내(notify.log), 레인 상태, MATLAB 결과 30분 배치
 - #72 fix(ui): 모바일 360/390/768 점검과 UX-AUDIT 수정
 - #70 feat(matlab): run_all_<name>.m 원클릭 실행과 JSON 실행 로그, mwatch 자동 수정
 - #69 docs(site): 모델 상태 정리, Data & Sources 패널, MATLAB 빌드 단계 결과
-- #68 docs: 강다은 데모 영상 역할 + MATLAB UX 진단표
-- #65 docs(submission): 제출 패키지 v1 (역할·Project 링크·MATLAB 검증 문단)
