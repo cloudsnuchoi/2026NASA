@@ -40,20 +40,27 @@ Mattermost 1:1 채널(`1on1-<username>`)과 팀 채널(@orchestrator 멘션)에�
 
 ## LLM
 
-제공자는 **DeepSeek**(OpenAI 호환). 베이스 URL과 모델은 `.env`에서 바꾸며, 코드에 고정하지 않는다. `bridge.py`는 `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `ORCH_MODEL`을 읽는다.
+제공자는 **DeepSeek**(OpenAI 호환). 베이스 URL과 모델은 `.env`에서 바꾸며, 코드에 고정하지 않는다. `bridge.py`는 `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`을 읽고, 없으면 예전 이름 `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `ORCH_MODEL`을 대체값으로 읽는다. VPS에서는 `setup-bot-key`가 숨김 입력으로 넣어 준다.
 
 | 변수 | 기본·예시 | 설명 |
 | --- | --- | --- |
-| `OPENAI_API_KEY` | (비움) | DeepSeek API 키. `.env`에만 두고 커밋하지 않는다. |
-| `OPENAI_BASE_URL` | `https://api.deepseek.com` | OpenAI 호환 엔드포인트. 다른 호환 제공자로 바꿀 수 있다. |
-| `ORCH_MODEL` | `deepseek-v4.1-flash` | 호출할 모델 이름. **정확한 모델 id는 아직 검증하지 않았다.** 콘솔·문서에서 확인한 뒤 여기만 고친다. |
+| `LLM_API_KEY` | (비움) | DeepSeek API 키. `.env`에만 두고 커밋하지 않는다. |
+| `LLM_BASE_URL` | `https://api.deepseek.com` | OpenAI 호환 엔드포인트. 다른 호환 제공자로 바꿀 수 있다. |
+| `LLM_MODEL` | `deepseek-flash` | 모델 id. 현재 DeepSeek-V4.1-Flash(공식 문서 2026-11-15 확인). 레거시 `deepseek-v4-flash`는 쓰지 않는다. |
+
+동작 규칙:
+- 일상 대화와 `!assign` 문구: thinking 끔(`extra_body={"thinking":{"type":"disabled"}}`).
+- `!review`: thinking 켬(`reasoning_effort="high"`). thinking 모드에서 `temperature`는 무시되므로 보내지 않는다.
+- tools를 쓰는 thinking 요청은 assistant 메시지의 `reasoning_content`를 이후 요청에 그대로 다시 보낸다(안 보내면 400). `reasoning_content`는 채팅에 게시하지 않는다.
+- 캐시: system 프롬프트+저장소 문서를 매 요청 맨 앞에 같은 순서로 두고, 시각·대화 상대·Hylē 지시·GitHub 상태는 마지막 사용자 메시지 뒤에 붙인다. 로그에 `cache_hit`/`cache_miss`(`prompt_cache_hit_tokens`/`prompt_cache_miss_tokens`)가 남는다.
+- 429·5xx는 1초·3초 백오프로 2번 재시도하고, 그래도 실패하면 채팅에 "LLM 응답 지연"만 남긴다.
 
 결정 원문: [docs/DECISIONS.md](../../docs/DECISIONS.md) (2026-11-15 12:28). 옵션 A(공식 Agents 플러그인)를 보조로 켤 때도 같은 OpenAI Compatible 설정(DeepSeek 베이스 URL·모델·키)을 쓰면 된다.
 
 ## 실행
 
 ```bash
-cp .env.example .env    # OPENAI_API_KEY, OPENAI_BASE_URL, ORCH_MODEL 입력. MM_BOT_TOKEN은 provision.sh가 넣음
+cp .env.example .env    # VPS에서는 setup-bot-key로 LLM_API_KEY·LLM_MODEL·LLM_BASE_URL 입력. MM_BOT_TOKEN은 provision.sh가 넣음
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python bridge.py --dry-run --mock-llm     # 오프라인, 키 없이
 .venv/bin/python bridge.py --dry-run                # 오프라인, 실제 LLM

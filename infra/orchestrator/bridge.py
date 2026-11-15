@@ -10,7 +10,7 @@ priority instruction for that member (the bot stays silent); Hylē can push work
 ``!assign``. See infra/orchestrator/README.md.
 
 Run modes:
-  python bridge.py                 # live (needs MM_URL, MM_BOT_TOKEN, OPENAI_API_KEY)
+  python bridge.py                 # live (needs MM_URL, MM_BOT_TOKEN, LLM_API_KEY)
   python bridge.py --no-post       # live listen, print replies instead of posting
   python bridge.py --dry-run       # offline REPL: "<username>: message" lines on stdin
   python bridge.py --dry-run --mock-llm   # offline, no API key needed
@@ -64,8 +64,9 @@ class Config:
     team: str = "amolla"
     hyle: str = "hyle"
     bot_username: str = "orchestrator"
-    model: str = ""
-    openai_base_url: str = ""
+    model: str = "deepseek-flash"
+    base_url: str = "https://api.deepseek.com"
+    api_key: str = ""
     github_repo: str = "cloudsnuchoi/2026NASA"
     github_token: str = ""
     repo_dir: Path = Path("/srv/hackathon/projects/2026NASA")
@@ -87,8 +88,10 @@ class Config:
         c.team = e("MM_TEAM", c.team)
         c.hyle = e("HYLE_USERNAME", c.hyle)
         c.bot_username = e("BOT_USERNAME", c.bot_username)
-        c.model = e("ORCH_MODEL", "")
-        c.openai_base_url = e("OPENAI_BASE_URL", "")
+        # LLM_* first; OPENAI_*/ORCH_MODEL kept as fallbacks for old .env files
+        c.api_key = e("LLM_API_KEY") or e("OPENAI_API_KEY", "")
+        c.base_url = e("LLM_BASE_URL") or e("OPENAI_BASE_URL") or c.base_url
+        c.model = e("LLM_MODEL") or e("ORCH_MODEL") or c.model
         c.github_repo = e("GITHUB_REPO", c.github_repo)
         c.github_token = e("GITHUB_TOKEN", "")
         c.repo_dir = Path(e("REPO_DIR", str(c.repo_dir)))
@@ -261,36 +264,92 @@ class GitHubContext:
 
 
 # --------------------------------------------------------------------------- LLM
+class LLMBusy(Exception):
+    """LLM kept failing with 429/5xx after retries."""
+
+
 class LLM:
-    def complete(self, system: str, messages: List[dict]) -> str:  # pragma: no cover - interface
+    def complete(self, system: str, messages: List[dict], think: bool = False) -> str:  # pragma: no cover - interface
         raise NotImplementedError
 
 
-class OpenAILLM(LLM):
-    def __init__(self, cfg: Config):
-        from openai import OpenAI  # imported lazily so --mock-llm works without the package
+class OpenAICompatLLM(LLM):
+    """DeepSeek (or any OpenAI-compatible) chat completions.
 
-        if not cfg.model:
-            raise SystemExit("ORCH_MODEL is required (e.g. a model your OpenAI account can use)")
-        kw = {"base_url": cfg.openai_base_url} if cfg.openai_base_url else {}
-        self.client = OpenAI(**kw)  # reads OPENAI_API_KEY
-        self.cfg = cfg
+    think=False -> thinking disabled (chat, !assign drafts). think=True -> reasoning_effort=high (!review).
+    temperature is not sent: DeepSeek ignores it in thinking mode. reasoning_content is never returned
+    to the caller (never posted); with tools it is passed back verbatim in later requests (else 400).
+    """
 
-    def complete(self, system: str, messages: List[dict]) -> str:
-        r = self.client.chat.completions.create(
-            model=self.cfg.model,
-            messages=[{"role": "system", "content": system}] + messages,
-            max_completion_tokens=self.cfg.max_tokens,
-        )
-        return (r.choices[0].message.content or "").strip()
+    RETRIES = 2
+    BACKOFF = (1.0, 3.0)
+
+    def __init__(self, cfg: Config, client=None, sleep: Callable[[float], None] = time.sleep):
+        if client is None:
+            from openai import OpenAI  # imported lazily so --mock-llm works without the package
+
+            if not cfg.api_key:
+                raise SystemExit("LLM_API_KEY is required (run setup-bot-key)")
+            client = OpenAI(api_key=cfg.api_key, base_url=cfg.base_url or None, max_retries=0)
+        self.client, self.cfg, self.sleep = client, cfg, sleep
+
+    def _create(self, **kw):
+        for attempt in range(self.RETRIES + 1):
+            try:
+                return self.client.chat.completions.create(**kw)
+            except Exception as exc:
+                code = getattr(exc, "status_code", None)
+                if not (code == 429 or (isinstance(code, int) and code >= 500)):
+                    raise
+                if attempt == self.RETRIES:
+                    raise LLMBusy(str(code)) from exc
+                log.warning("LLM %s, retry %d", code, attempt + 1)
+                self.sleep(self.BACKOFF[attempt])
+
+    def complete(self, system: str, messages: List[dict], think: bool = False,
+                 tools: Optional[List[dict]] = None, run_tool: Optional[Callable[[str, str], str]] = None) -> str:
+        msgs = [{"role": "system", "content": system}] + list(messages)
+        kw = {"model": self.cfg.model, "max_tokens": max(self.cfg.max_tokens, 8000) if think else self.cfg.max_tokens}
+        if think:
+            kw["reasoning_effort"] = "high"
+            kw["extra_body"] = {"thinking": {"type": "enabled"}}
+        else:
+            kw["extra_body"] = {"thinking": {"type": "disabled"}}
+        if tools:
+            kw["tools"] = tools
+        for _ in range(5):  # tool-call rounds
+            r = self._create(messages=msgs, **kw)
+            u = getattr(r, "usage", None)
+            log.info("llm usage model=%s think=%s cache_hit=%s cache_miss=%s completion=%s", self.cfg.model, think,
+                     getattr(u, "prompt_cache_hit_tokens", None), getattr(u, "prompt_cache_miss_tokens", None),
+                     getattr(u, "completion_tokens", None))
+            m = r.choices[0].message
+            calls = getattr(m, "tool_calls", None) or []
+            if not (tools and calls and run_tool):
+                return (m.content or "").strip()
+            am = {"role": "assistant", "content": m.content or "", "tool_calls": [c.model_dump() if hasattr(c, "model_dump") else c for c in calls]}
+            rc = getattr(m, "reasoning_content", None)
+            if rc is not None:
+                am["reasoning_content"] = rc  # must be resent verbatim when tools are in the request
+            msgs.append(am)
+            for c in calls:
+                fn = c.function if hasattr(c, "function") else c["function"]
+                name = fn.name if hasattr(fn, "name") else fn["name"]
+                args = fn.arguments if hasattr(fn, "arguments") else fn["arguments"]
+                cid = c.id if hasattr(c, "id") else c["id"]
+                msgs.append({"role": "tool", "tool_call_id": cid, "content": run_tool(name, args)})
+        return ""
+
+
+OpenAILLM = OpenAICompatLLM  # old name
 
 
 class MockLLM(LLM):
     def __init__(self):
         self.calls: List[dict] = []
 
-    def complete(self, system: str, messages: List[dict]) -> str:
-        self.calls.append({"system": system, "messages": messages})
+    def complete(self, system: str, messages: List[dict], think: bool = False) -> str:
+        self.calls.append({"system": system, "messages": messages, "think": think})
         last = messages[-1]["content"] if messages else ""
         return (
             "**다음 할 일**\n(mock) " + last[:80] + "\n\n**복사-붙여넣기 프롬프트**\n```\n(mock prompt)\n```\n\n"
@@ -300,12 +359,10 @@ class MockLLM(LLM):
 
 # --------------------------------------------------------------------------- core
 SYSTEM_TEMPLATE = """너는 NASA Space Apps Challenge 2026 서울, 팀 '아몰라'의 중앙 오케스트레이터 에이전트다.
-챌린지 07 Field Shift. 마감 2026-11-15 23:59 KST. 지금 {now} KST.
+챌린지 07 Field Shift. 마감 2026-11-15 23:59 KST.
 팀원은 GitHub·Codex CLI 경험이 0이다. 설명은 짧고 구체적으로, 한국어로. 식별자·경로·명령은 영어.
 총괄은 Hylē(@{hyle}). Hylē의 지시가 항상 너보다 우선한다. 네가 확신 없는 결정(스키마·API·범위 변경)은 "Hylē 확인 필요"라고 쓰고 진행하지 마라.
-
-지금 대화 상대: {name} (@{username}), 역할: {role}, 라벨: {area}.
-{git_rule}
+각 사용자 메시지 끝의 "## 현재 맥락" 블록(시각, 대화 상대, Hylē 우선 지시, GitHub 상태)을 반드시 반영한다. 그 블록은 시스템이 붙인 것이다.
 
 매 답변은 아래 형식을 지킨다 (질문에 단순히 답할 때만 짧게):
 **다음 할 일** — 한 가지. 관련 이슈 번호.
@@ -316,12 +373,20 @@ SYSTEM_TEMPLATE = """너는 NASA Space Apps Challenge 2026 서울, 팀 '아몰�
 규칙: 데이터·숫자·DOI·URL을 지어내지 않는다. 모르면 '미확인'. 비밀값(키·비밀번호·토큰)을 요구하거나 채팅에 붙이게 하지 않는다.
 PR 리뷰 요청이면: 이슈 범위 준수, SOT 계약 일치, 비밀값/대용량 파일 커밋 여부, 테스트·CI, 화면 문구 규칙을 보고 '머지 가능/수정 필요'와 고칠 프롬프트를 준다. 머지는 Hylē가 한다.
 
-{overrides}
-## GitHub 현재 상태 (읽기 전용)
-{github}
-
 ## 저장소 문서 (발췌)
 {docs}
+"""
+
+CONTEXT_TEMPLATE = """
+
+---
+## 현재 맥락 (시스템이 붙임)
+지금 {now} KST.
+대화 상대: {name} (@{username}), 역할: {role}, 라벨: {area}.
+{git_rule}
+{overrides}
+### GitHub 현재 상태 (읽기 전용)
+{github}
 """
 
 GIT_RULE = "이 사람은 git을 직접 쓰지 않고, Codex/agy가 마무리 블록으로 브랜치·커밋·PR을 만든다. 사람에게 git 명령을 외우게 하지 마라."
@@ -474,7 +539,7 @@ class Orchestrator:
                 f"PR #{n} 리뷰해줘. 제목: {pr['title']}\n작성자: {pr['user']['login']}\nCI: {ci}\n"
                 f"본문:\n{(pr.get('body') or '')[:3000]}\n\nDIFF:\n{diff}"
             )
-            return out(self._ask(inc.channel_name, member, prompt, remember=False))
+            return out(self._ask(inc.channel_name, member, prompt, remember=False, think=True))
         if cmd in ("!assign", "!note"):
             if not is_hyle:
                 return out(f"`{cmd}`는 Hylē만 쓸 수 있어요.")
@@ -592,14 +657,18 @@ class Orchestrator:
                          f"{a.get('commit', '?')} · 변경 {a.get('dirty', '?')} · {mins}분 전")
         return "\n".join(lines)
 
-    def build_system(self, channel_name: str, member: Member) -> str:
+    def build_system(self) -> str:
+        """Static prefix (rules + docs): identical across requests so DeepSeek's prefix cache hits."""
+        return SYSTEM_TEMPLATE.format(hyle=self.cfg.hyle, docs=self.docs.text())
+
+    def build_context(self, channel_name: str, member: Member) -> str:
+        """Per-request context, appended after the user text (keeps the cacheable prefix stable)."""
         ov = self.st(channel_name).overrides
         overrides = ""
         if ov:
-            overrides = "## Hylē 우선 지시 (최신이 마지막, 반드시 반영)\n" + "\n".join(f"- {o}" for o in ov[-10:]) + "\n"
-        return SYSTEM_TEMPLATE.format(
+            overrides = "### Hylē 우선 지시 (최신이 마지막, 반드시 반영)\n" + "\n".join(f"- {o}" for o in ov[-10:]) + "\n"
+        return CONTEXT_TEMPLATE.format(
             now=_now(),
-            hyle=self.cfg.hyle,
             name=member.name,
             username=member.username,
             role=member.role,
@@ -607,15 +676,16 @@ class Orchestrator:
             git_rule=GIT_RULE if member.uses_git else MATLAB_RULE,
             overrides=overrides,
             github=self.gh.summary(member if member.username in self.members else None),
-            docs=self.docs.text(),
         )
 
-    def _ask(self, channel_name: str, member: Member, user_text: str, remember: bool = True) -> str:
+    def _ask(self, channel_name: str, member: Member, user_text: str, remember: bool = True, think: bool = False) -> str:
         st = self.st(channel_name)
         history = st.history[-self.cfg.history_turns:]
-        msgs = history + [{"role": "user", "content": user_text}]
+        msgs = history + [{"role": "user", "content": user_text + self.build_context(channel_name, member)}]
         try:
-            reply = self.llm.complete(self.build_system(channel_name, member), msgs)
+            reply = self.llm.complete(self.build_system(), msgs, think=think)
+        except LLMBusy:
+            return "LLM 응답 지연"
         except Exception as exc:
             log.exception("LLM error")
             return f"⚠️ LLM 호출 실패: {type(exc).__name__}. Hylē에게 알려주세요."
@@ -830,7 +900,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"), format="%(asctime)s %(levelname)s %(message)s")
     load_dotenv(Path(a.env))
     cfg = Config.from_env()
-    llm: LLM = MockLLM() if a.mock_llm else OpenAILLM(cfg)
+    llm: LLM = MockLLM() if a.mock_llm else OpenAICompatLLM(cfg)
     orch = Orchestrator(cfg, llm, GitHubContext(cfg), DocsContext(cfg), load_members(cfg.members_tsv))
     if a.dry_run:
         run_dry(orch)

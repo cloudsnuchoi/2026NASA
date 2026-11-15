@@ -8,7 +8,11 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import bridge  # noqa: E402
-from bridge import Config, Incoming, MockLLM, Orchestrator, find_member, load_members, split_message  # noqa: E402,I001
+from bridge import Config, Incoming, LLMBusy, MockLLM, OpenAICompatLLM, Orchestrator, find_member, load_members, split_message  # noqa: E402,I001
+
+
+def full(call):
+    return call["system"] + "\n".join(m["content"] for m in call["messages"])
 
 MEMBERS_TSV = Path(__file__).resolve().parents[2] / "chat" / "members.tsv"
 
@@ -62,14 +66,14 @@ def test_members_loaded():
 def test_member_message_in_1on1_gets_reply(orch):
     outs = orch.handle(inc("jieun", "1on1-jieun", "지도 어디서부터 해요?"))
     assert len(outs) == 1 and outs[0].channel == "cid-1on1-jieun"
-    sys_prompt = orch.llm.calls[-1]["system"]
+    sys_prompt = full(orch.llm.calls[-1])
     assert "고지은" in sys_prompt and "UI/UX A" in sys_prompt
     assert "Codex/agy가 마무리 블록" in sys_prompt  # git members get git rule
 
 
 def test_matlab_member_gets_no_git_rule(orch):
     orch.handle(inc("yoonsung", "1on1-yoonsung", "POWER 데이터 어떻게 받아요?"))
-    sys_prompt = orch.llm.calls[-1]["system"]
+    sys_prompt = full(orch.llm.calls[-1])
     assert "MATLAB 담당은 git을 쓰지 않는다" in sys_prompt
 
 
@@ -77,8 +81,8 @@ def test_hyle_plain_message_is_override_and_silent(orch):
     assert orch.handle(inc("hyle", "1on1-jieun", "오늘은 S1까지만")) == []
     assert orch.llm.calls == []
     orch.handle(inc("jieun", "1on1-jieun", "다음 뭐 해요?"))
-    assert "오늘은 S1까지만" in orch.llm.calls[-1]["system"]
-    assert "Hylē 우선 지시" in orch.llm.calls[-1]["system"]
+    assert "오늘은 S1까지만" in full(orch.llm.calls[-1])
+    assert "Hylē 우선 지시" in full(orch.llm.calls[-1])
 
 
 def test_hyle_mention_in_1on1_gets_reply(orch):
@@ -144,7 +148,7 @@ def test_state_persists(tmp_path):
 
 def test_llm_failure_is_reported(orch):
     class Boom(MockLLM):
-        def complete(self, s, m):
+        def complete(self, s, m, think=False):
             raise RuntimeError("down")
     orch.llm = Boom()
     out = orch.handle(inc("jieun", "1on1-jieun", "질문"))[0].message
@@ -270,3 +274,105 @@ def test_feedback_on_error_and_stale_dirty(orch):
     d = orch.on_agent(hb("jieun", "idle", dirty="2", branch="feat/12-x"), now=t0 + 300 + 16 * 60)
     assert len(d) == 1 and "커밋 안 된 파일이 2개" in d[0].message
     assert orch.on_agent(hb("jieun", "idle", dirty="2"), now=t0 + 300 + 19 * 60) == []  # cooldown
+
+
+# ---- DeepSeek client behaviour (fake client, no network)
+class _Obj:
+    def __init__(self, **kw):
+        self.__dict__.update(kw)
+
+
+class FakeClient:
+    def __init__(self, responses):
+        self.responses, self.requests = list(responses), []
+        self.chat = _Obj(completions=_Obj(create=self.create))
+
+    def create(self, **kw):
+        self.requests.append(kw)
+        r = self.responses.pop(0)
+        if isinstance(r, Exception):
+            raise r
+        return r
+
+
+def _resp(content, reasoning=None, tool_calls=None):
+    msg = _Obj(content=content, reasoning_content=reasoning, tool_calls=tool_calls)
+    usage = _Obj(prompt_cache_hit_tokens=10, prompt_cache_miss_tokens=5, completion_tokens=3)
+    return _Obj(choices=[_Obj(message=msg)], usage=usage)
+
+
+def _err(code):
+    e = Exception(f"http {code}")
+    e.status_code = code
+    return e
+
+
+def test_thinking_off_by_default_and_on_for_review(orch):
+    fc = FakeClient([_resp("hi", reasoning="secret thoughts")])
+    llm = OpenAICompatLLM(Config(), client=fc, sleep=lambda s: None)
+    assert llm.complete("S", [{"role": "user", "content": "u"}]) == "hi"
+    req = fc.requests[0]
+    assert req["extra_body"] == {"thinking": {"type": "disabled"}} and "reasoning_effort" not in req
+    assert "temperature" not in req and req["model"] == "deepseek-flash"
+    fc2 = FakeClient([_resp("ok", reasoning="r")])
+    out = OpenAICompatLLM(Config(), client=fc2, sleep=lambda s: None).complete("S", [{"role": "user", "content": "u"}], think=True)
+    assert out == "ok" and "r" not in out
+    assert fc2.requests[0]["reasoning_effort"] == "high"
+    orch.handle(inc("jieun", "1on1-jieun", "!review 7"))
+    assert orch.llm.calls[-1]["think"] is True
+    orch.handle(inc("jieun", "1on1-jieun", "안녕"))
+    assert orch.llm.calls[-1]["think"] is False
+
+
+def test_reasoning_content_resent_with_tools():
+    call = _Obj(id="c1", function=_Obj(name="lookup", arguments="{}"))
+    fc = FakeClient([_resp("", reasoning="R1", tool_calls=[call]), _resp("final", reasoning="R2")])
+    llm = OpenAICompatLLM(Config(), client=fc, sleep=lambda s: None)
+    out = llm.complete("S", [{"role": "user", "content": "u"}], think=True, tools=[{"type": "function"}], run_tool=lambda n, a: "42")
+    assert out == "final"
+    second = fc.requests[1]["messages"]
+    assert second[-2]["role"] == "assistant" and second[-2]["reasoning_content"] == "R1"
+    assert second[-1] == {"role": "tool", "tool_call_id": "c1", "content": "42"}
+
+
+def test_retry_429_5xx_then_busy_message(orch):
+    sleeps = []
+    fc = FakeClient([_err(429), _err(503), _resp("ok")])
+    assert OpenAICompatLLM(Config(), client=fc, sleep=sleeps.append).complete("S", []) == "ok" and sleeps == [1.0, 3.0]
+    fc = FakeClient([_err(500), _err(502), _err(503)])
+    with pytest.raises(LLMBusy):
+        OpenAICompatLLM(Config(), client=fc, sleep=lambda s: None).complete("S", [])
+    fc = FakeClient([_err(401)])
+    with pytest.raises(Exception) as ei:
+        OpenAICompatLLM(Config(), client=fc, sleep=lambda s: None).complete("S", [])
+    assert not isinstance(ei.value, LLMBusy)
+
+    class Busy(MockLLM):
+        def complete(self, s, m, think=False):
+            raise LLMBusy("429")
+    orch.llm = Busy()
+    assert orch.handle(inc("jieun", "1on1-jieun", "질문"))[0].message == "LLM 응답 지연"
+
+
+def test_static_prefix_is_stable_and_context_after_user_text(orch):
+    orch.handle(inc("jieun", "1on1-jieun", "하나"))
+    orch.handle(inc("yoonsung", "1on1-yoonsung", "둘"))
+    a, b = orch.llm.calls[-2], orch.llm.calls[-1]
+    assert a["system"] == b["system"]  # cacheable prefix identical across members
+    assert b["messages"][-1]["content"].startswith("둘") and "## 현재 맥락" in b["messages"][-1]["content"]
+    assert "## 현재 맥락" not in orch.st("1on1-jieun").history[0]["content"]
+
+
+def test_env_fallbacks(monkeypatch):
+    for k in ("LLM_API_KEY", "LLM_BASE_URL", "LLM_MODEL", "OPENAI_API_KEY", "OPENAI_BASE_URL", "ORCH_MODEL"):
+        monkeypatch.delenv(k, raising=False)
+    c = Config.from_env()
+    assert c.model == "deepseek-flash" and c.base_url == "https://api.deepseek.com" and c.api_key == ""
+    monkeypatch.setenv("OPENAI_API_KEY", "old")
+    monkeypatch.setenv("ORCH_MODEL", "m-old")
+    c = Config.from_env()
+    assert c.api_key == "old" and c.model == "m-old"
+    monkeypatch.setenv("LLM_API_KEY", "new")
+    monkeypatch.setenv("LLM_MODEL", "m-new")
+    c = Config.from_env()
+    assert c.api_key == "new" and c.model == "m-new"
