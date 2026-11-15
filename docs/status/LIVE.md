@@ -1,7 +1,7 @@
-# 아몰라 실시간 현황 · 21:08 KST
+# 아몰라 실시간 현황 · 21:13 KST
 
-일정: 1차 제출 21:00 (지남) · 동결 23:00 (1시간 51분 남음) · 최종 제출 23:30 (2시간 21분 남음)
-최종 제출 23:30 KST까지 **2시간 21분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (1시간 46분 남음) · 최종 제출 23:30 (2시간 16분 남음)
+최종 제출 23:30 KST까지 **2시간 16분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -10,7 +10,7 @@
 | AI 모델 | 100% | 5/5 |
 | MATLAB | 86% | 6/7 |
 | UI | 100% | 7/7 |
-| 인프라·봇 | 83% | 5/6 |
+| 인프라·봇 | 100% | 6/6 |
 
 ## 데이터 100%
 - ✅ POWER 일별 12주 1995–2025
@@ -58,12 +58,12 @@
 - ✅ 화면 캡처 docs/screens
 - ✅ 공개 URL QA (docs/QA-FINAL.md)
 
-## 인프라·봇 83%
+## 인프라·봇 100%
 - ✅ Mattermost
 - ✅ 봇 (tmux bot)
 - ✅ 러너 (tmux runner)
 - ✅ SSH 공개키 자동 등록 (keywatch) — root 프로세스로 확인
-- 🟡 main CI 최근 성공
+- ✅ main CI 최근 성공 — success
 - ✅ live 현황 (tmux live)
 
 ## 막힌 점
@@ -71,7 +71,6 @@
 
 ## 다음 할 일
 1. MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv
-2. 인프라·봇: main CI 최근 성공
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
@@ -99,19 +98,19 @@
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 21:08 | — |
+| 김우찬 | 21:10 | — |
 | 김윤성 | 21:04 | — |
 | 고지은 | 21:04 | — |
 | 하지민 | 20:45 | — |
 | 강다은 | 17:18 | — |
-| Hylē | 16:01 | 20:57 |
+| Hylē | 16:01 | 21:10 |
 
 ## 최근 머지된 PR
+- #73 fix(bot): MATLAB 방 캡처 요구 금지 규칙
+- #71 feat(matlab): 서버 봇 직접 안내(notify.log), 레인 상태, MATLAB 결과 30분 배치
+- #72 fix(ui): 모바일 360/390/768 점검과 UX-AUDIT 수정
 - #70 feat(matlab): run_all_<name>.m 원클릭 실행과 JSON 실행 로그, mwatch 자동 수정
 - #69 docs(site): 모델 상태 정리, Data & Sources 패널, MATLAB 빌드 단계 결과
 - #68 docs: 강다은 데모 영상 역할 + MATLAB UX 진단표
 - #65 docs(submission): 제출 패키지 v1 (역할·Project 링크·MATLAB 검증 문단)
 - #67 feat(validation): USDA NASS 2012 군 단위 수확량 대조 (엔진 변경 없음)
-- #66 docs: DATA_SOURCES.md와 Prithvi 일치율 단일 정의
-- #64 feat(demo): 고정 정적 데모 (GitHub Pages /demo/, 스냅샷 대체)
-- #63 feat(matlab): 윤성·지민 추가 세트 스크립트 6개 + 입력 + 가이드
