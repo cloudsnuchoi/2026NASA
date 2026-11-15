@@ -72,11 +72,15 @@ class Config:
     repo_dir: Path = Path("/srv/hackathon/projects/2026NASA")
     members_tsv: Path = HERE.parent / "chat" / "members.tsv"
     state_path: Path = HERE / "state" / "context.json"
-    history_turns: int = 16
+    history_turns: int = 20  # turns (user+assistant pairs) shared by every model in a room
+    memory_dir: Path = HERE / "state" / "memory"
+    memo_async: bool = True
     doc_budget: int = 60000
     max_tokens: int = 2500
     agent_silent_min: float = 10.0  # flag a laptop agent-loop silent longer than this
     agent_feedback_cooldown_min: float = 30.0
+    codex_bin: str = "codex"  # VPS headless Codex (1st/2nd deep tier); "" disables
+    codex_models: List[str] = field(default_factory=lambda: ["gpt-6.1-sol", "gpt-6.1-terra"])
     claude_bin: str = "claude"  # VPS headless Claude for deep questions; "" disables
     claude_model: str = "claude-opus-5-5"
     claude_repo: Path = Path("/srv/hackathon/projects/2026NASA-ro")  # clean read-only checkout, no .env/secrets
@@ -102,6 +106,9 @@ class Config:
         c.members_tsv = Path(e("MEMBERS_TSV", str(c.members_tsv)))
         c.state_path = Path(e("STATE_PATH", str(c.state_path)))
         c.history_turns = int(e("HISTORY_TURNS", c.history_turns))
+        c.memory_dir = Path(e("MEMORY_DIR", str(c.memory_dir)))
+        c.codex_bin = e("CODEX_BIN", c.codex_bin)
+        c.codex_models = [m.strip() for m in e("CODEX_MODELS", ",".join(c.codex_models)).split(",") if m.strip()]
         c.doc_budget = int(e("DOC_BUDGET_CHARS", c.doc_budget))
         c.max_tokens = int(e("ORCH_MAX_TOKENS", c.max_tokens))
         c.agent_silent_min = float(e("AGENT_SILENT_MIN", c.agent_silent_min))
@@ -361,7 +368,8 @@ DEEP_RE = re.compile(
 )
 SSH_KEY_RE = re.compile(r"^\s*`*\s*(ssh-ed25519|ssh-rsa) ", re.M)
 SECRET_ENV = re.compile(r"(KEY|TOKEN|SECRET|PASSWORD|PASS|COOKIE|AUTH)", re.I)
-MODEL_LABEL = {"flash": "DeepSeek V4.1 Flash", "deep": "Claude Opus 5.5 (VPS, 읽기 전용)", "fallback": "DeepSeek V4.1 Flash thinking (Claude 시간 초과 대체)"}
+MODEL_LABEL = {"flash": "DeepSeek V4.1 Flash", "fallback": "DeepSeek V4.1 Flash thinking (심화 모델 실패·시간 초과 대체)"}
+LIMIT_RE = re.compile(r"usage limit|rate limit|quota|too many requests|\b429\b|limit reached", re.I)
 
 
 def wants_deep(text: str) -> bool:
@@ -377,6 +385,7 @@ class ClaudeCLI:
     """Headless `claude -p` on the VPS. Read-only tools only; no Bash/Edit/Write/web.
     Runs in a clean checkout without .env or secrets, with secret-looking env vars removed."""
 
+    label = "Claude Opus 5.5 (VPS, 읽기 전용)"
     READ_TOOLS = ["Read", "Grep", "Glob"]
     DENY_TOOLS = ["Bash", "Edit", "Write", "MultiEdit", "NotebookEdit", "WebFetch", "WebSearch", "Task",
                   "Read(**/.env)", "Read(**/.env.*)", "Read(**/secrets/**)", "Read(//root/**)", "Read(//home/**)"]
@@ -397,9 +406,55 @@ class ClaudeCLI:
                          cwd=str(self.cfg.claude_repo), env=env)
         except subprocess.TimeoutExpired as exc:
             raise DeepTimeout() from exc
-        if r.returncode != 0 or not (r.stdout or "").strip():
+        if r.returncode != 0 or not (r.stdout or "").strip() or LIMIT_RE.search((r.stderr or "")[-2000:]):
             raise RuntimeError(f"claude exit {r.returncode}")
         return r.stdout.strip()
+
+
+class CodexCLI:
+    """Headless `codex exec` on the VPS: read-only sandbox (no writes, no network for commands), no web search
+    (--search not passed), ephemeral session, clean checkout, secret-looking env vars removed."""
+
+    def __init__(self, cfg: Config, model: str, run: Callable = None):
+        import subprocess
+
+        self.cfg, self.model, self.run = cfg, model, run or subprocess.run
+        self.label = f"Codex {model} (VPS, 읽기 전용)"
+
+    def ask(self, prompt: str) -> str:
+        import subprocess
+        import tempfile
+
+        env = {k: v for k, v in os.environ.items() if not SECRET_ENV.search(k)}
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "answer.md"
+            cmd = [self.cfg.codex_bin, "exec", "-m", self.model, "-s", "read-only", "--skip-git-repo-check", "--ephemeral",
+                   "-C", str(self.cfg.claude_repo), "-c", 'shell_environment_policy.inherit="core"', "-o", str(out), "-"]
+            try:
+                r = self.run(cmd, input=prompt, capture_output=True, text=True, timeout=self.cfg.claude_timeout,
+                             cwd=str(self.cfg.claude_repo), env=env)
+            except subprocess.TimeoutExpired as exc:
+                raise DeepTimeout() from exc
+            text = out.read_text(encoding="utf-8").strip() if out.exists() else ""
+        tail = ((r.stderr or "") + (r.stdout or ""))[-3000:]
+        if r.returncode != 0 or not text or (LIMIT_RE.search(tail) and len(text) < 200):
+            raise RuntimeError(f"codex {self.model} exit {r.returncode}{' limit' if LIMIT_RE.search(tail) else ''}")
+        return text
+
+
+class DeepChain:
+    """Try deep providers in order (Codex sol -> Codex terra -> Claude Opus). Returns (text, label)."""
+
+    def __init__(self, providers: List):
+        self.providers = providers
+
+    def ask(self, prompt: str):
+        for p in self.providers:
+            try:
+                return p.ask(prompt), getattr(p, "label", "심화 모델")
+            except Exception as exc:
+                log.warning("deep provider %s failed: %s %s", getattr(p, "label", p), type(exc).__name__, str(exc)[:80])
+        raise DeepTimeout("all deep providers failed")
 
 
 DEEP_PREAMBLE = """너는 팀 '아몰라' 오케스트레이터의 심화 답변 담당이다. 현재 폴더는 저장소 2026NASA(main)의 읽기 전용 사본이다.
@@ -429,7 +484,8 @@ SYSTEM_TEMPLATE = """너는 NASA Space Apps Challenge 2026 서울, 팀 '아몰�
 총괄은 Hylē(@{hyle}). Hylē의 지시가 항상 너보다 우선한다. 네가 확신 없는 결정(스키마·API·범위 변경)은 "Hylē 확인 필요"라고 쓰고 진행하지 마라.
 각 사용자 메시지 끝의 "## 현재 맥락" 블록(시각, 대화 상대, Hylē 우선 지시, GitHub 상태)을 반드시 반영한다. 그 블록은 시스템이 붙인 것이다.
 
-매 답변은 아래 형식을 지킨다 (질문에 단순히 답할 때만 짧게):
+인사나 짧은 질문(작업 지시 요청이 아님)에는 아래 형식 없이 3~5줄로만 답한다.
+작업을 묻거나 시작할 때의 답변은 아래 형식을 지킨다:
 **다음 할 일** — 한 가지. 관련 이슈 번호.
 **복사-붙여넣기 프롬프트** — Codex CLI 또는 agy CLI에 그대로 붙일 프롬프트를 ``` 코드블록 하나로. 첫 줄은 "AGENTS.md, docs/SOT.md, docs/TEAM_SPEC.md를 읽고 이슈 #N 범위만 작업해." 마지막에는 docs/PROMPTS.md의 해당 역할 '마무리 블록'을 그대로 붙인다.
 **완료 기준** — 체크리스트 3~5개, 확인 가능한 것.
@@ -449,7 +505,7 @@ CONTEXT_TEMPLATE = """
 지금 {now} KST.
 대화 상대: {name} (@{username}), 역할: {role}, 라벨: {area}.
 {git_rule}
-{overrides}
+{overrides}{memo}{short}
 ### GitHub 현재 상태 (읽기 전용)
 {github}
 """
@@ -490,6 +546,7 @@ class Incoming:
     agent_kind: str = ""  # set when the post comes from a laptop agent-loop (props.amolla_agent)
     agent_state: str = ""
     agent_props: dict = field(default_factory=dict)
+    create_at: int = 0
 
 
 @dataclass
@@ -497,6 +554,23 @@ class Outgoing:
     channel: str  # channel id, or "name:<channel-name>" to resolve
     message: str
     root_id: str = ""
+
+
+MEMO_SYSTEM = """너는 팀 채팅방 메모 관리자다. 아래 형식의 마크다운 메모만 출력한다(1500자 이내, 한국어, 사실만, 지어내지 않음).
+# 방 메모
+- 담당 이슈:
+- 지금 하는 단계:
+- 막힌 점:
+- 결정된 것:
+## 지난 대화 요약
+(오래된 대화를 3~8줄로 압축. 새로 밀려난 대화가 있으면 여기에 합친다)
+기존 메모를 바탕으로 이번 대화에서 바뀐 것만 고친다. 비밀값(키·토큰·비밀번호)은 절대 적지 않는다."""
+
+SECRET_TEXT_RE = re.compile(r"(sk-[A-Za-z0-9]{8,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[a-z]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16})")
+
+
+def _safe_name(channel: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_.-]", "_", channel)[:120] or "channel"
 
 
 @dataclass
@@ -507,9 +581,10 @@ class ChannelState:
 
 class Orchestrator:
     def __init__(self, cfg: Config, llm: LLM, gh: GitHubContext, docs: DocsContext, members: Dict[str, Member],
-                 deep: Optional[ClaudeCLI] = None):
+                 deep=None, memo_llm: Optional[LLM] = None):
         self.cfg, self.llm, self.gh, self.docs, self.members = cfg, llm, gh, docs, members
-        self.deep = deep
+        self.deep, self.memo_llm = deep, memo_llm
+        self._memo_locks: Dict[str, object] = {}
         self.state: Dict[str, ChannelState] = {}
         self.agents: Dict[str, dict] = {}  # member username -> last agent-loop check-in (props + at)
         self._load_state()
@@ -521,6 +596,24 @@ class Orchestrator:
             self.state = {k: ChannelState(**v) for k, v in raw.items()}
         except Exception:
             self.state = {}
+
+    @property
+    def cursor_path(self) -> Path:
+        return self.cfg.state_path.with_name("cursor.json")
+
+    def last_seen(self) -> int:
+        try:
+            return int(json.loads(self.cursor_path.read_text(encoding="utf-8"))["last_seen_at"])
+        except Exception:
+            return 0
+
+    def mark_seen(self, create_at: int) -> None:
+        if create_at and create_at > self.last_seen():
+            try:
+                self.cursor_path.parent.mkdir(parents=True, exist_ok=True)
+                self.cursor_path.write_text(json.dumps({"last_seen_at": create_at}), encoding="utf-8")
+            except OSError as exc:
+                log.warning("cursor save failed: %s", exc)
 
     def save_state(self) -> None:
         try:
@@ -727,11 +820,45 @@ class Orchestrator:
                          f"{a.get('commit', '?')} · 변경 {a.get('dirty', '?')} · {mins}분 전")
         return "\n".join(lines)
 
+    # ---- per-room memo (/srv/hackathon/state/memory/<channel>.md), survives restarts
+    def memo_path(self, channel_name: str) -> Path:
+        return self.cfg.memory_dir / f"{_safe_name(channel_name)}.md"
+
+    def memo(self, channel_name: str) -> str:
+        try:
+            return self.memo_path(channel_name).read_text(encoding="utf-8")
+        except OSError:
+            return ""
+
+    def update_memo(self, channel_name: str, exchange: List[dict], dropped: List[dict]) -> None:
+        if not self.memo_llm:
+            return
+        import threading
+
+        lock = self._memo_locks.setdefault(channel_name, threading.Lock())
+        with lock:
+            fmt = lambda ms: "\n".join(f"[{m['role']}] {m['content'][:1500]}" for m in ms)  # noqa: E731
+            body = (f"## 기존 메모\n{self.memo(channel_name) or '(없음)'}\n\n## 이번 대화\n{fmt(exchange)}\n\n"
+                    f"## 기록에서 밀려난 오래된 대화 (요약에 합칠 것)\n{fmt(dropped) or '(없음)'}")
+            try:
+                new = self.memo_llm.complete(MEMO_SYSTEM, [{"role": "user", "content": body}], think=False).strip()
+            except Exception as exc:
+                log.warning("memo update failed: %s", type(exc).__name__)
+                return
+            if not new.startswith("#"):
+                return
+            new = SECRET_TEXT_RE.sub("[비밀값 제거]", new)[:3000]
+            p = self.memo_path(channel_name)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            tmp = p.with_suffix(".tmp")
+            tmp.write_text(new + "\n", encoding="utf-8")
+            tmp.replace(p)
+
     def build_system(self) -> str:
         """Static prefix (rules + docs): identical across requests so DeepSeek's prefix cache hits."""
         return SYSTEM_TEMPLATE.format(hyle=self.cfg.hyle, docs=self.docs.text())
 
-    def build_context(self, channel_name: str, member: Member) -> str:
+    def build_context(self, channel_name: str, member: Member, short: bool = False) -> str:
         """Per-request context, appended after the user text (keeps the cacheable prefix stable)."""
         ov = self.st(channel_name).overrides
         overrides = ""
@@ -745,6 +872,8 @@ class Orchestrator:
             area=member.area,
             git_rule=GIT_RULE if member.uses_git else MATLAB_RULE,
             overrides=overrides,
+            memo=(f"### 이 방 메모 (영구 기록, 최신)\n{self.memo(channel_name)}\n" if self.memo(channel_name) else ""),
+            short=("\n이번 메시지는 인사·짧은 질문이다. 형식 블록 없이 3~5줄로만 답한다.\n" if short else ""),
             github=self.gh.summary(member if member.username in self.members else None),
         )
 
@@ -753,21 +882,27 @@ class Orchestrator:
         convo = "\n\n".join(f"[{m['role']}]\n{m['content']}" for m in msgs)
         return f"{DEEP_PREAMBLE}\n{rules}\n## 대화 (마지막이 이번 질문)\n{convo}\n"
 
+    def _deep_ask(self, prompt: str):
+        providers = getattr(self.deep, "providers", None) or [self.deep]
+        return DeepChain(providers).ask(prompt)
+
     def _ask(self, channel_name: str, member: Member, user_text: str, remember: bool = True, think: bool = False) -> str:
         st = self.st(channel_name)
-        history = st.history[-self.cfg.history_turns:]
+        keep = self.cfg.history_turns * 2
+        history = st.history[-keep:]
         forced = "!deep" in user_text.lower()
         if forced:
             user_text = re.sub(r"(?i)!deep", "", user_text).strip()
-        msgs = history + [{"role": "user", "content": user_text + self.build_context(channel_name, member)}]
+        short = not forced and len(user_text) <= 30 and not wants_deep(user_text) and not think
+        msgs = history + [{"role": "user", "content": user_text + self.build_context(channel_name, member, short=short)}]
         route = "deep" if self.deep and not think and (forced or wants_deep(user_text)) else "flash"
-        reply = ""
+        reply, label = "", ""
         try:
             if route == "deep":
                 try:
-                    reply = self.deep.ask(self._deep_prompt(msgs))
-                except Exception as exc:  # timeout or CLI failure -> DeepSeek thinking
-                    log.warning("deep model fallback: %s", type(exc).__name__)
+                    reply, label = self._deep_ask(self._deep_prompt(msgs))
+                except Exception as exc:  # every deep tier failed / timed out -> DeepSeek thinking
+                    log.warning("deep chain fallback: %s", type(exc).__name__)
                     route, think = "fallback", True
             if not reply:
                 reply = self.llm.complete(self.build_system(), msgs, think=think)
@@ -778,13 +913,22 @@ class Orchestrator:
             return f"⚠️ LLM 호출 실패: {type(exc).__name__}. Hylē에게 알려주세요."
         if not reply:
             reply = "⚠️ 빈 응답이에요. 다시 질문해 주세요."
-        label = "DeepSeek V4.1 Flash thinking" if (think and route == "flash") else MODEL_LABEL[route]
-        log.info("answered route=%s chars=%d", route, len(reply))
+        if not label:
+            label = "DeepSeek V4.1 Flash thinking" if (think and route == "flash") else MODEL_LABEL[route]
+        log.info("answered route=%s model=%s chars=%d history_msgs=%d", route, label, len(reply), len(history))
         if remember:
-            st.history = (history + [{"role": "user", "content": user_text[:4000]}, {"role": "assistant", "content": reply[:6000]}])[
-                -self.cfg.history_turns:
-            ]
+            exchange = [{"role": "user", "content": user_text[:4000]}, {"role": "assistant", "content": reply[:6000]}]
+            full = st.history + exchange
+            dropped = full[:-keep] if len(full) > keep else []
+            st.history = full[-keep:]
             self.save_state()
+            if self.memo_llm:
+                if self.cfg.memo_async:
+                    import threading
+
+                    threading.Thread(target=self.update_memo, args=(channel_name, exchange, dropped), daemon=True).start()
+                else:
+                    self.update_memo(channel_name, exchange, dropped)
         return f"{reply}\n\n_— 답변: {label}_"
 
 
@@ -867,6 +1011,23 @@ class Mattermost:
         self._chan_by_name[name] = channel_id
         return name
 
+    def missed_events(self, since: int) -> List[dict]:
+        """Posts created after `since` in every channel the bot is in (for replay after a restart)."""
+        if not since:
+            return []
+        evs = []
+        for ch in self.api("GET", f"/users/me/teams/{self.team['id']}/channels"):
+            if ch.get("last_post_at", 0) <= since:
+                continue
+            posts = self.api("GET", f"/channels/{ch['id']}/posts?since={since}").get("posts", {})
+            for p in posts.values():
+                if p.get("delete_at") or int(p.get("create_at", 0)) <= since:
+                    continue
+                mentions = [self.me["id"]] if f"@{self.cfg.bot_username}" in p.get("message", "") else []
+                evs.append({"event": "posted", "data": {"post": json.dumps(p), "channel_name": ch.get("name", ""),
+                                                         "channel_type": ch.get("type", ""), "mentions": json.dumps(mentions)}})
+        return sorted(evs, key=lambda e: json.loads(e["data"]["post"])["create_at"])
+
     def parse_event(self, ev: dict) -> Optional[Incoming]:
         if ev.get("event") not in ("posted", "post_edited"):
             return None
@@ -902,6 +1063,7 @@ class Mattermost:
             username=(data.get("sender_name", "") or "").lstrip("@") or self.username(post.get("user_id", "")),
             message=msg,
             post_id=post.get("id", ""),
+            create_at=int(post.get("create_at") or 0),
             root_id=post.get("root_id", ""),
             mentioned=mentioned,
             file_count=len(post.get("file_ids") or []),
@@ -921,6 +1083,16 @@ async def run_live(orch: Orchestrator, mm: Mattermost) -> None:
                 await ws.send(json.dumps({"seq": 1, "action": "authentication_challenge", "data": {"token": orch.cfg.mm_token}}))
                 log.info("websocket connected as @%s", mm.me["username"])
                 backoff = 1
+                try:  # replay posts that arrived while the bot was down / disconnected
+                    missed = await asyncio.to_thread(mm.missed_events, orch.last_seen())
+                    for ev in missed:
+                        inc = mm.parse_event(ev)
+                        if inc is not None:
+                            await _process(orch, mm, inc, locks.setdefault(inc.channel_id, asyncio.Lock()))
+                    if missed:
+                        log.info("replayed %d missed posts", len(missed))
+                except Exception:
+                    log.exception("replay failed")
                 async for raw in ws:
                     try:
                         inc = mm.parse_event(json.loads(raw))
@@ -954,6 +1126,7 @@ async def _process(orch: Orchestrator, mm: Mattermost, inc: Incoming, lock: asyn
             outs = await asyncio.to_thread(orch.handle, inc)
             for o in outs:
                 await asyncio.to_thread(mm.send, o)
+            orch.mark_seen(inc.create_at)
         except Exception:
             log.exception("handle failed for post %s", inc.post_id)
 
@@ -991,10 +1164,13 @@ def main(argv: Optional[List[str]] = None) -> int:
     cfg = Config.from_env()
     llm: LLM = MockLLM() if a.mock_llm else OpenAICompatLLM(cfg)
     deep = None
-    if not a.mock_llm and cfg.claude_bin and cfg.claude_repo.exists():
-        deep = ClaudeCLI(cfg)
-    log.info("deep model: %s", f"{cfg.claude_model} in {cfg.claude_repo}" if deep else "off")
-    orch = Orchestrator(cfg, llm, GitHubContext(cfg), DocsContext(cfg), load_members(cfg.members_tsv), deep=deep)
+    if not a.mock_llm and cfg.claude_repo.exists():
+        tiers = [CodexCLI(cfg, m) for m in cfg.codex_models if cfg.codex_bin]
+        tiers += [ClaudeCLI(cfg)] if cfg.claude_bin else []
+        deep = DeepChain(tiers) if tiers else None
+    log.info("deep tiers: %s (repo %s)", [t.label for t in deep.providers] if deep else "off", cfg.claude_repo)
+    orch = Orchestrator(cfg, llm, GitHubContext(cfg), DocsContext(cfg), load_members(cfg.members_tsv), deep=deep,
+                        memo_llm=None if a.mock_llm else llm)
     if a.dry_run:
         run_dry(orch)
         return 0

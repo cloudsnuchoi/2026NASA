@@ -8,7 +8,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import bridge  # noqa: E402
-from bridge import ClaudeCLI, Config, DeepTimeout, Incoming, LLMBusy, wants_deep, MockLLM, OpenAICompatLLM, Orchestrator, find_member, load_members, split_message  # noqa: E402,I001
+from bridge import ClaudeCLI, CodexCLI, Config, DeepChain, DeepTimeout, Mattermost, Incoming, LLMBusy, wants_deep, MockLLM, OpenAICompatLLM, Orchestrator, find_member, load_members, split_message  # noqa: E402,I001
 
 
 def full(call):
@@ -380,8 +380,8 @@ def test_env_fallbacks(monkeypatch):
 
 # ---- model routing (Claude deep vs DeepSeek flash)
 class FakeDeep:
-    def __init__(self, reply="deep answer", exc=None):
-        self.reply, self.exc, self.prompts = reply, exc, []
+    def __init__(self, reply="deep answer", exc=None, label="Claude Opus 5.5 (VPS, 읽기 전용)"):
+        self.reply, self.exc, self.prompts, self.label = reply, exc, [], label
 
     def ask(self, prompt):
         self.prompts.append(prompt)
@@ -413,7 +413,7 @@ def test_deep_flag_and_timeout_fallback_to_thinking(orch):
     orch.deep = FakeDeep(exc=DeepTimeout())
     out = orch.handle(inc("jieun", "1on1-jieun", "!deep 질문"))[0].message
     assert orch.llm.calls[-1]["think"] is True and "!deep" not in orch.llm.calls[-1]["messages"][-1]["content"]
-    assert "Claude 시간 초과 대체" in out
+    assert "심화 모델 실패·시간 초과 대체" in out
 
 
 def test_reply_in_thread_and_ssh_key_ignored(orch):
@@ -431,7 +431,7 @@ def test_claude_cli_is_read_only_and_strips_secrets(monkeypatch, tmp_path):
 
     def run(cmd, **kw):
         seen.update(cmd=cmd, **kw)
-        return type("R", (), {"returncode": 0, "stdout": "ok"})()
+        return type("R", (), {"returncode": 0, "stdout": "ok", "stderr": ""})()
     cli = ClaudeCLI(Config(claude_repo=tmp_path), run=run)
     assert cli.ask("hello") == "ok"
     cmd = seen["cmd"]
@@ -447,3 +447,105 @@ def test_claude_cli_is_read_only_and_strips_secrets(monkeypatch, tmp_path):
         raise subprocess.TimeoutExpired(cmd, 120)
     with pytest.raises(DeepTimeout):
         ClaudeCLI(Config(claude_repo=tmp_path), run=slow).ask("x")
+
+
+# ---- deep chain (Codex sol -> terra -> Claude), shared history, room memo, replay
+def test_codex_cli_read_only_flags_and_env(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENET_API_KEY", "x")
+    seen = {}
+
+    def run(cmd, **kw):
+        seen.update(cmd=cmd, **kw)
+        Path(cmd[cmd.index("-o") + 1]).write_text("sol answer", encoding="utf-8")
+        return type("R", (), {"returncode": 0, "stdout": "", "stderr": ""})()
+    cli = CodexCLI(Config(claude_repo=tmp_path), "gpt-6.1-sol", run=run)
+    assert cli.ask("q") == "sol answer" and cli.label.startswith("Codex gpt-6.1-sol")
+    cmd = seen["cmd"]
+    assert cmd[:4] == ["codex", "exec", "-m", "gpt-6.1-sol"]
+    assert cmd[cmd.index("-s") + 1] == "read-only" and "--ephemeral" in cmd and "--search" not in cmd
+    assert cmd[cmd.index("-C") + 1] == str(tmp_path) and cmd[-1] == "-"
+    assert "OPENET_API_KEY" not in seen["env"] and seen["timeout"] == 120.0
+
+
+def test_codex_limit_and_failure_detected(tmp_path):
+    def limited(cmd, **kw):
+        return type("R", (), {"returncode": 1, "stdout": "", "stderr": "You've hit your usage limit"})()
+    with pytest.raises(RuntimeError):
+        CodexCLI(Config(claude_repo=tmp_path), "gpt-6.1-sol", run=limited).ask("q")
+
+
+def test_chain_order_sol_terra_claude_then_deepseek(orch):
+    sol = FakeDeep(exc=RuntimeError("limit"), label="Codex gpt-6.1-sol (VPS, 읽기 전용)")
+    terra = FakeDeep(exc=DeepTimeout(), label="Codex gpt-6.1-terra (VPS, 읽기 전용)")
+    claude = FakeDeep("claude says", label="Claude Opus 5.5 (VPS, 읽기 전용)")
+    orch.deep = DeepChain([sol, terra, claude])
+    out = orch.handle(inc("woochan", "1on1-woochan", "!deep NDVI 결측 처리"))[0].message
+    assert out.startswith("claude says") and out.endswith("_— 답변: Claude Opus 5.5 (VPS, 읽기 전용)_")
+    assert len(sol.prompts) == len(terra.prompts) == len(claude.prompts) == 1
+    orch.deep = DeepChain([FakeDeep("sol says", label="Codex gpt-6.1-sol (VPS, 읽기 전용)"), claude])
+    assert orch.handle(inc("woochan", "1on1-woochan", "!deep 다시"))[0].message.endswith("Codex gpt-6.1-sol (VPS, 읽기 전용)_")
+    orch.deep = DeepChain([FakeDeep(exc=RuntimeError("x")), FakeDeep(exc=RuntimeError("y"))])
+    assert "심화 모델 실패" in orch.handle(inc("woochan", "1on1-woochan", "!deep 또"))[0].message
+
+
+def test_shared_history_20_turns_reaches_both_models(orch):
+    for i in range(25):
+        orch.handle(inc("jieun", "1on1-jieun", f"질문 {i} 이야기"))
+    assert len(orch.st("1on1-jieun").history) == 40  # 20 turns kept
+    assert len(orch.llm.calls[-1]["messages"]) == 41  # 20 turns + current
+    orch.deep = FakeDeep("deep")
+    orch.handle(inc("jieun", "1on1-jieun", "!deep 이어서"))
+    assert "질문 24 이야기" in orch.deep.prompts[0] and "질문 5 이야기" in orch.deep.prompts[0]
+
+
+def test_room_memo_written_updated_and_injected(tmp_path):
+    cfg = Config(state_path=tmp_path / "s.json", memory_dir=tmp_path / "memory", memo_async=False, members_tsv=MEMBERS_TSV)
+
+    class MemoLLM(MockLLM):
+        def complete(self, system, messages, think=False):
+            self.calls.append({"system": system, "messages": messages})
+            return "# 방 메모\n- 담당 이슈: #24\n- 지금 하는 단계: SG 평활\n- 키 sk-abcdefghijklmnop\n"
+    memo = MemoLLM()
+    o = Orchestrator(cfg, MockLLM(), FakeGH(), FakeDocs(), load_members(MEMBERS_TSV), memo_llm=memo)
+    o.handle(inc("woochan", "1on1-woochan", "담당 이슈 뭐야?"))
+    text = (tmp_path / "memory" / "1on1-woochan.md").read_text(encoding="utf-8")
+    assert "#24" in text and "sk-abc" not in text and "[비밀값 제거]" in text
+    o2 = Orchestrator(cfg, MockLLM(), FakeGH(), FakeDocs(), load_members(MEMBERS_TSV))  # after restart
+    o2.handle(inc("woochan", "1on1-woochan", "그거 첫 단계"))
+    assert "SG 평활" in o2.llm.calls[-1]["messages"][-1]["content"]
+    assert "이번 대화" in memo.calls[0]["messages"][0]["content"]
+
+
+def test_short_question_gets_short_hint(orch):
+    orch.handle(inc("jieun", "1on1-jieun", "안녕"))
+    assert "3~5줄로만" in orch.llm.calls[-1]["messages"][-1]["content"]
+    orch.handle(inc("jieun", "1on1-jieun", "S2 화면에 토양 요약 카드를 넣으려는데 어떤 API 필드를 써야 하고 단위 표기는 어떻게 하나요"))
+    assert "형식 블록 없이" not in orch.llm.calls[-1]["messages"][-1]["content"]
+
+
+def test_cursor_and_missed_events(tmp_path):
+    o = Orchestrator(Config(state_path=tmp_path / "s.json", members_tsv=MEMBERS_TSV), MockLLM(), FakeGH(), FakeDocs(),
+                     load_members(MEMBERS_TSV))
+    assert o.last_seen() == 0
+    o.mark_seen(1000)
+    o.mark_seen(500)
+    assert o.last_seen() == 1000
+    mm = Mattermost.__new__(Mattermost)
+    mm.cfg, mm.me, mm.team, mm._users = Config(), {"id": "bot"}, {"id": "t"}, {"u": "woochan"}
+    posts = {"a": {"id": "a", "create_at": 1500, "message": "질문", "user_id": "u", "channel_id": "c"},
+             "b": {"id": "b", "create_at": 900, "message": "old", "user_id": "u", "channel_id": "c"},
+             "d": {"id": "d", "create_at": 1600, "message": "gone", "user_id": "u", "channel_id": "c", "delete_at": 5}}
+    calls = []
+
+    def api(method, path, **kw):
+        calls.append(path)
+        if path.startswith("/users/me/teams"):
+            return [{"id": "c", "name": "1on1-woochan", "type": "P", "last_post_at": 1600},
+                    {"id": "q", "name": "random", "type": "O", "last_post_at": 10}]
+        return {"posts": posts}
+    mm.api = api
+    evs = mm.missed_events(1000)
+    assert [json.loads(e["data"]["post"])["id"] for e in evs] == ["a"]
+    assert not any("/channels/q/" in c for c in calls)
+    assert mm.parse_event(evs[0]).create_at == 1500
+    assert mm.missed_events(0) == []
