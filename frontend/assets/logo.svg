@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="ART FARM logo">
+  <defs><clipPath id="c"><circle cx="60" cy="60" r="54"/></clipPath></defs>
+  <circle cx="60" cy="60" r="58" fill="#173a2b"/>
+  <g clip-path="url(#c)">
+    <rect x="0" y="0" width="120" height="120" fill="#24543e"/>
+    <circle cx="60" cy="44" r="16" fill="#f2c46d"/>
+    <path d="M0 74 L60 62 L120 74 L120 120 L0 120Z" fill="#82c341"/>
+    <path d="M0 74 L60 62 L40 120 L0 120Z" fill="#5a9e2e"/>
+    <path d="M60 62 L120 74 L120 120 L80 120Z" fill="#a3d977"/>
+    <path d="M60 62 L40 120 M60 62 L80 120 M60 62 L20 120 M60 62 L100 120" stroke="#173a2b" stroke-width="1.5" opacity=".45"/>
+  </g>
+  <circle cx="60" cy="60" r="56" fill="none" stroke="#f2c46d" stroke-width="3"/>
+</svg>

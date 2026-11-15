@@ -102,6 +102,30 @@ async def quick(request: Request) -> Response:
     return JSONResponse(out)
 
 
+_fields_geo: dict | None = None
+
+
+async def fields_geo(request: Request) -> Response:
+    """Outer rings of the 20 pilot demo fields (from /fields + /field/{id}/profile), cached in memory."""
+    global _fields_geo
+    if _fields_geo is None:
+        fl = (await client.get("/fields")).json()
+        out = []
+        for f in fl.get("fields", []):
+            p = (await client.get(f"/field/{f['field_id']}/profile")).json()
+            g = p.get("geometry") or {}
+            polys = g.get("coordinates", []) if g.get("type") == "MultiPolygon" else [g.get("coordinates", [])]
+            if not polys or not polys[0]:
+                continue
+            ring = max((pp[0] for pp in polys), key=len)
+            if len(ring) > 1 and ring[0] == ring[-1]:
+                ring = ring[:-1]
+            out.append({"field_id": f["field_id"], "county_fips": f["county_fips"], "area_ha": f.get("area_ha"),
+                        "ring": [[round(x, 6), round(y, 6)] for x, y in ring[:400]]})
+        _fields_geo = {"fields": out, "source": "USDA Crop Sequence Boundaries via model_api; not ownership parcels"}
+    return JSONResponse(_fields_geo)
+
+
 async def proxy(request: Request) -> Response:
     path = "/" + request.path_params["path"]
     method = request.method
@@ -133,6 +157,7 @@ async def proxy(request: Request) -> Response:
 app = Starlette(
     routes=[
         Route("/api/quick", quick, methods=["POST"]),
+        Route("/api/fields-geo", fields_geo, methods=["GET"]),
         Route("/api/{path:path}", proxy, methods=["GET", "POST"]),
         Mount("/", StaticFiles(directory=str(FRONTEND), html=True), name="static"),
     ]
