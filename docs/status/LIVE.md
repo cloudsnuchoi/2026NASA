@@ -1,6 +1,6 @@
-# 아몰라 실시간 현황 · 20:06 KST
+# 아몰라 실시간 현황 · 20:12 KST
 
-제출 목표 22:00 KST까지 **1시간 53분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **1시간 47분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -8,7 +8,7 @@
 | 엔진·API | 100% | 6/6 |
 | AI 모델 | 100% | 5/5 |
 | MATLAB | 71% | 5/7 |
-| UI | 86% | 6/7 |
+| UI | 100% | 7/7 |
 | 인프라·봇 | 83% | 5/6 |
 
 ## 데이터 100%
@@ -48,14 +48,14 @@
 - ✅ jimin: baresoil_days_20fields.csv — ✅ 결과 파일 있음
 - 🟡 jieun: fig_p10p90.png + fig_backtest2012.png — 🟡 접속함·작업 중
 
-## UI 86%
+## UI 100%
 - ✅ frontend/ 코드 (main)
 - ✅ 공개 데모 접속 200 (로그인 없음) — https://watts-astrology-asus-blessed.trycloudflare.com
 - ✅ 공개 API /fields (20필지)
 - ✅ 1층 /quick (screening estimate) — HTTP 200
 - ✅ 2층 전략 비교 /strategies/compare — HTTP 200
 - ✅ 화면 캡처 docs/screens
-- 🟡 공개 URL QA (docs/QA-FINAL.md)
+- ✅ 공개 URL QA (docs/QA-FINAL.md)
 
 ## 인프라·봇 83%
 - ✅ Mattermost
@@ -71,7 +71,7 @@
 ## 다음 할 일
 1. MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv
 2. MATLAB: jieun: fig_p10p90.png + fig_backtest2012.png
-3. UI: 공개 URL QA (docs/QA-FINAL.md)
+3. 인프라·봇: main CI 최근 성공
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
@@ -89,25 +89,25 @@
 | mfixq | ? | ? | 19:53 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | 12:11 |
 | runner | — | GitHub Actions 러너 | 13:09 |
-| web | — | 프론트+API 프록시 (:8095) | 19:55 |
+| web | — | 프론트+API 프록시 (:8095) | 20:09 |
 | web-tunnel | — | 공개 데모 터널 | 19:00 |
 
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 20:05 | — |
-| 김윤성 | 19:57 | — |
-| 고지은 | 19:49 | — |
+| 김우찬 | 20:10 | — |
+| 김윤성 | 20:10 | — |
+| 고지은 | 20:11 | — |
 | 하지민 | 19:58 | — |
 | 강다은 | 17:18 | — |
-| Hylē | 16:01 | 19:55 |
+| Hylē | 16:01 | 20:10 |
 
 ## 최근 머지된 PR
+- #61 docs(matlab): 가이드 경로를 work/로 + 실행만 하는 원칙
+- #59 fix(matlab): V8 배치가 서버 API 캐시를 읽고 기존 결과를 보관 — 우찬님 USGS·Open-Meteo 오류 해결
+- #60 fix(web): 공개 URL QA 수정 (경계 좌표, 결측을 0%로 표시하던 문제, 문구) + QA-FINAL
 - #58 feat(web): AI 생성 이미지 표시(사진 워터마크 + 로고 푸터) · SI 내역 확정
 - #57 fix: 테스트가 실제 수정 큐에 쓰던 문제 + live.json MATLAB 사람별 3단계 + 시뮬 Stretch
 - #56 feat(orchestrator,matlab): MATLAB 오류 → 에이전트 자동 수정 큐 + 오늘 저녁 역할표
 - #55 fix(status): UI 레인 진행률을 공개 데모 실동작 점검으로
 - #53 docs(submission): 제출 초안 — 문구·데이터 링크·SI·슬라이드 7장·영상 대본
-- #54 docs: DECISIONS·si-log 충돌 표시 제거
-- #52 feat(web): ART FARM 프론트(1층 Quick Screen /quick + 2층 Deep Analysis) + 공개 배포
-- #51 feat(matlab): L2 사전계산 파이프라인 + 사람별 가이드 (우찬·윤성·지민·지은)
