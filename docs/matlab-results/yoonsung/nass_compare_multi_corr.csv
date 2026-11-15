@@ -1,0 +1,3 @@
+crop,n,r,p,note
+corn,64,-0.416447830627798,0.000619731816367125,"statistically significant at p < 0.05 (r = -0.42, p = 0.00062, n = 64); correlation only, not causation; 4 counties"
+soybean,64,-0.23816175202491,0.0580778151586501,"not statistically significant (r = -0.24, p = 0.0581, n = 64); directional check only"
