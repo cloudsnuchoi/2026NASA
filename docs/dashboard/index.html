@@ -43,6 +43,8 @@
   </header>
 
   <main class="wrap">
+    <section id="live-status" aria-label="라이브 현황"></section>
+
     <section aria-labelledby="members-title">
       <div class="section-head">
         <h2 id="members-title">팀원 현황</h2>
@@ -132,6 +134,8 @@
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <script src="../site/site.js"></script>
   <script>FieldShiftSite.mount({ active: "dashboard" });</script>
+  <script src="../site/live.js"></script>
+  <script>FieldShiftLive.mount("live-status");</script>
   <script src="./app.js"></script>
 </body>
 </html>
