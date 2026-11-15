@@ -629,3 +629,29 @@ def test_design_memo_prompt_tracks_decisions(tmp_path):
     o.deep = FakeDeep("ok")
     o.handle(inc("jimin", "uiux-design", "S5 배지 넣기로 해요"))
     assert "PRD 논의방" in memo.calls[-1]["messages"][0]["content"]
+
+
+# ---- quality fixes: MATLAB paths, toolbox/token rules, guide template, screenshots
+def test_static_context_has_matlab_paths_rules_and_template(orch):
+    s = orch.build_system().split("## 저장소 문서")[0]
+    assert "/data/processed/v1/inputs/" in s and "서버 바깥 경로" in s
+    assert "Add-On 탐색기" in s and "브라우저 MATLAB 접속 토큰" in s
+    for mark in ("✅ 할 일", "📘 방법", "📋 명세", "🎯 이슈", "📮 완료 보고"):
+        assert mark in s
+    assert "matlab/TASKS.md" in bridge.DOC_FILES and "infra/matlab/REMOTE.md" in bridge.DOC_FILES
+
+
+def test_screenshot_goes_to_flash_vision_not_cli(orch):
+    class N(FakeNotifier):
+        def fetch_images(self, ids):
+            return ["data:image/png;base64,AAAA"]
+    orch.notifier = N()
+    orch.deep = FakeDeep("should not be used")
+    i = inc("yoonsung", "1on1-yoonsung", "Error using parquetwrite 이거 왜 나요")
+    i.file_ids, i.file_count = ["f1"], 1
+    out = orch.handle(i)[0]
+    assert orch.deep.prompts == []
+    content = orch.llm.calls[-1]["messages"][-1]["content"]
+    assert isinstance(content, list) and content[1]["type"] == "image_url" and "첨부 이미지 1장" in content[0]["text"]
+    assert "DeepSeek V4.1 Flash" in out.message
+    assert isinstance(orch.st("1on1-yoonsung").history[-2]["content"], str)  # history keeps text only
