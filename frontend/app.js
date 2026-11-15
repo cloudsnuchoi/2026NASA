@@ -107,7 +107,7 @@
   let map, userLayer, vertexLayer, demoLayers = {};
   function initMap() {
     if (map) { setTimeout(() => map.invalidateSize(), 50); return; }
-    map = L.map("map", { zoomControl: true, worldCopyJump: false }).setView([41.6, -91.5], 6);
+    map = L.map("map", { zoomControl: true, worldCopyJump: false }).setView([41.0, -90.3], 6);
     window.__artfarmMap = map;
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
       maxZoom: 19,
@@ -130,6 +130,15 @@
         lyr.bindTooltip(`Pilot demo field · ${COUNTY[f.county_fips] || f.county_fips} · ${fmt(f.area_ha, 1)} ha`);
         lyr.on("click", (e) => { L.DomEvent.stopPropagation(e); usePresetField(f); });
         demoLayers[f.field_id] = lyr;
+      }
+      for (const fips of Object.keys(COUNTY)) {
+        const f = state.fields.find((x) => x.county_fips === fips);
+        if (!f) continue;
+        const c = f.ring.reduce((a, p) => [a[0] + p[0] / f.ring.length, a[1] + p[1] / f.ring.length], [0, 0]);
+        L.circleMarker([c[1], c[0]], { radius: 8, color: "#173a2b", weight: 2, fillColor: "#f2c46d", fillOpacity: 1 })
+          .bindTooltip(`Pilot · ${COUNTY[fips]}`, { permanent: true, direction: "right", className: "vtx-label" })
+          .on("click", (e) => { L.DomEvent.stopPropagation(e); usePresetField(f); })
+          .addTo(map);
       }
     } catch (e) {
       toast("Pilot field outlines unavailable: " + e.message);
