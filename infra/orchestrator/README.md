@@ -75,3 +75,17 @@ Docker로 띄우는 방법은 [infra/RUNBOOK.md](../RUNBOOK.md) 6단계를 본�
 ```bash
 pip install -r requirements-dev.txt && pytest -q tests && ruff check .
 ```
+
+## 모델 계층화 (2026-11-15)
+
+| 질문 | 모델 | 비고 |
+| --- | --- | --- |
+| 인사·상태·짧은 질문 | DeepSeek V4.1 Flash (`deepseek-flash`, thinking 끔) | 기본 |
+| 코드, MATLAB 오류, 데이터·알고리즘·물리 질문, 또는 `!deep` | VPS `claude -p --model claude-opus-5-5` | 읽기 전용(Read·Grep·Glob만, Bash·Edit·Write·웹 금지), 120초 |
+| Claude가 120초를 넘기거나 실패 | DeepSeek V4.1 Flash thinking(high) | 자동 대체 |
+| `!review` | DeepSeek V4.1 Flash thinking(high) | 기존 그대로 |
+
+- 판정은 `bridge.py`의 `wants_deep()` 정규식(키워드)이다. 답변 끝에 `— 답변: <모델>` 한 줄이 붙는다.
+- Claude는 `CLAUDE_REPO`(기본 `/srv/hackathon/projects/2026NASA-ro`, `.env`·비밀이 없는 main 읽기 전용 사본)에서 돈다. 키·토큰·비밀번호처럼 보이는 환경 변수는 지우고 넘긴다. `.env`, `secrets/`, `/root`, `/home` 읽기도 거부 규칙으로 막는다.
+- 환경 변수: `CLAUDE_BIN`(기본 `claude`, 빈 값이면 끔), `CLAUDE_MODEL`, `CLAUDE_REPO`, `CLAUDE_TIMEOUT`(초).
+- 봇은 질문 글의 스레드에 답한다. SSH 공개키 글(`ssh-ed25519 …`, `ssh-rsa …`)에는 답하지 않는다(VPS keywatch가 등록하고 답한다).

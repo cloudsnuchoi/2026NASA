@@ -77,6 +77,10 @@ class Config:
     max_tokens: int = 2500
     agent_silent_min: float = 10.0  # flag a laptop agent-loop silent longer than this
     agent_feedback_cooldown_min: float = 30.0
+    claude_bin: str = "claude"  # VPS headless Claude for deep questions; "" disables
+    claude_model: str = "claude-opus-5-5"
+    claude_repo: Path = Path("/srv/hackathon/projects/2026NASA-ro")  # clean read-only checkout, no .env/secrets
+    claude_timeout: float = 120.0
     auto_dispatch: bool = True  # !assign also posts "!task #N <prompt>" for the member's laptop agent-loop
 
     @classmethod
@@ -102,6 +106,10 @@ class Config:
         c.max_tokens = int(e("ORCH_MAX_TOKENS", c.max_tokens))
         c.agent_silent_min = float(e("AGENT_SILENT_MIN", c.agent_silent_min))
         c.agent_feedback_cooldown_min = float(e("AGENT_FEEDBACK_COOLDOWN_MIN", c.agent_feedback_cooldown_min))
+        c.claude_bin = e("CLAUDE_BIN", c.claude_bin)
+        c.claude_model = e("CLAUDE_MODEL", c.claude_model)
+        c.claude_repo = Path(e("CLAUDE_REPO", str(c.claude_repo)))
+        c.claude_timeout = float(e("CLAUDE_TIMEOUT", c.claude_timeout))
         c.auto_dispatch = e("AUTO_DISPATCH", "1").strip().lower() not in ("0", "false", "no", "")
         return c
 
@@ -344,6 +352,63 @@ class OpenAICompatLLM(LLM):
 OpenAILLM = OpenAICompatLLM  # old name
 
 
+DEEP_RE = re.compile(
+    r"```|\bdef |\bfunction\b|Traceback|Error using|오류|에러|error|exception|\.m\b|matlab|코드|함수|스크립트|"
+    r"알고리즘|algorithm|물리|물수지|수지|증발산|\bET0?\b|FAO-?56|\bKc\b|NDVI|Savitzky|sgolay|평활|CVaR|몬테카를로|monte ?carlo|"
+    r"분위|P10|P90|토양수분|soil moisture|SMAP|IMERG|NLDAS|NEX-GDDP|GEOS-S2S|HLS|CDL|CSB|SSURGO|스키마|schema|SQL|parquet|csv|"
+    r"데이터|dataset|좌표|EPSG|보간|interpol|회귀|regression|통계|분산|표준편차",
+    re.I,
+)
+SSH_KEY_RE = re.compile(r"^\s*`*\s*(ssh-ed25519|ssh-rsa) ", re.M)
+SECRET_ENV = re.compile(r"(KEY|TOKEN|SECRET|PASSWORD|PASS|COOKIE|AUTH)", re.I)
+MODEL_LABEL = {"flash": "DeepSeek V4.1 Flash", "deep": "Claude Opus 5.5 (VPS, 읽기 전용)", "fallback": "DeepSeek V4.1 Flash thinking (Claude 시간 초과 대체)"}
+
+
+def wants_deep(text: str) -> bool:
+    """Route code / MATLAB errors / data, algorithm, physics questions (or '!deep') to the deep model."""
+    return "!deep" in text.lower() or bool(DEEP_RE.search(text))
+
+
+class DeepTimeout(Exception):
+    pass
+
+
+class ClaudeCLI:
+    """Headless `claude -p` on the VPS. Read-only tools only; no Bash/Edit/Write/web.
+    Runs in a clean checkout without .env or secrets, with secret-looking env vars removed."""
+
+    READ_TOOLS = ["Read", "Grep", "Glob"]
+    DENY_TOOLS = ["Bash", "Edit", "Write", "MultiEdit", "NotebookEdit", "WebFetch", "WebSearch", "Task",
+                  "Read(**/.env)", "Read(**/.env.*)", "Read(**/secrets/**)", "Read(//root/**)", "Read(//home/**)"]
+
+    def __init__(self, cfg: Config, run: Callable = None):
+        import subprocess
+
+        self.cfg, self.run = cfg, run or subprocess.run
+
+    def ask(self, prompt: str) -> str:
+        import subprocess
+
+        env = {k: v for k, v in os.environ.items() if not SECRET_ENV.search(k)}
+        cmd = [self.cfg.claude_bin, "-p", "--model", self.cfg.claude_model, "--output-format", "text",
+               "--no-session-persistence", "--allowedTools", *self.READ_TOOLS, "--disallowedTools", *self.DENY_TOOLS]
+        try:
+            r = self.run(cmd, input=prompt, capture_output=True, text=True, timeout=self.cfg.claude_timeout,
+                         cwd=str(self.cfg.claude_repo), env=env)
+        except subprocess.TimeoutExpired as exc:
+            raise DeepTimeout() from exc
+        if r.returncode != 0 or not (r.stdout or "").strip():
+            raise RuntimeError(f"claude exit {r.returncode}")
+        return r.stdout.strip()
+
+
+DEEP_PREAMBLE = """너는 팀 '아몰라' 오케스트레이터의 심화 답변 담당이다. 현재 폴더는 저장소 2026NASA(main)의 읽기 전용 사본이다.
+필요하면 AGENTS.md, docs/SOT.md, docs/TEAM_SPEC.md, matlab/TASKS.md, infra/matlab/REMOTE.md와 관련 코드를 읽고 답한다. 파일을 고치거나 명령을 실행하지 않는다.
+숫자·DOI·URL을 지어내지 않는다. 모르면 '미확인'. 비밀값을 묻거나 출력하지 않는다. 한국어로, 초보자가 바로 따라 할 수 있게 짧고 구체적으로 답한다.
+MATLAB 오류면 원인 한 줄 → 고친 코드 → 확인 방법 순서로 쓴다.
+"""
+
+
 class MockLLM(LLM):
     def __init__(self):
         self.calls: List[dict] = []
@@ -401,6 +466,7 @@ HELP = """**orchestrator 명령** (메시지 맨 앞에 입력)
 - `!status` 이슈·PR·CI 요약
 - `!review <PR번호>` PR diff 리뷰
 - `!reset` 이 채널 대화 기억 지우기
+- `!deep <질문>` 심화 모델(Claude Opus)로 답하기. 코드·MATLAB 오류·데이터·알고리즘 질문은 자동으로 심화 모델
 - (Hylē) `!assign <이름|username> #<이슈> [추가 지시]` 해당 1on1 채널에 작업 지시 보내기
 - (Hylē) `!note <이름|username> <지시>` 그 사람 채널에 우선 지시만 저장(답 안 함)
 - (Hylē·봇) `!task #<이슈> <지시>` 1on1 채널에 쓰면 그 팀원 노트북의 agent-loop가 실행 (봇은 대답 안 함)
@@ -440,8 +506,10 @@ class ChannelState:
 
 
 class Orchestrator:
-    def __init__(self, cfg: Config, llm: LLM, gh: GitHubContext, docs: DocsContext, members: Dict[str, Member]):
+    def __init__(self, cfg: Config, llm: LLM, gh: GitHubContext, docs: DocsContext, members: Dict[str, Member],
+                 deep: Optional[ClaudeCLI] = None):
         self.cfg, self.llm, self.gh, self.docs, self.members = cfg, llm, gh, docs, members
+        self.deep = deep
         self.state: Dict[str, ChannelState] = {}
         self.agents: Dict[str, dict] = {}  # member username -> last agent-loop check-in (props + at)
         self._load_state()
@@ -483,11 +551,13 @@ class Orchestrator:
             return []  # addressed to the member's laptop agent-loop
         if not msg and not inc.file_count:
             return []
+        if SSH_KEY_RE.search(msg):
+            return []  # SSH public keys are handled by the VPS keywatch service (it replies itself)
         is_hyle = inc.username == self.cfg.hyle
         one_on_one = self.member_for_channel(inc.channel_name)
-        root = inc.root_id or ("" if one_on_one else inc.post_id)
+        root = inc.root_id or inc.post_id  # always answer in the thread of the question
 
-        if msg.startswith("!"):
+        if msg.startswith("!") and not msg.lower().startswith("!deep"):
             return self._command(inc, msg, is_hyle, root)
 
         if one_on_one is not None:
@@ -678,12 +748,29 @@ class Orchestrator:
             github=self.gh.summary(member if member.username in self.members else None),
         )
 
+    def _deep_prompt(self, msgs: List[dict]) -> str:
+        rules = SYSTEM_TEMPLATE.split("## 저장소 문서")[0].format(hyle=self.cfg.hyle)
+        convo = "\n\n".join(f"[{m['role']}]\n{m['content']}" for m in msgs)
+        return f"{DEEP_PREAMBLE}\n{rules}\n## 대화 (마지막이 이번 질문)\n{convo}\n"
+
     def _ask(self, channel_name: str, member: Member, user_text: str, remember: bool = True, think: bool = False) -> str:
         st = self.st(channel_name)
         history = st.history[-self.cfg.history_turns:]
+        forced = "!deep" in user_text.lower()
+        if forced:
+            user_text = re.sub(r"(?i)!deep", "", user_text).strip()
         msgs = history + [{"role": "user", "content": user_text + self.build_context(channel_name, member)}]
+        route = "deep" if self.deep and not think and (forced or wants_deep(user_text)) else "flash"
+        reply = ""
         try:
-            reply = self.llm.complete(self.build_system(), msgs, think=think)
+            if route == "deep":
+                try:
+                    reply = self.deep.ask(self._deep_prompt(msgs))
+                except Exception as exc:  # timeout or CLI failure -> DeepSeek thinking
+                    log.warning("deep model fallback: %s", type(exc).__name__)
+                    route, think = "fallback", True
+            if not reply:
+                reply = self.llm.complete(self.build_system(), msgs, think=think)
         except LLMBusy:
             return "LLM 응답 지연"
         except Exception as exc:
@@ -691,12 +778,14 @@ class Orchestrator:
             return f"⚠️ LLM 호출 실패: {type(exc).__name__}. Hylē에게 알려주세요."
         if not reply:
             reply = "⚠️ 빈 응답이에요. 다시 질문해 주세요."
+        label = "DeepSeek V4.1 Flash thinking" if (think and route == "flash") else MODEL_LABEL[route]
+        log.info("answered route=%s chars=%d", route, len(reply))
         if remember:
             st.history = (history + [{"role": "user", "content": user_text[:4000]}, {"role": "assistant", "content": reply[:6000]}])[
                 -self.cfg.history_turns:
             ]
             self.save_state()
-        return reply
+        return f"{reply}\n\n_— 답변: {label}_"
 
 
 def extract_prompt(reply: str) -> str:
@@ -901,7 +990,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     load_dotenv(Path(a.env))
     cfg = Config.from_env()
     llm: LLM = MockLLM() if a.mock_llm else OpenAICompatLLM(cfg)
-    orch = Orchestrator(cfg, llm, GitHubContext(cfg), DocsContext(cfg), load_members(cfg.members_tsv))
+    deep = None
+    if not a.mock_llm and cfg.claude_bin and cfg.claude_repo.exists():
+        deep = ClaudeCLI(cfg)
+    log.info("deep model: %s", f"{cfg.claude_model} in {cfg.claude_repo}" if deep else "off")
+    orch = Orchestrator(cfg, llm, GitHubContext(cfg), DocsContext(cfg), load_members(cfg.members_tsv), deep=deep)
     if a.dry_run:
         run_dry(orch)
         return 0

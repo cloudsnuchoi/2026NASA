@@ -8,7 +8,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import bridge  # noqa: E402
-from bridge import Config, Incoming, LLMBusy, MockLLM, OpenAICompatLLM, Orchestrator, find_member, load_members, split_message  # noqa: E402,I001
+from bridge import ClaudeCLI, Config, DeepTimeout, Incoming, LLMBusy, wants_deep, MockLLM, OpenAICompatLLM, Orchestrator, find_member, load_members, split_message  # noqa: E402,I001
 
 
 def full(call):
@@ -376,3 +376,74 @@ def test_env_fallbacks(monkeypatch):
     monkeypatch.setenv("LLM_MODEL", "m-new")
     c = Config.from_env()
     assert c.api_key == "new" and c.model == "m-new"
+
+
+# ---- model routing (Claude deep vs DeepSeek flash)
+class FakeDeep:
+    def __init__(self, reply="deep answer", exc=None):
+        self.reply, self.exc, self.prompts = reply, exc, []
+
+    def ask(self, prompt):
+        self.prompts.append(prompt)
+        if self.exc:
+            raise self.exc
+        return self.reply
+
+
+def test_wants_deep_routing():
+    assert not wants_deep("안녕하세요") and not wants_deep("다음 뭐 해요?")
+    assert wants_deep("Error using sgolayfilt 이거 왜 나와요") and wants_deep("NDVI 평활 창 크기?") and wants_deep("!deep 그냥")
+
+
+def test_greeting_uses_flash_and_labels(orch):
+    orch.deep = FakeDeep()
+    out = orch.handle(inc("jieun", "1on1-jieun", "안녕하세요"))[0].message
+    assert orch.deep.prompts == [] and out.endswith("_— 답변: DeepSeek V4.1 Flash_")
+
+
+def test_matlab_error_goes_to_claude_with_repo_context(orch):
+    orch.deep = FakeDeep("원인: 창 크기가 짝수")
+    out = orch.handle(inc("woochan", "1on1-woochan", "Error using sgolayfilt: frame length must be odd"))[0]
+    assert out.message.startswith("원인") and "Claude Opus 5.5" in out.message
+    assert "matlab/TASKS.md" in orch.deep.prompts[0] and "frame length" in orch.deep.prompts[0]
+    assert orch.llm.calls == []  # DeepSeek not called
+
+
+def test_deep_flag_and_timeout_fallback_to_thinking(orch):
+    orch.deep = FakeDeep(exc=DeepTimeout())
+    out = orch.handle(inc("jieun", "1on1-jieun", "!deep 질문"))[0].message
+    assert orch.llm.calls[-1]["think"] is True and "!deep" not in orch.llm.calls[-1]["messages"][-1]["content"]
+    assert "Claude 시간 초과 대체" in out
+
+
+def test_reply_in_thread_and_ssh_key_ignored(orch):
+    i = inc("woochan", "1on1-woochan", "질문 있어요")
+    i.post_id = "p9"
+    assert orch.handle(i)[0].root_id == "p9"
+    assert orch.handle(inc("woochan", "1on1-woochan", "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIabc amolla-vps")) == []
+
+
+def test_claude_cli_is_read_only_and_strips_secrets(monkeypatch, tmp_path):
+    monkeypatch.setenv("LLM_API_KEY", "sk-secret")
+    monkeypatch.setenv("MM_BOT_TOKEN", "tok")
+    monkeypatch.setenv("HOME", "/home/x")
+    seen = {}
+
+    def run(cmd, **kw):
+        seen.update(cmd=cmd, **kw)
+        return type("R", (), {"returncode": 0, "stdout": "ok"})()
+    cli = ClaudeCLI(Config(claude_repo=tmp_path), run=run)
+    assert cli.ask("hello") == "ok"
+    cmd = seen["cmd"]
+    assert cmd[:4] == ["claude", "-p", "--model", "claude-opus-5-5"]
+    allowed = cmd[cmd.index("--allowedTools") + 1:cmd.index("--disallowedTools")]
+    assert allowed == ["Read", "Grep", "Glob"] and "Bash" in cmd and "Write" in cmd
+    assert "LLM_API_KEY" not in seen["env"] and "MM_BOT_TOKEN" not in seen["env"] and seen["env"]["HOME"] == "/home/x"
+    assert seen["timeout"] == 120.0 and seen["cwd"] == str(tmp_path) and "sk-secret" not in seen["input"]
+
+    import subprocess
+
+    def slow(cmd, **kw):
+        raise subprocess.TimeoutExpired(cmd, 120)
+    with pytest.raises(DeepTimeout):
+        ClaudeCLI(Config(claude_repo=tmp_path), run=slow).ask("x")
