@@ -63,3 +63,10 @@
 - **열림 (백엔드 공백).** 모델 API·DB 적재·MC·LLM/RAG 통합·배포 담당이 슬롯에 없다. 안 A(권장): 강다은(Python 백엔드·데이터·AI·MC 경험)이 백엔드. 안 B: Hylē + 에이전트가 소유. Hylē가 09:00 전 결정.
 - **결정 (협업 도구).** 6명 모두 각자 노트북에서 Codex CLI + Gemini CLI(agy)를 GitHub에 연결해 쓴다. Codex는 `AGENTS.md`, Gemini는 `GEMINI.md`(→ `AGENTS.md` 가져옴)를 읽는다.
 - **결정 (오케스트레이션).** GitHub = 유일한 상태. 무거운 중앙 오케스트레이터 에이전트는 만들지 않는다. 30–60분마다 읽기 전용 모니터링 다이제스트(`infra/monitor/digest.sh` 또는 NASA 봇)로 지연·막힘·리뷰 대기를 본다.
+
+## 2026-11-15 09:30 · 역할 확정, 채팅·오케스트레이터·CI 운영
+
+- **결정 (역할).** MATLAB A 김윤성, MATLAB B 김우찬, UI/UX A 고지은, UI/UX B 하지민, 복셀 시뮬·데모 영상 강다은(확인 필요), Hylē = 풀스택(백엔드 공백 안 B) + 총괄. TEAM_SPEC 7.1·7.2 갱신.
+- **결정 (소통).** VPS에 Mattermost Team Edition 12.0.2 + Postgres를 띄운다(`infra/chat/`, 127.0.0.1만 열고 Cloudflare quick tunnel로 노출). 팀 `amolla`. 공개 채널: 공지(announce), uiux-design, demo-video, ppt-slides, data-matlab, backend, sim-voxel, random. 비공개 `1on1-<이름>` = 팀원 + Hylē + orchestrator 봇.
+- **결정 (오케스트레이터).** 08:20의 「무거운 중앙 에이전트 없음」을 바꾼다. 팀원이 git·Codex 초보라서 1:1 지시가 필요하기 때문이다. 대신 작게 만든다. `infra/orchestrator/bridge.py`가 웹소켓으로 1on1과 멘션을 받고, LLM(OpenAI 호환)에 저장소 문서와 GitHub 읽기 전용 상태를 넣어 "다음 할 일, 붙여 넣을 프롬프트, 완료 기준"을 답한다. Hylē의 글이 우선한다. 봇은 GitHub에 쓰지 않는다. Mattermost 공식 Agents 플러그인은 무라이선스 등급에서 채널 에이전트와 원격 MCP가 막혀 있어 보조(옵션 A)로만 둔다.
+- **결정 (git 운영).** 팀원은 git 명령 대신 `docs/PROMPTS.md`의 **마무리 블록**을 에이전트에 붙인다. MATLAB 담당은 git을 쓰지 않고, Hylē가 커밋한다. main은 PR 필수(승인 0, admin 우회), 머지는 Hylē만 한다. CI는 self-hosted 러너(`[self-hosted, linux]`)에서 돌리고, 포크 PR은 실행하지 않는다. 러너 등록 뒤 `ci-ok`를 필수 체크로 더한다.

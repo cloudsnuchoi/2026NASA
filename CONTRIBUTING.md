@@ -14,15 +14,15 @@
     → 브랜치 feat/<이슈번호>-slug  (main에서)
     → 작게 커밋 (Conventional Commits)
     → PR을 main으로
-    → 리뷰 1명 승인
-    → squash merge
+    → 오케스트레이터 봇 리뷰(!review) + 스크린샷 확인
+    → Hylē가 squash merge
     → 이슈 닫힘, 보드 Status를 Done으로
 ```
 
 1. **이슈가 일의 단위다.** 라벨 `area:*` 와 `priority: P0` 또는 `P1`을 붙인다. 본문의 “제안 담당”은 사람 이름이다. 급하지 않으면 GitHub 계정 할당은 본인이 한다.
 2. **`main`은 항상 데모 가능한 쪽을 향한다.** 직접 푸시하지 않는다.
 3. **한 PR · 한 이슈 · 작은 diff.** 계약(SOT) 변경과 구현은 가능하면 같은 PR에 둔다.
-4. **리뷰 1명.** 해커톤 중에는 같은 영역이 아닌 사람 또는 팀장이 빠르게 본다. 승인 전 merge 금지. 작성자는 squash merge.
+4. **머지는 Hylē만.** main은 ruleset `main-protection`으로 PR 필수(승인 0, admin 우회 허용). 봇 리뷰와 스크린샷을 보고 Hylē가 squash merge한다. 러너 등록 뒤에는 CI `ci-ok` 통과가 필수다.
 5. **충돌은 로컬에서 rebase 또는 merge 후 푸시.** `main`의 데이터 계약이 바뀌었으면 SOT를 다시 읽는다.
 6. **데이터와 비밀값은 PR에 포함하지 않는다.** VPS의 `/data/raw`, `/data/processed/vN`만 사용한다. 연결 정보는 환경 변수.
 

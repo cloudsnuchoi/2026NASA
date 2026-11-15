@@ -1,0 +1,82 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    # Public repo + self-hosted runner: never run code from forks on the VPS.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect python
+        id: detect
+        run: |
+          if git ls-files '*.py' | grep -q .; then echo "has=true" >> "$GITHUB_OUTPUT"; else echo "has=false" >> "$GITHUB_OUTPUT"; echo "no python files, skipping"; fi
+      - name: Set up venv
+        if: steps.detect.outputs.has == 'true'
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          . "$RUNNER_TEMP/venv/bin/activate"
+          pip install -q --upgrade pip ruff pytest
+          for req in $(git ls-files '*requirements*.txt' | grep -v -- '-dev' ); do
+            echo "pip install -r $req"; pip install -q -r "$req" || echo "::warning::failed to install $req"
+          done
+      - name: Ruff (lint)
+        if: steps.detect.outputs.has == 'true'
+        run: |
+          . "$RUNNER_TEMP/venv/bin/activate"
+          ruff check --output-format=github .
+      - name: Pytest
+        if: steps.detect.outputs.has == 'true'
+        run: |
+          . "$RUNNER_TEMP/venv/bin/activate"
+          dirs=$(git ls-files | grep -E '(^|/)tests?/.*test_.*\.py$|(^|/)test_.*\.py$' | xargs -r -n1 dirname | sort -u | tr '\n' ' ')
+          if [ -z "$dirs" ]; then echo "no tests yet"; exit 0; fi
+          python -m pytest -q $dirs
+
+  frontend:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint, test, build each package.json app (frontend/, sim/)
+        run: |
+          found=0
+          for pkg in frontend/package.json sim/package.json; do
+            [ -f "$pkg" ] || continue
+            found=1; dir=$(dirname "$pkg"); echo "== $dir"
+            cd "$dir"
+            if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
+            npm run lint --if-present
+            CI=true npm test --if-present
+            npm run build --if-present
+            cd - >/dev/null
+          done
+          [ "$found" = 1 ] || echo "no package.json in frontend/ or sim/, skipping"
+
+  ci-ok:
+    # Single required status check for the main ruleset (add later, after runner is registered).
+    if: always()
+    needs: [python, frontend]
+    runs-on: [self-hosted, linux]
+    steps:
+      - run: |
+          echo "python=${{ needs.python.result }} frontend=${{ needs.frontend.result }}"
+          for r in "${{ needs.python.result }}" "${{ needs.frontend.result }}"; do
+            case "$r" in success|skipped) ;; *) exit 1;; esac
+          done

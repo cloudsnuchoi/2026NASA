@@ -263,3 +263,8 @@ matlab/*.m~
 # OS / editor
 .DS_Store
 Thumbs.db
+
+# Hackathon infra secrets/state
+infra/chat/secrets/
+infra/orchestrator/state/
+infra/orchestrator/.venv/

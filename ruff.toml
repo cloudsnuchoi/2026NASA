@@ -1,0 +1,8 @@
+# Repo-wide lint config (used by .github/workflows/ci.yml). Keep it lenient for a 16h hackathon.
+line-length = 130
+target-version = "py310"
+extend-exclude = ["notebooks", "matlab", ".venv*"]
+
+[lint]
+select = ["E", "F"]
+ignore = ["E501", "E731"]

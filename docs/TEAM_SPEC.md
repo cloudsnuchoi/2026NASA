@@ -325,18 +325,20 @@ flowchart TB
 | UI/UX A | 1명 | S0–S3 화면, 디자인 시스템(게임풍), 지도 | `frontend/` |
 | UI/UX B | 1명 | S4–S7 화면, 카드·차트·용어 카드, 발표 슬라이드 디자인 | `frontend/`, `pitch/` |
 
-**제안(확정 아님) — 기술 배경 기준 매칭.** MATLAB A·B: 하지민(신호처리·RF), 김윤성(GNC·경로계획·자율 — 추정·필터 경험). UI/UX: 고지은(레이더 신호처리, UI/UX, 데이터 정리, 마케팅) + 1명. 복셀 시뮬: 이미 작업 중인 사람 유지. 김우찬(발사체·공력 기계)은 시뮬 또는 UI B 후보. 강다은(Python 백엔드·데이터·AI·몬테카를로)은 아래 공백의 1순위.
+**확정 (2026-11-15 09:30 KST).**
 
-### 7.2 ⚠ 백엔드 공백
+| 슬롯 | 이름 | Mattermost |
+| --- | --- | --- |
+| 오케스트레이터·PM + **풀스택(백엔드·API·DB·RAG·인프라·배포)** | Hylē | `hyle` |
+| MATLAB A (기후·토양수분) | 김윤성 | `yoonsung` |
+| MATLAB B (식생·시나리오) | 김우찬 | `woochan` |
+| UI/UX A (S0–S3) | 고지은 | `jieun` |
+| UI/UX B (S4–S7, 슬라이드 디자인) | 하지민 | `jimin` |
+| three.js 복셀 시뮬·데모 영상 | 강다은 (**확인 필요**) | `daeun` |
 
-위 6슬롯에는 **모델 API(FastAPI), DB 적재, MC·CVaR, LLM/RAG 통합, Prithvi 추론, 배포**를 맡은 사람이 없다. 이것이 크리티컬 패스다.
+### 7.2 백엔드 담당 (해소)
 
-| 안 | 내용 | 장점 | 위험 |
-| --- | --- | --- | --- |
-| **A (권장)** | 강다은이 백엔드·MC 담당. 그 대신 UI/UX를 1명 + 에이전트로 줄이거나, MATLAB 1명이 오후에 UI B로 이동 | 경험자가 크리티컬 패스를 쥠 | UI 인력 감소 |
-| B | Hylē + Codex/agy 에이전트가 백엔드 소유, 강다은은 리뷰어 | 슬롯 유지 | Hylē 과부하, 모니터링·통합 지연 |
-
-결정: Hylē, 09:00 전. DECISIONS.md에 기록.
+7.2의 공백은 **안 B로 해소**됐다. Hylē가 Codex/agy 에이전트와 함께 모델 API, DB 적재, MC·CVaR, LLM/RAG, Prithvi 추론, 배포를 맡는다. 과부하를 줄이려고 지시·피드백은 Mattermost 오케스트레이터 봇(`infra/orchestrator/`)이 1:1 채널에서 대신한다. 팀원은 봇이 준 프롬프트를 Codex/agy에 붙여 넣는다([PROMPTS.md](PROMPTS.md), [ONBOARDING.md](ONBOARDING.md)).
 
 ### 7.3 인계 흐름
 
@@ -420,6 +422,8 @@ flowchart LR
 ---
 
 ## 9. 오케스트레이션과 모니터링
+
+> **09:30 KST 갱신:** 1:1 지시는 Mattermost 오케스트레이터 봇이 맡는다([infra/orchestrator/README.md](../infra/orchestrator/README.md), DECISIONS 09:30). GitHub는 여전히 유일한 상태 저장소다. 봇은 읽기만 한다.
 
 **원칙.** GitHub가 유일한 상태 저장소다. 무거운 중앙 오케스트레이터 에이전트(사람에게 실시간 지시하는 자율 에이전트)는 만들지 않는다. 16시간 안에 그것을 만들고 디버깅하는 비용이 이득보다 크고, 사람 6명은 이미 각자 에이전트를 쓴다.
 

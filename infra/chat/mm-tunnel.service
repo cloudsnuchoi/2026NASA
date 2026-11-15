@@ -1,0 +1,17 @@
+# systemd --user unit (optional; tmux is fine too).
+# Install: mkdir -p ~/.config/systemd/user && cp mm-tunnel.service ~/.config/systemd/user/
+#          systemctl --user daemon-reload && systemctl --user enable --now mm-tunnel
+#          sudo loginctl enable-linger hackathon   # only if you want it to survive logout (needs sudo)
+[Unit]
+Description=Cloudflare quick tunnel for amolla Mattermost
+After=network-online.target
+
+[Service]
+Environment=MM_HOST_PORT=8065
+Environment=TUNNEL_LOG=/srv/hackathon/db/mattermost/tunnel.log
+ExecStart=/srv/hackathon/projects/2026NASA/infra/chat/tunnel.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

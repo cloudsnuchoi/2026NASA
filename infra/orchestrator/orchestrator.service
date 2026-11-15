@@ -1,0 +1,15 @@
+# Alternative to Docker: systemd --user unit (venv in infra/orchestrator/.venv).
+# Install: cp orchestrator.service ~/.config/systemd/user/ && systemctl --user daemon-reload
+#          systemctl --user enable --now orchestrator && journalctl --user -u orchestrator -f
+[Unit]
+Description=amolla Mattermost orchestrator bridge
+After=network-online.target
+
+[Service]
+WorkingDirectory=/srv/hackathon/projects/2026NASA/infra/orchestrator
+ExecStart=/srv/hackathon/projects/2026NASA/infra/orchestrator/.venv/bin/python bridge.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

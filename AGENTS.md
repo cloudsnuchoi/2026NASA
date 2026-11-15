@@ -47,7 +47,8 @@
 - 템플릿 [`.github/pull_request_template.md`](.github/pull_request_template.md)를 채운다.
 - 이슈를 `Closes #N`으로 연결한다.
 - SI(코딩 에이전트, LLM)를 썼으면 [docs/si-log.md](docs/si-log.md)에 한 줄을 남긴다.
-- 리뷰어 1명의 승인 후 squash merge (CONTRIBUTING).
+- 승인 수 0. Hylē(또는 오케스트레이터 리뷰 확인 후 Hylē)가 squash merge. 작성자는 머지하지 않는다. 러너 등록 뒤에는 CI `ci-ok` 통과가 필수다.
+- 작업 프롬프트 끝에는 [docs/PROMPTS.md](docs/PROMPTS.md)의 **마무리 블록**을 붙인다(브랜치 → 검사 → 커밋 → 푸시 → `gh pr create` → `PR: <url>` 출력).
 
 ## 역할별 규칙
 
@@ -85,15 +86,15 @@
 
 - 결정은 `docs/DECISIONS.md`에 KST 시각과 함께. 계약 변경은 SOT와 같은 PR.
 
-## 폴더 소유 (권고, TEAM_SPEC 7.1 역할 확정 후 갱신)
+## 폴더 소유 (2026-11-15 09:30 KST 확정)
 
 에이전트는 이슈가 가리키는 폴더 위주로 수정하고, 계약 파일(`docs/SOT.md`, API 스키마)은 협의된 경우에만 고친다.
 
 | 폴더 | 역할 슬롯 |
 | --- | --- |
-| `matlab/` | MATLAB A·B |
-| `data_pipeline/`, `model_api/`, `rag/` | 백엔드 (공백 — TEAM_SPEC 7.2) |
-| `frontend/` | UI/UX A·B |
-| `sim/` | 복셀 시뮬 |
-| `infra/`, `docs/` | Hylē |
+| `matlab/` | MATLAB A 김윤성(`climate/`), MATLAB B 김우찬(`vegetation/`, `scenario/`) — git 대신 Hylē가 커밋 |
+| `data_pipeline/`, `model_api/`, `rag/` | Hylē (풀스택) |
+| `frontend/` | UI/UX A 고지은 (S0–S3), UI/UX B 하지민 (S4–S7) |
+| `sim/` | 강다은 (확인 필요) |
+| `infra/`, `docs/`, `.github/` | Hylē |
 | `notebooks/` | 누구나 (EDA) |

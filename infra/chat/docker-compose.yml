@@ -1,0 +1,69 @@
+# Mattermost Team Edition + Postgres for team 아몰라 (NASA Space Apps 2026).
+# Run on the VPS as user `hackathon` from /srv/hackathon/projects/2026NASA/infra/chat:
+#   cp .env.example .env && (edit .env) && docker compose up -d
+# Exposure: 127.0.0.1 only. Public access goes through a Cloudflare quick tunnel (see RUNBOOK).
+# Data lives under /srv/hackathon/db/mattermost (bind mounts, nothing in git).
+name: amolla-chat
+
+services:
+  mm-postgres:
+    image: postgres:${POSTGRES_IMAGE_TAG:-18-alpine}
+    container_name: amolla-mm-postgres
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      TZ: Asia/Seoul
+      POSTGRES_USER: ${POSTGRES_USER:-mmuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-mattermost}
+    volumes:
+      # postgres 18+ images keep data under /var/lib/postgresql (versioned subdir)
+      - ${MM_DB_ROOT:-/srv/hackathon/db/mattermost}/postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    mem_limit: 2g
+    networks: [hackathon-net]
+
+  mattermost:
+    image: mattermost/mattermost-team-edition:${MATTERMOST_IMAGE_TAG:-12.0.2}
+    container_name: amolla-mattermost
+    restart: unless-stopped
+    depends_on:
+      mm-postgres:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "127.0.0.1:${MM_HOST_PORT:-8065}:8065"
+    environment:
+      TZ: Asia/Seoul
+      MM_SQLSETTINGS_DRIVERNAME: postgres
+      MM_SQLSETTINGS_DATASOURCE: postgres://${POSTGRES_USER:-mmuser}:${POSTGRES_PASSWORD}@mm-postgres:5432/${POSTGRES_DB:-mattermost}?sslmode=disable&connect_timeout=10
+      # SiteURL is set after the tunnel starts (provision.sh / RUNBOOK step 4). Env would pin it.
+      MM_SERVICESETTINGS_ENABLELOCALMODE: "true"        # lets `mmctl --local` work inside the container
+      MM_SERVICESETTINGS_ENABLEBOTACCOUNTCREATION: "true"
+      MM_SERVICESETTINGS_ENABLEUSERACCESSTOKENS: "true"
+      MM_TEAMSETTINGS_ENABLEOPENSERVER: "false"          # no self sign-up; accounts come from provision.sh
+      MM_EMAILSETTINGS_SENDEMAILNOTIFICATIONS: "false"
+      MM_EMAILSETTINGS_REQUIREEMAILVERIFICATION: "false"
+      MM_LOCALIZATIONSETTINGS_DEFAULTSERVERLOCALE: ko
+      MM_LOCALIZATIONSETTINGS_DEFAULTCLIENTLOCALE: ko
+      MM_PLUGINSETTINGS_ENABLEUPLOADS: "true"            # needed only for Option A (Agents plugin upload)
+    volumes:
+      - ${MM_DB_ROOT:-/srv/hackathon/db/mattermost}/app/config:/mattermost/config:rw
+      - ${MM_DB_ROOT:-/srv/hackathon/db/mattermost}/app/data:/mattermost/data:rw
+      - ${MM_DB_ROOT:-/srv/hackathon/db/mattermost}/app/logs:/mattermost/logs:rw
+      - ${MM_DB_ROOT:-/srv/hackathon/db/mattermost}/app/plugins:/mattermost/plugins:rw
+      - ${MM_DB_ROOT:-/srv/hackathon/db/mattermost}/app/client-plugins:/mattermost/client/plugins:rw
+    tmpfs:
+      - /tmp
+    mem_limit: 4g
+    networks: [hackathon-net]
+
+networks:
+  hackathon-net:
+    external: true
