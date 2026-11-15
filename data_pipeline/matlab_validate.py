@@ -110,6 +110,10 @@ def main():
     parser.add_argument('--out', type=Path, default=Path(__file__).resolve().parents[1] / 'docs/MATLAB-VALIDATION.md')
     args = parser.parse_args()
     content = build(args.root)
+    # Keep the hand-recorded V8 pre-run check (data_pipeline/v8_precheck.py) across regenerations.
+    marker = '<!-- PRE-RUN-CHECK -->'
+    if args.out.is_file() and marker in (old := args.out.read_text()):
+        content = content.rstrip('\n') + '\n\n' + old[old.index(marker):]
     temp = args.out.with_suffix('.tmp')
     temp.write_text(content)
     temp.replace(args.out)

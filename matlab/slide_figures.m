@@ -11,9 +11,6 @@ inputDir = '/data/processed/v1/matlab/inputs';
 outputDir = '/data/processed/v1/matlab/outputs/jieun';
 paths = {fullfile(outputDir, 'fig_p10p90.png'), ...
     fullfile(outputDir, 'fig_backtest2012.png')};
-for k = 1:numel(paths)
-    assert(~isfile(paths{k}), 'Refusing to overwrite: %s', paths{k});
-end
 q = read_snapshot(fullfile(inputDir, 'engine_p10p90_20fields.csv'), ...
     ["field_id","strategy_code","metric","p10","p50","p90","unit"]);
 b = read_snapshot(fullfile(inputDir, 'engine_2012_deficit.csv'), ...
@@ -46,7 +43,7 @@ for fid = reshape(ids, 1, [])
             'Invalid/missing backtest deficit: field %s strategy %s.', fid, strategy);
     end
 end
-if ~isfolder(outputDir), mkdir(outputDir); end
+archive_existing_outputs(outputDir, paths); % old outputs -> old/<stamp>/
 
 fig = figure('Visible','off','Color','w','Position',[100 100 1500 560]);
 cleanup = onCleanup(@() close(fig));
@@ -116,13 +113,20 @@ assert(~any(ismissing(t.field_id) | ismissing(t.strategy_code)), ...
 end
 
 function save_new_png(fig, path)
-% Atomic reservation; do not replace a pre-existing deliverable.
-file = javaObject('java.io.File', path);
-assert(file.createNewFile(), 'Refusing to overwrite: %s', path);
-try
-    exportgraphics(fig, path, 'Resolution',200);
-catch err
-    delete(path); % Only this invocation's incomplete reserved file.
-    rethrow(err);
+% Previous deliverables were already moved to old/<stamp>/ by archive_existing_outputs.
+exportgraphics(fig, path, 'Resolution',200);
 end
+
+function archive_existing_outputs(outputDir, files)
+% Never overwrite: move previous outputs to <outputDir>/old/<yyyymmdd_HHMMSS>/.
+if ~isfolder(outputDir), mkdir(outputDir); end
+existing = files(cellfun(@isfile, files));
+if isempty(existing), return; end
+stamp = char(datetime('now', 'Format', 'yyyyMMdd_HHmmss'));
+oldDir = fullfile(outputDir, 'old', stamp);
+mkdir(oldDir);
+for k = 1:numel(existing)
+    movefile(existing{k}, oldDir);
+end
+fprintf('Previous outputs moved to %s\n', oldDir);
 end

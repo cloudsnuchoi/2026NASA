@@ -8,7 +8,7 @@ inputDir  = '/data/processed/v1/matlab/inputs';
 outputDir = '/data/processed/v1/matlab/outputs/yoonsung';
 pngFile = fullfile(outputDir, 'drought_compare_2012.png');
 csvFile = fullfile(outputDir, 'drought_compare_2012_summary.csv');
-assert(~isfile(pngFile) && ~isfile(csvFile), 'Output exists already: rename or ask the bot before re-running.');
+archive_existing_outputs(outputDir, {pngFile, csvFile}); % old outputs -> old/<stamp>/
 
 fields = read_ids_as_text(fullfile(inputDir, 'fields_20.csv'));
 fields.field_id = string(fields.field_id); fields.county_fips = pad(string(fields.county_fips), 5, 'left', '0');
@@ -59,4 +59,18 @@ opts = detectImportOptions(path, 'Delimiter', ',', 'TextType', 'string');
 idCols = intersect(opts.VariableNames, {'field_id', 'county_fips', 'variable', 'period', 'strategy_code', 'county_label'});
 opts = setvartype(opts, idCols, 'string');
 t = readtable(path, opts);
+end
+
+function archive_existing_outputs(outputDir, files)
+% Never overwrite: move previous outputs to <outputDir>/old/<yyyymmdd_HHMMSS>/.
+if ~isfolder(outputDir), mkdir(outputDir); end
+existing = files(cellfun(@isfile, files));
+if isempty(existing), return; end
+stamp = char(datetime('now', 'Format', 'yyyyMMdd_HHmmss'));
+oldDir = fullfile(outputDir, 'old', stamp);
+mkdir(oldDir);
+for k = 1:numel(existing)
+    movefile(existing{k}, oldDir);
+end
+fprintf('Previous outputs moved to %s\n', oldDir);
 end
