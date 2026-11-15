@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T18:49:40+09:00",
+ "generated_at": "2026-11-15T18:59:56+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 190,
+ "remaining_min": 180,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "lanes": [
   {
@@ -273,6 +273,24 @@
    "last_activity": "16:01"
   },
   {
+   "name": "l1",
+   "model": "?",
+   "task": "?",
+   "last_activity": "18:59"
+  },
+  {
+   "name": "l2",
+   "model": "?",
+   "task": "?",
+   "last_activity": "18:59"
+  },
+  {
+   "name": "l4",
+   "model": "?",
+   "task": "?",
+   "last_activity": "18:59"
+  },
+  {
    "name": "live",
    "model": "—",
    "task": "이 현황 생성기 (5분)",
@@ -283,6 +301,12 @@
    "model": "—",
    "task": "Mattermost Cloudflare 터널",
    "last_activity": "12:11"
+  },
+  {
+   "name": "prd",
+   "model": "?",
+   "task": "?",
+   "last_activity": "18:59"
   },
   {
    "name": "runner",
