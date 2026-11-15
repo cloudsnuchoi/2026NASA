@@ -97,7 +97,7 @@ Outside the pilot fields the tool says: *"Deep analysis available in 4 pilot cou
 - **김우찬** — MATLAB: vegetation and scenarios; prototype V8
 - **고지은** — UI/UX + MATLAB slide figures
 - **하지민** — UI/UX + MATLAB NDVI bare-soil analysis
-- **강다은** — 3D simulation (planned)
+- **강다은** — 3D simulation (planned) + demo video
 
 ### Links
 
