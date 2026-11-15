@@ -14,6 +14,14 @@ import pytest
 
 MATLAB_DIR = Path(__file__).resolve().parents[2] / "matlab"
 SCRIPTS = sorted(MATLAB_DIR.glob("*.m"))
+MAT2_OUTPUTS = {
+    "yoonsung_nldas_2012.m": ("nldas_vs_engine_2012.png", "nldas_vs_engine_2012.csv"),
+    "yoonsung_season_anomaly.m": ("season_anomaly_1995_2025.png", "season_anomaly_1995_2025.csv"),
+    "yoonsung_s2s_box.m": ("s2s_vs_history_box.png", "s2s_vs_history_box.csv"),
+    "jimin_growing_season.m": ("growing_season_20fields.csv", "jimin_supported_daily.csv"),
+    "jimin_ndvi_anomaly.m": ("jimin_ndvi_anomaly.csv", "ndvi_anomaly.png"),
+    "jimin_bare_vs_rye.m": ("bare_vs_strategyB.csv", "jimin_strategyB_assumptions_used.csv"),
+}
 OPENERS = {"function", "if", "for", "parfor", "while", "switch", "try", "spmd"}
 INTERACTIVE = re.compile(
     r"\b(ginput|input|keyboard|waitforbuttonpress|uiwait|inputdlg|questdlg|"
@@ -135,10 +143,15 @@ def test_no_name_clash_and_function_order(path: Path) -> None:
 def test_no_interactive_calls(path: Path) -> None:
     code = "\n".join(_code_lines(path))
     assert not INTERACTIVE.search(code), INTERACTIVE.search(code)
-    for m in re.finditer(r"\bfigure\s*\(([^)]*)\)", code):
-        assert "Visible" in path.read_text(encoding="utf-8").splitlines()[
-            code[: m.start()].count("\n")
-        ], "figure() must be created with 'Visible','off'"
+    raw_lines = path.read_text(encoding="utf-8").splitlines()
+    for m in re.finditer(r"\bfigure\s*\(", code):
+        line = code[: m.start()].count("\n")
+        # Read continued property lists too; merely mentioning Visible or
+        # setting it to 'on' must not satisfy the headless execution contract.
+        call = "\n".join(raw_lines[line:]).split(")", 1)[0]
+        assert re.search(r"['\"]Visible['\"]\s*,\s*['\"]off['\"]", call, re.I), (
+            "figure() must be created with 'Visible','off'"
+        )
 
 
 @pytest.mark.parametrize("path", SCRIPTS, ids=lambda p: p.name)
@@ -161,3 +174,25 @@ def test_overwrite_policy_archives(path: Path) -> None:
     assert "createNewFile" not in text
     if re.search(r"\b(writetable|exportgraphics)\(", text):
         assert "archive_existing_outputs(" in text
+
+
+@pytest.mark.parametrize("name,outputs", MAT2_OUTPUTS.items(), ids=MAT2_OUTPUTS)
+def test_mat2_required_outputs_and_archive_before_write(name: str, outputs: tuple[str, ...]) -> None:
+    path = MATLAB_DIR / name
+    assert path.is_file(), f"Missing required MAT2 script: {name}"
+    text = path.read_text(encoding="utf-8")
+    code = "\n".join(_code_lines(path))
+    for output in outputs:
+        assert re.search(r"['\"]" + re.escape(output) + r"['\"]", text), output
+    writes = list(re.finditer(r"\b(writetable|exportgraphics)\s*\(", code))
+    assert writes, "script must emit its deliverables"
+    archive = re.search(r"(?m)^\s*archive_existing_outputs\s*\(", code)
+    assert archive and archive.start() < writes[0].start(), "archive before first output write"
+    helper = re.search(r"(?m)^\s*function\s+archive_existing_outputs\s*\(", code)
+    assert helper, "archive helper is required"
+    helper_code = code[helper.start():]
+    assert re.search(r"\bmovefile\s*\(", helper_code), "archive must move previous outputs"
+    assert re.search(r"\bisfile\b", helper_code), "only archive existing files"
+    assert re.search(r"fullfile\(outputDir,\s*['\"]old['\"],\s*stamp\)", text), (
+        "archive outputs under old/<timestamp>"
+    )
