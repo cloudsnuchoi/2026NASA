@@ -1,24 +1,24 @@
 {
- "generated_at": "2026-11-15T20:42:53+09:00",
+ "generated_at": "2026-11-15T20:48:01+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
    "name": "1차 제출",
    "at": "2026-11-15T21:00:00+09:00",
-   "remaining_min": 17
+   "remaining_min": 11
   },
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 137
+   "remaining_min": 131
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 167
+   "remaining_min": 161
   }
  ],
- "remaining_min": 167,
+ "remaining_min": 161,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -319,12 +319,6 @@
    "last_activity": "13:09"
   },
   {
-   "name": "site2",
-   "model": "?",
-   "task": "?",
-   "last_activity": "20:31"
-  },
-  {
    "name": "sub2",
    "model": "?",
    "task": "?",
@@ -359,19 +353,19 @@
   {
    "name": "김윤성",
    "user": "yoonsung",
-   "mattermost_last": "20:15",
+   "mattermost_last": "20:45",
    "repo_last": null
   },
   {
    "name": "고지은",
    "user": "jieun",
-   "mattermost_last": "20:40",
+   "mattermost_last": "20:47",
    "repo_last": null
   },
   {
    "name": "하지민",
    "user": "jimin",
-   "mattermost_last": "20:42",
+   "mattermost_last": "20:45",
    "repo_last": null
   },
   {
