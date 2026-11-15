@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>아몰라 현황 대시보드 · 2026NASA Field Shift</title>
+  <title>아몰라 라이브 현황 · 2026NASA Field Shift</title>
+  <!-- dash-v2 2026-11-15 -->
+  <meta name="description" content="팀 아몰라 해커톤 라이브 현황판. 팀원별 현재 작업, 마감 카운트다운, PR 대기열.">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/static/pretendard.min.css">
   <link rel="stylesheet" href="./styles.css">
 </head>
@@ -13,22 +15,41 @@
       <div class="header-grid">
         <div>
           <p class="kicker">NASA Space Apps 2026 · Challenge 07 Field Shift</p>
-          <h1>팀 아몰라 · 해커톤 현황 대시보드</h1>
-          <p class="sub">저장소 <a href="https://github.com/cloudsnuchoi/2026NASA" target="_blank" rel="noopener">cloudsnuchoi/2026NASA</a> · 마감 2026-11-15 23:59 Asia/Seoul (KST) · 본편 Story County, IA (FIPS 19169)</p>
+          <h1>팀 아몰라 · 라이브 현황판</h1>
+          <p class="sub">저장소 <a href="https://github.com/cloudsnuchoi/2026NASA" target="_blank" rel="noopener">cloudsnuchoi/2026NASA</a>
+            · 마감 2026-11-15 23:59 Asia/Seoul (KST)
+            · 본편 Story County, IA</p>
         </div>
-        <div class="countdown" id="countdown">
-          <div class="label">남은 시간 (마감 23:59 KST)</div>
-          <div class="time" id="countdown-time">--:--:--</div>
-          <div class="label" id="now-kst"></div>
+        <div class="header-tools">
+          <div class="countdown" id="countdown">
+            <div class="label">남은 시간 (마감 23:59 KST)</div>
+            <div class="time" id="countdown-time">--:--:--</div>
+            <div class="label" id="now-kst"></div>
+          </div>
+          <div class="tool-row">
+            <button type="button" class="icon-btn" id="theme-toggle" aria-label="밝은/어두운 테마 전환">테마</button>
+            <button type="button" class="icon-btn" id="refresh-btn" aria-label="지금 새로고침">새로고침</button>
+          </div>
         </div>
       </div>
-      <p id="current-block" class="sub" style="margin-top:0.8rem"></p>
+      <div class="checklist-now" id="checklist-now">
+        <strong>현재 체크리스트 구간</strong>
+        <span id="current-block">확인 중…</span>
+      </div>
       <div class="blocks" id="time-blocks"></div>
       <div id="banner" class="banner" hidden></div>
     </div>
   </header>
 
   <main class="wrap">
+    <section aria-labelledby="members-title">
+      <div class="section-head">
+        <h2 id="members-title">팀원 현황</h2>
+        <p class="muted">이슈의 <code>STATUS:</code> 댓글 기준. 30분 이상 갱신 없으면 노란 경고, 60분이 넘으면 빨간 경고.</p>
+      </div>
+      <div class="member-grid" id="member-cards"></div>
+    </section>
+
     <div class="grid">
       <section class="card span-12">
         <h2>요약</h2>
@@ -36,19 +57,25 @@
       </section>
 
       <section class="card span-6">
-        <h2>영역별 진행률 (이슈 라벨 area/*)</h2>
+        <h2>영역별 진행률</h2>
         <div id="areas"></div>
       </section>
 
       <section class="card span-6">
-        <h2>제안 담당자별 진행률</h2>
-        <p class="muted">이슈 본문 <code>## 제안 담당</code>에서 이름을 읽습니다.</p>
-        <div id="members"></div>
+        <h2>PR 대기열</h2>
+        <p class="muted">열린 PR · 리뷰 필요 · CI 상태</p>
+        <div id="pr-queue"></div>
+      </section>
+
+      <section class="card span-12">
+        <h2>최근 활동</h2>
+        <p class="muted">댓글, 커밋, PR · 시각은 Asia/Seoul (KST)</p>
+        <ol class="feed" id="activity-feed"></ol>
       </section>
 
       <section class="card span-12">
         <h2>이슈 (우선순위 · 영역)</h2>
-        <div style="overflow-x:auto">
+        <div class="table-wrap">
           <table>
             <thead><tr><th>#</th><th>제목</th><th>상태 · 라벨</th><th>제안 담당</th></tr></thead>
             <tbody id="issues"></tbody>
@@ -56,29 +83,9 @@
         </div>
       </section>
 
-      <section class="card span-6">
-        <h2>Pull Requests</h2>
-        <div style="overflow-x:auto">
-          <table>
-            <thead><tr><th>#</th><th>제목</th><th>상태</th><th>작성자</th></tr></thead>
-            <tbody id="pulls"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="card span-6">
-        <h2>최근 커밋</h2>
-        <div style="overflow-x:auto">
-          <table>
-            <thead><tr><th>SHA</th><th>메시지</th><th>작성자</th><th>시각 (KST)</th></tr></thead>
-            <tbody id="commits"></tbody>
-          </table>
-        </div>
-      </section>
-
       <section class="card span-12">
         <h2>아키텍처 다이어그램</h2>
-        <p class="muted"><a href="../ARCHITECTURE.md">docs/ARCHITECTURE.md</a>의 mermaid 블록을 렌더합니다. 빌드·서비스 파이프라인, 의사결정 모델, 협업 흐름이 들어 있습니다.</p>
+        <p class="muted"><a href="../ARCHITECTURE.md">docs/ARCHITECTURE.md</a>의 mermaid 블록. 빌드·서비스 파이프라인, 의사결정 모델, 협업 흐름.</p>
         <div class="tabs" id="diagram-tabs"></div>
         <div class="mermaid-box" id="mermaid-box"><div class="empty">불러오는 중…</div></div>
       </section>
@@ -92,14 +99,25 @@
           <a href="../TEAM_SPEC.md">TEAM_SPEC.md</a>
           <a href="../CHECKLIST.md">CHECKLIST.md</a>
           <a href="../DECISIONS.md">DECISIONS.md</a>
+          <a href="../PROMPTS.md">PROMPTS.md</a>
           <a href="https://github.com/cloudsnuchoi/2026NASA/issues" target="_blank" rel="noopener">Issues</a>
           <a href="https://github.com/cloudsnuchoi/2026NASA/pulls" target="_blank" rel="noopener">Pull requests</a>
         </div>
       </section>
     </div>
+
     <footer>
-      GitHub REST API를 브라우저에서 비인증으로 호출합니다 (한도 60회/시간). 2분마다 갱신하고, 실패하거나 한도에 걸리면 localStorage 캐시를 씁니다.
-      시각은 모두 Asia/Seoul (KST)입니다. 이 페이지는 빌드 없는 정적 HTML입니다.
+      <details id="token-box">
+        <summary>선택: GitHub 토큰 (한도를 60/시간에서 올리기)</summary>
+        <p>읽기 전용 토큰만 쓰세요. <strong>광범위 권한(쓰기, workflow, 삭제) 토큰은 넣지 마세요.</strong> 토큰은 이 브라우저의 localStorage에만 저장되며, GitHub API 요청 헤더로만 쓰입니다. 서버에 업로드되지 않습니다.</p>
+        <div class="token-row">
+          <input type="password" id="token-input" autocomplete="off" spellcheck="false" placeholder="ghp_… 또는 github_pat_… (공개 저장소 읽기만)">
+          <button type="button" class="icon-btn" id="token-save">저장</button>
+          <button type="button" class="icon-btn" id="token-clear">삭제</button>
+        </div>
+        <p class="muted" id="token-state">토큰 없음 · 비인증 한도 60회/시간</p>
+      </details>
+      <p>GitHub REST API를 브라우저에서 호출합니다. 댓글은 2분마다, 이슈·PR·커밋은 토큰이 없으면 약 10분마다 갱신해 비인증 한도(60/시간)를 넘기지 않습니다. 실패하거나 한도에 걸리면 localStorage 캐시를 씁니다. 시각은 모두 Asia/Seoul (KST)입니다.</p>
     </footer>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>

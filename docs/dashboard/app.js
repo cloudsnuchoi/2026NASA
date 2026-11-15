@@ -1,16 +1,41 @@
-/* Field Shift status dashboard — plain JS, no build. */
+/* Field Shift live team board — plain JS, no build. dash-v2 */
 (function () {
   "use strict";
 
   const OWNER = "cloudsnuchoi";
   const REPO = "2026NASA";
   const API = "https://api.github.com";
-  const CACHE_KEY = "fieldshift-dash-v1";
-  const REFRESH_MS = 2 * 60 * 1000;
+  const CACHE_KEY = "fieldshift-dash-v2";
+  const TOKEN_KEY = "fieldshift-gh-token";
+  const THEME_KEY = "fieldshift-theme";
+  const COMMENT_REFRESH_MS = 2 * 60 * 1000;
+  const FULL_SYNC_MS = 10 * 60 * 1000;
   const DEADLINE = new Date("2026-11-15T23:59:00+09:00");
+  const COMMENTS_SINCE = "2026-11-14T15:00:00Z"; /* 2026-11-15 00:00 KST */
+  const STALE_30 = 30 * 60 * 1000;
+  const STALE_60 = 60 * 60 * 1000;
   const ARCH_URLS = [
     "../ARCHITECTURE.md",
     "https://raw.githubusercontent.com/cloudsnuchoi/2026NASA/main/docs/ARCHITECTURE.md",
+  ];
+
+  /* 팀원 GitHub 로그인 매핑 — 여기만 고치면 됩니다. */
+  const LOGIN_MAP = {
+    cloudsnuchoi: "Hylē",
+    ssbb215356: "김윤성",
+    "flyingbear-code": "김우찬",
+    "jieun-Ribby": "고지은",
+    hahah383: "하지민",
+    kangdaeun2005: "강다은",
+  };
+
+  const TEAM = [
+    { id: "hyle", name: "Hylē", role: "풀스택·인프라", login: "cloudsnuchoi" },
+    { id: "yoonsung", name: "김윤성", role: "MATLAB A", login: "ssbb215356" },
+    { id: "woochan", name: "김우찬", role: "MATLAB B", login: "flyingbear-code" },
+    { id: "jieun", name: "고지은", role: "UI/UX A", login: "jieun-Ribby" },
+    { id: "jimin", name: "하지민", role: "UI/UX B", login: "hahah383" },
+    { id: "daeun", name: "강다은", role: "복셀 시뮬", login: "kangdaeun2005" },
   ];
 
   const TIME_BLOCKS = [
@@ -35,17 +60,28 @@
     { key: "area: pitch", label: "pitch" },
   ];
 
-  const MEMBERS = [
-    { id: "hyle", name: "Hylē", patterns: [/hyl[eē]/i, /하일리/] },
-    { id: "yoonsung", name: "김윤성", patterns: [/김윤성/, /윤성/] },
-    { id: "woochan", name: "김우찬", patterns: [/김우찬/, /우찬/] },
-    { id: "jieun", name: "고지은", patterns: [/고지은/, /지은/] },
-    { id: "jimin", name: "하지민", patterns: [/하지민/, /지민/] },
-    { id: "daeun", name: "강다은", patterns: [/강다은/, /다은/] },
-  ];
+  const STATE_META = {
+    progress: { key: "progress", label: "🟢 진행 중", badge: "progress", card: "state-progress" },
+    blocked: { key: "blocked", label: "🔴 막힘", badge: "blocked", card: "state-blocked" },
+    review: { key: "review", label: "🟡 리뷰 대기", badge: "review", card: "state-review" },
+    done: { key: "done", label: "✅ 완료", badge: "done", card: "state-done" },
+  };
 
   const $ = (id) => document.getElementById(id);
   const banner = $("banner");
+
+  function getToken() {
+    try { return (localStorage.getItem(TOKEN_KEY) || "").trim(); } catch (e) { return ""; }
+  }
+
+  function setToken(value) {
+    try {
+      if (value) localStorage.setItem(TOKEN_KEY, value);
+      else localStorage.removeItem(TOKEN_KEY);
+    } catch (e) { /* private mode */ }
+  }
+
+  function hasToken() { return !!getToken(); }
 
   function setBanner(msg, kind) {
     banner.textContent = msg || "";
@@ -62,7 +98,28 @@
       hour: "2-digit", minute: "2-digit", second: "2-digit",
       hour12: false,
     }).format(d);
-    return parts.replace(" ", " ") + " Asia/Seoul (KST)";
+    return parts + " Asia/Seoul (KST)";
+  }
+
+  function fmtKSTShort(d) {
+    return new Intl.DateTimeFormat("sv-SE", {
+      timeZone: "Asia/Seoul",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      hour12: false,
+    }).format(d);
+  }
+
+  function relativeKo(then, now) {
+    const ms = now - then;
+    if (ms < 0) return "방금";
+    const s = Math.floor(ms / 1000);
+    if (s < 20) return "방금";
+    if (s < 60) return s + "초 전";
+    const m = Math.floor(s / 60);
+    if (m < 60) return m + "분 전";
+    const h = Math.floor(m / 60);
+    if (h < 24) return h + "시간 " + (m % 60) + "분 전";
+    return fmtKST(then);
   }
 
   function tickCountdown() {
@@ -104,25 +161,21 @@
     });
     const cur = TIME_BLOCKS.find(function (b) { return b.id === currentId; });
     $("current-block").textContent = cur
-      ? ("현재 체크리스트 구간: " + cur.label)
+      ? cur.label
       : (now < new Date(TIME_BLOCKS[0].start)
-        ? "현재 체크리스트 구간: 아직 동결 창 전"
-        : "현재 체크리스트 구간: 마감 이후");
+        ? "아직 동결 창 전"
+        : "마감 이후");
   }
 
   function loadCache() {
     try {
       const raw = localStorage.getItem(CACHE_KEY);
       return raw ? JSON.parse(raw) : null;
-    } catch (e) {
-      return null;
-    }
+    } catch (e) { return null; }
   }
 
   function saveCache(data) {
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-    } catch (e) { /* quota */ }
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (e) { /* quota */ }
   }
 
   function parseLinkNext(header) {
@@ -143,15 +196,26 @@
     };
   }
 
+  function authHeaders() {
+    const headers = { Accept: "application/vnd.github+json" };
+    const token = getToken();
+    if (token) headers.Authorization = "Bearer " + token;
+    return headers;
+  }
+
   async function fetchJson(url) {
-    const res = await fetch(url, {
-      headers: { Accept: "application/vnd.github+json" },
-    });
+    const res = await fetch(url, { headers: authHeaders() });
     const rate = rateFrom(res);
     if (res.status === 403 || res.status === 429) {
       const err = new Error("rate_limited");
       err.rate = rate;
       err.status = res.status;
+      throw err;
+    }
+    if (res.status === 401) {
+      const err = new Error("bad_token");
+      err.rate = rate;
+      err.status = 401;
       throw err;
     }
     if (!res.ok) {
@@ -164,12 +228,13 @@
     return { data: data, rate: rate, link: res.headers.get("Link") };
   }
 
-  async function fetchAll(url) {
+  async function fetchAll(url, maxPages) {
     let acc = [];
     let next = url;
     let rate = null;
     let guard = 0;
-    while (next && guard < 8) {
+    const cap = maxPages || 2;
+    while (next && guard < cap) {
       const page = await fetchJson(next);
       acc = acc.concat(page.data);
       rate = page.rate;
@@ -179,27 +244,51 @@
     return { data: acc, rate: rate };
   }
 
-  async function loadGithub() {
-    const issuesUrl = API + "/repos/" + OWNER + "/" + REPO + "/issues?state=all&per_page=100";
-    const pullsUrl = API + "/repos/" + OWNER + "/" + REPO + "/pulls?state=all&per_page=100";
-    const commitsUrl = API + "/repos/" + OWNER + "/" + REPO + "/commits?per_page=15";
-    const [issues, pulls, commits] = await Promise.all([
-      fetchAll(issuesUrl),
-      fetchAll(pullsUrl),
-      fetchJson(commitsUrl),
-    ]);
+  function issueNumberFromComment(c) {
+    const url = c.issue_url || "";
+    const m = url.match(/\/issues\/(\d+)$/);
+    return m ? Number(m[1]) : null;
+  }
+
+  function parseStatus(body) {
+    if (!body) return null;
+    const lines = body.replace(/\r\n/g, "\n").split("\n");
+    const first = (lines[0] || "").trim();
+    const head = first.match(/^STATUS:\s*(?:(🟢|🔴|🟡|✅)\s*)?(진행\s*중|막힘|리뷰\s*대기|완료)/);
+    if (!head) return null;
+    const label = head[2].replace(/\s+/g, " ").trim();
+    let key = "progress";
+    if (label === "막힘") key = "blocked";
+    else if (label === "리뷰 대기") key = "review";
+    else if (label === "완료") key = "done";
+    const field = function (name) {
+      const re = new RegExp("^" + name + "\\s*:\\s*(.*)$");
+      for (let i = 1; i < lines.length; i++) {
+        const m = lines[i].trim().match(re);
+        if (m) return m[1].trim();
+      }
+      return "";
+    };
+    const progRaw = field("진행률");
+    const progM = progRaw.match(/(\d+)/);
     return {
-      fetchedAt: Date.now(),
-      issues: issues.data,
-      pulls: pulls.data,
-      commits: commits.data,
-      rate: commits.rate || pulls.rate || issues.rate,
+      key: key,
+      task: field("작업"),
+      progress: progM ? Math.min(100, Number(progM[1])) : null,
+      blocked: field("막힌\\s*점") || field("막힌 점"),
+      next: field("다음"),
     };
   }
 
-  function isIssue(item) {
-    return !item.pull_request;
+  function nameOfLogin(login) {
+    return LOGIN_MAP[login] || login;
   }
+
+  function memberByLogin(login) {
+    return TEAM.find(function (m) { return m.login === login; }) || null;
+  }
+
+  function isIssue(item) { return !item.pull_request; }
 
   function labelsOf(item) {
     return (item.labels || []).map(function (l) { return l.name; });
@@ -214,18 +303,127 @@
   function ownersOf(item) {
     const text = ownerSection(item.body);
     if (!text) return [];
-    const found = [];
-    MEMBERS.forEach(function (mem) {
-      if (mem.patterns.some(function (re) { return re.test(text); })) {
-        found.push(mem);
-      }
+    return TEAM.filter(function (mem) {
+      const re = new RegExp(mem.name.replace(/[ē]/g, "e?") + "|Hylē|하일리", mem.name === "Hylē" ? "i" : undefined);
+      if (mem.name === "Hylē") return /hyl[eē]|하일리/i.test(text);
+      if (mem.name === "김윤성") return /김윤성|윤성/.test(text);
+      if (mem.name === "김우찬") return /김우찬|우찬/.test(text);
+      if (mem.name === "고지은") return /고지은|지은/.test(text);
+      if (mem.name === "하지민") return /하지민|지민/.test(text);
+      if (mem.name === "강다은") return /강다은|다은/.test(text);
+      return re.test(text);
     });
-    return found;
   }
 
   function pct(n, d) {
     if (!d) return 0;
     return Math.round((100 * n) / d);
+  }
+
+  function mergeComments(prev, incoming) {
+    const map = {};
+    (prev || []).concat(incoming || []).forEach(function (c) { map[c.id] = c; });
+    return Object.keys(map).map(function (k) { return map[k]; });
+  }
+
+  function latestStatusByLogin(comments) {
+    const by = {};
+    (comments || []).forEach(function (c) {
+      const parsed = parseStatus(c.body);
+      if (!parsed) return;
+      const login = c.user && c.user.login;
+      if (!login) return;
+      const t = new Date(c.updated_at || c.created_at).getTime();
+      if (!by[login] || t > by[login].time) {
+        by[login] = { comment: c, parsed: parsed, time: t, issue: issueNumberFromComment(c) };
+      }
+    });
+    return by;
+  }
+
+  function issueByNumber(data, n) {
+    return (data.issues || []).find(function (i) { return i.number === n; }) || null;
+  }
+
+  function renderMemberCards(data) {
+    const now = Date.now();
+    const latest = latestStatusByLogin(data.comments || []);
+    const pulls = (data.pulls || []).filter(function (p) { return p.state === "open"; });
+    const html = TEAM.map(function (mem) {
+      const st = latest[mem.login];
+      const meta = st ? STATE_META[st.parsed.key] : null;
+      const age = st ? now - st.time : null;
+      let staleClass = "";
+      let staleHtml = "";
+      if (st && st.parsed.key !== "done") {
+        if (age > STALE_60) {
+          staleClass = "stale-60";
+          staleHtml = '<span class="stale-flag bad">60분 초과</span>';
+        } else if (age > STALE_30) {
+          staleClass = "stale-30";
+          staleHtml = '<span class="stale-flag warn">30분 초과</span>';
+        }
+      }
+      const cardClass = "member-card " + (meta ? meta.card : "") + (staleClass ? " " + staleClass : "");
+      const badge = meta
+        ? '<span class="badge ' + meta.badge + '">' + escapeHtml(meta.label) + "</span>"
+        : '<span class="badge">보고 없음</span>';
+      const task = st && st.parsed.task
+        ? '<p class="task-text">' + escapeHtml(st.parsed.task) + "</p>"
+        : '<p class="task-text empty">아직 STATUS 댓글이 없습니다.</p>';
+      const prog = st && st.parsed.progress != null ? st.parsed.progress : null;
+      const bar = prog != null
+        ? '<div class="progress-row"><div class="bar" role="progressbar" aria-valuenow="' + prog +
+          '" aria-valuemin="0" aria-valuemax="100"><span style="width:' + prog + '%"></span></div>' +
+          '<div class="pct">' + prog + "%</div></div>"
+        : '<div class="progress-row"><div class="bar"><span style="width:0%"></span></div><div class="pct muted">—</div></div>';
+      let issueHtml = "";
+      if (st && st.issue) {
+        const iss = issueByNumber(data, st.issue);
+        const title = iss ? iss.title : "이슈 #" + st.issue;
+        const href = iss && iss.html_url
+          ? iss.html_url
+          : "https://github.com/" + OWNER + "/" + REPO + "/issues/" + st.issue;
+        issueHtml = '<a class="issue-link" href="' + escapeHtml(href) + '" target="_blank" rel="noopener">#' +
+          st.issue + " " + escapeHtml(title) + "</a>";
+      } else {
+        const assigned = (data.issues || []).filter(isIssue).filter(function (i) {
+          return i.state === "open" && ownersOf(i).some(function (o) { return o.id === mem.id; });
+        }).slice(0, 2);
+        issueHtml = assigned.length
+          ? assigned.map(function (i) {
+              return '<a class="issue-link" href="' + escapeHtml(i.html_url) + '" target="_blank" rel="noopener">#' +
+                i.number + " " + escapeHtml(i.title) + "</a>";
+            }).join("<br>")
+          : '<span class="muted">연결된 이슈 없음</span>';
+      }
+      const ago = st
+        ? '<div class="ago">마지막 보고 ' + escapeHtml(relativeKo(st.time, now)) +
+          " · " + escapeHtml(fmtKST(new Date(st.time))) + "</div>"
+        : '<div class="ago">보고 시각 없음</div>';
+      const minePr = pulls.filter(function (p) { return p.user && p.user.login === mem.login; });
+      const prHtml = minePr.length
+        ? '<div class="pr-line">열린 PR: ' + minePr.map(function (p) {
+            return '<a href="' + escapeHtml(p.html_url) + '" target="_blank" rel="noopener">#' + p.number +
+              " " + escapeHtml(p.title) + "</a>";
+          }).join(", ") + "</div>"
+        : '<div class="pr-line muted">열린 PR 없음</div>';
+      const blocked = st && st.parsed.blocked
+        ? '<p class="blocked-note">막힌 점: ' + escapeHtml(st.parsed.blocked) + "</p>"
+        : "";
+      const next = st && st.parsed.next
+        ? '<p class="next-note">다음: ' + escapeHtml(st.parsed.next) + "</p>"
+        : "";
+      return (
+        '<article class="' + cardClass + '" data-login="' + escapeHtml(mem.login) + '">' +
+          '<div class="member-top">' + badge + staleHtml + "</div>" +
+          "<h3 class=\"member-name\">" + escapeHtml(mem.name) + "</h3>" +
+          '<p class="member-meta">' + escapeHtml(mem.role) + " · @" + escapeHtml(mem.login) + "</p>" +
+          '<div class="task-label">현재 작업</div>' + task + bar + issueHtml + blocked + next + ago + prHtml +
+        "</article>"
+      );
+    }).join("");
+    $("member-cards").innerHTML = html;
   }
 
   function renderStats(data) {
@@ -235,13 +433,19 @@
     const pulls = data.pulls || [];
     const openP = pulls.filter(function (p) { return p.state === "open"; });
     const merged = pulls.filter(function (p) { return p.merged_at; });
+    const latest = latestStatusByLogin(data.comments || []);
+    let blocked = 0, active = 0;
+    Object.keys(latest).forEach(function (login) {
+      if (latest[login].parsed.key === "blocked") blocked += 1;
+      if (latest[login].parsed.key === "progress") active += 1;
+    });
     $("stats").innerHTML =
       stat("열린 이슈", openI.length) +
       stat("닫힌 이슈", closedI.length) +
       stat("전체 진행", pct(closedI.length, issues.length) + "%") +
       stat("열린 PR", openP.length) +
       stat("머지된 PR", merged.length) +
-      stat("최근 커밋", (data.commits || []).length + "건 표시");
+      stat("진행 중 / 막힘", active + " / " + blocked);
   }
 
   function stat(label, value) {
@@ -268,28 +472,93 @@
     }).join("");
   }
 
-  function renderMembers(data) {
-    const issues = (data.issues || []).filter(isIssue);
-    $("members").innerHTML = MEMBERS.map(function (mem) {
-      const mine = issues.filter(function (i) {
-        return ownersOf(i).some(function (o) { return o.id === mem.id; });
-      });
-      const open = mine.filter(function (i) { return i.state === "open"; });
-      const closed = mine.length - open.length;
-      const p = pct(closed, mine.length);
-      const titles = open.slice(0, 3).map(function (i) {
-        return '<div class="muted">#' + i.number + " " + escapeHtml(i.title) + "</div>";
-      }).join("");
+  function ciTag(sha, statuses) {
+    const st = (statuses || {})[sha];
+    if (!st || !st.state || st.state === "pending" && !st.total_count) {
+      return '<span class="tag">CI 미확인</span>';
+    }
+    if (st.state === "success") return '<span class="tag ci-success">CI 통과</span>';
+    if (st.state === "pending") return '<span class="tag ci-pending">CI 진행</span>';
+    if (st.state === "failure" || st.state === "error") return '<span class="tag ci-failure">CI 실패</span>';
+    return '<span class="tag">CI ' + escapeHtml(st.state) + "</span>";
+  }
+
+  function renderPrQueue(data) {
+    const open = (data.pulls || []).filter(function (p) { return p.state === "open"; });
+    if (!open.length) {
+      $("pr-queue").innerHTML = '<div class="empty">열린 PR이 없습니다.</div>';
+      return;
+    }
+    $("pr-queue").innerHTML = open.map(function (p) {
+      const sha = p.head && p.head.sha;
+      const draft = p.draft ? '<span class="tag draft">초안</span>' : "";
+      const review = p.draft
+        ? '<span class="tag">초안</span>'
+        : '<span class="tag p1">리뷰 필요</span>';
+      const author = p.user && p.user.login ? p.user.login : "";
+      const who = nameOfLogin(author);
       return (
-        '<div class="member"><header><strong>' +
-        escapeHtml(mem.name) +
-        "</strong><span class=\"muted\">" +
-        closed + "/" + mine.length + " · " + p + "%</span></header>" +
-        '<div class="bar"><span style="width:' + p + '%"></span></div>' +
-        (titles || '<div class="muted">열린 이슈 없음</div>') +
-        "</div>"
+        '<div class="pr-item"><div class="pr-title"><a href="' + escapeHtml(p.html_url) +
+        '" target="_blank" rel="noopener">#' + p.number + " " + escapeHtml(p.title) +
+        "</a></div><div>" + draft + review + ciTag(sha, data.statuses) +
+        ' <span class="muted">@' + escapeHtml(author) + (who !== author ? " · " + escapeHtml(who) : "") +
+        "</span></div></div>"
       );
     }).join("");
+  }
+
+  function renderFeed(data) {
+    const items = [];
+    (data.comments || []).forEach(function (c) {
+      const login = c.user && c.user.login;
+      const parsed = parseStatus(c.body);
+      const n = issueNumberFromComment(c);
+      const snippet = parsed
+        ? (STATE_META[parsed.key].label + (parsed.task ? " · " + parsed.task : ""))
+        : (c.body || "").split("\n")[0].slice(0, 120);
+      items.push({
+        t: new Date(c.created_at).getTime(),
+        kind: parsed ? "STATUS" : "댓글",
+        html: '<a href="' + escapeHtml(c.html_url) + '" target="_blank" rel="noopener">#' +
+          (n || "?") + "</a> @" + escapeHtml(login) + " (" + escapeHtml(nameOfLogin(login)) + ") " +
+          escapeHtml(snippet),
+      });
+    });
+    (data.commits || []).forEach(function (c) {
+      const sha = c.sha.slice(0, 7);
+      const msg = (c.commit && c.commit.message ? c.commit.message : "").split("\n")[0];
+      const author = (c.author && c.author.login) || (c.commit && c.commit.author && c.commit.author.name) || "";
+      const date = c.commit && c.commit.author && c.commit.author.date;
+      items.push({
+        t: date ? new Date(date).getTime() : 0,
+        kind: "커밋",
+        html: '<a href="' + escapeHtml(c.html_url) + '" target="_blank" rel="noopener">' + sha +
+          "</a> " + escapeHtml(msg) + ' <span class="muted">' + escapeHtml(author) + "</span>",
+      });
+    });
+    (data.pulls || []).forEach(function (p) {
+      const author = p.user && p.user.login ? p.user.login : "";
+      items.push({
+        t: new Date(p.created_at).getTime(),
+        kind: "PR",
+        html: '<a href="' + escapeHtml(p.html_url) + '" target="_blank" rel="noopener">#' +
+          p.number + " " + escapeHtml(p.title) + "</a> @" + escapeHtml(author),
+      });
+      if (p.merged_at) {
+        items.push({
+          t: new Date(p.merged_at).getTime(),
+          kind: "머지",
+          html: '<a href="' + escapeHtml(p.html_url) + '" target="_blank" rel="noopener">#' +
+            p.number + "</a> 머지됨",
+        });
+      }
+    });
+    items.sort(function (a, b) { return b.t - a.t; });
+    const top = items.slice(0, 25);
+    $("activity-feed").innerHTML = top.map(function (it) {
+      return '<li class="feed-item"><span class="feed-time">' + escapeHtml(fmtKSTShort(new Date(it.t))) +
+        " KST</span><span class=\"feed-kind\">" + escapeHtml(it.kind) + "</span><span>" + it.html + "</span></li>";
+    }).join("") || '<li class="empty">활동이 아직 없습니다.</li>';
   }
 
   function priClass(item) {
@@ -331,55 +600,24 @@
     $("issues").innerHTML = rows || "<tr><td colspan='4' class='muted'>이슈 없음</td></tr>";
   }
 
-  function renderPulls(data) {
-    const pulls = (data.pulls || []).slice();
-    const rows = pulls.map(function (p) {
-      const st = p.merged_at
-        ? '<span class="tag open">merged</span>'
-        : (p.state === "open" ? '<span class="tag open">open</span>' : '<span class="tag closed">closed</span>');
-      return (
-        "<tr><td><a href=\"" + escapeHtml(p.html_url) + "\" target=\"_blank\" rel=\"noopener\">#" +
-        p.number + "</a></td><td>" + escapeHtml(p.title) + "</td><td>" + st +
-        "</td><td>" + escapeHtml(p.user && p.user.login ? p.user.login : "") + "</td></tr>"
-      );
-    }).join("");
-    $("pulls").innerHTML = rows || "<tr><td colspan='4' class='muted'>PR 없음</td></tr>";
-  }
-
-  function renderCommits(data) {
-    const commits = data.commits || [];
-    const rows = commits.map(function (c) {
-      const sha = c.sha.slice(0, 7);
-      const msg = (c.commit && c.commit.message ? c.commit.message : "").split("\n")[0];
-      const author = (c.commit && c.commit.author && c.commit.author.name) || "";
-      const date = c.commit && c.commit.author && c.commit.author.date
-        ? fmtKST(new Date(c.commit.author.date))
-        : "";
-      return (
-        "<tr><td><a href=\"" + escapeHtml(c.html_url) + "\" target=\"_blank\" rel=\"noopener\">" +
-        sha + "</a></td><td>" + escapeHtml(msg) + "</td><td>" + escapeHtml(author) +
-        "</td><td>" + escapeHtml(date) + "</td></tr>"
-      );
-    }).join("");
-    $("commits").innerHTML = rows || "<tr><td colspan='4' class='muted'>커밋 없음</td></tr>";
-  }
-
   function rateMessage(rate, fetchedAt, usedCache, err) {
     const when = fetchedAt ? fmtKST(new Date(fetchedAt)) : "";
     const bits = [];
     if (usedCache) bits.push("로컬 캐시 표시" + (when ? " (수집 " + when + ")" : ""));
     else if (when) bits.push("GitHub API 갱신 " + when);
     if (rate && rate.remaining != null) {
-      bits.push("잔여 요청 " + rate.remaining + "/" + (rate.limit || "?") + " (비인증 한도 60/시간)");
-      if (rate.reset) {
-        bits.push("한도 리셋 " + fmtKST(new Date(Number(rate.reset) * 1000)));
-      }
+      bits.push("잔여 요청 " + rate.remaining + "/" + (rate.limit || "?") +
+        (hasToken() ? " (토큰)" : " (비인증 한도 60/시간)"));
+      if (rate.reset) bits.push("한도 리셋 " + fmtKST(new Date(Number(rate.reset) * 1000)));
     }
-    bits.push("2분마다 갱신, 결과는 localStorage에 저장");
+    bits.push(hasToken() ? "2분마다 전체 갱신" : "댓글 2분마다 · 이슈/PR 약 10분마다");
     let kind = "";
     if (err === "rate_limited") {
       bits.unshift("API 한도에 걸렸습니다. 캐시로 표시합니다.");
       kind = "warn";
+    } else if (err === "bad_token") {
+      bits.unshift("토큰이 거부되었습니다. 토큰을 지우고 비인증으로 다시 시도하세요.");
+      kind = "bad";
     } else if (err) {
       bits.unshift("API 요청 실패(" + err + "). 캐시가 있으면 캐시를 씁니다.");
       kind = usedCache ? "warn" : "bad";
@@ -396,53 +634,136 @@
   }
 
   function renderAll(data) {
+    renderMemberCards(data);
     renderStats(data);
     renderAreas(data);
-    renderMembers(data);
+    renderPrQueue(data);
+    renderFeed(data);
     renderIssues(data);
-    renderPulls(data);
-    renderCommits(data);
+  }
+
+  async function loadComments(since) {
+    const q = "sort=updated&direction=desc&per_page=100&since=" + encodeURIComponent(since || COMMENTS_SINCE);
+    return fetchJson(API + "/repos/" + OWNER + "/" + REPO + "/issues/comments?" + q);
+  }
+
+  async function loadFull() {
+    const issuesUrl = API + "/repos/" + OWNER + "/" + REPO + "/issues?state=all&per_page=100";
+    const pullsUrl = API + "/repos/" + OWNER + "/" + REPO + "/pulls?state=all&per_page=100";
+    const commitsUrl = API + "/repos/" + OWNER + "/" + REPO + "/commits?per_page=20";
+    const [issues, pulls, commits, comments] = await Promise.all([
+      fetchAll(issuesUrl, 2),
+      fetchAll(pullsUrl, 2),
+      fetchJson(commitsUrl),
+      loadComments(COMMENTS_SINCE),
+    ]);
+    const data = {
+      fetchedAt: Date.now(),
+      fullSyncAt: Date.now(),
+      issues: issues.data,
+      pulls: pulls.data,
+      commits: commits.data,
+      comments: comments.data,
+      statuses: {},
+      rate: comments.rate || commits.rate || pulls.rate || issues.rate,
+    };
+    await maybeLoadStatuses(data);
+    return data;
+  }
+
+  async function maybeLoadStatuses(data) {
+    const open = (data.pulls || []).filter(function (p) { return p.state === "open" && p.head && p.head.sha; });
+    if (!open.length) return;
+    const remaining = data.rate && data.rate.remaining != null ? Number(data.rate.remaining) : 0;
+    const allow = hasToken() || remaining > 20;
+    if (!allow || open.length > 5) return;
+    const statuses = data.statuses || {};
+    for (let i = 0; i < open.length; i++) {
+      try {
+        const r = await fetchJson(API + "/repos/" + OWNER + "/" + REPO + "/commits/" + open[i].head.sha + "/status");
+        statuses[open[i].head.sha] = { state: r.data.state, total_count: r.data.total_count };
+        data.rate = r.rate || data.rate;
+      } catch (e) { /* skip CI */ }
+    }
+    data.statuses = statuses;
+  }
+
+  async function loadCommentsOnly(cache) {
+    const since = cache && cache.fetchedAt
+      ? new Date(cache.fetchedAt - 60 * 1000).toISOString()
+      : COMMENTS_SINCE;
+    const comments = await loadComments(since);
+    const merged = mergeComments(cache && cache.comments, comments.data);
+    return {
+      fetchedAt: Date.now(),
+      fullSyncAt: cache && cache.fullSyncAt,
+      issues: (cache && cache.issues) || [],
+      pulls: (cache && cache.pulls) || [],
+      commits: (cache && cache.commits) || [],
+      comments: merged,
+      statuses: (cache && cache.statuses) || {},
+      rate: comments.rate,
+    };
   }
 
   async function refresh(reason) {
     const cache = loadCache();
+    const now = Date.now();
+    const fullAge = cache && cache.fullSyncAt ? now - cache.fullSyncAt : Infinity;
+    const wantFull = reason === "boot" || reason === "manual" || hasToken() || fullAge >= FULL_SYNC_MS || !cache || !cache.issues;
     try {
-      const data = await loadGithub();
+      const data = wantFull ? await loadFull() : await loadCommentsOnly(cache);
+      if (!wantFull && cache && cache.issues) {
+        /* keep previous full payload */
+      }
       saveCache(data);
       renderAll(data);
       const b = rateMessage(data.rate, data.fetchedAt, false, null);
       setBanner(b.msg, b.kind);
     } catch (err) {
       const code = err && err.message ? err.message : String(err);
-      if (cache && cache.issues) {
+      if (code === "bad_token") setToken("");
+      if (cache && (cache.issues || cache.comments)) {
         renderAll(cache);
         const b = rateMessage(err.rate || cache.rate, cache.fetchedAt, true, code);
         setBanner(b.msg, b.kind || "warn");
       } else {
         setBanner("GitHub API를 불러오지 못했습니다 (" + code + "). 비인증 한도는 시간당 60회입니다. 잠시 뒤 새로고침하세요.", "bad");
+        $("member-cards").innerHTML = TEAM.map(function (mem) {
+          return '<article class="member-card"><h3 class="member-name">' + escapeHtml(mem.name) +
+            '</h3><p class="member-meta">' + escapeHtml(mem.role) + " · @" + escapeHtml(mem.login) +
+            '</p><p class="task-text empty">데이터를 아직 불러오지 못했습니다.</p></article>';
+        }).join("");
       }
     }
   }
 
   /* ---- mermaid from ARCHITECTURE.md ---- */
-  function extractMermaid(md) {
-    const blocks = [];
-    const re = /^##\s+(.+)\n([\s\S]*?)(?=^##\s|\s*$)/gm;
-    const parts = md.split(/(?=^## )/m);
-    parts.forEach(function (part) {
-      const titleMatch = part.match(/^##\s+(.+)$/m);
-      const title = titleMatch ? titleMatch[1].trim() : "다이어그램";
-      const fence = /```mermaid\s*([\s\S]*?)```/g;
-      let m;
-      while ((m = fence.exec(part))) {
-        blocks.push({ title: title, code: m[1].trim() });
-      }
-    });
-    return blocks;
-  }
-
   let mermaidReady = false;
   let mermaidBlocks = [];
+  let mermaidTheme = "dark";
+
+  function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") || "dark";
+  }
+
+  function applyTheme(theme) {
+    const t = theme === "light" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", t);
+    try { localStorage.setItem(THEME_KEY, t); } catch (e) { /* */ }
+    if (mermaidBlocks.length) {
+      mermaidReady = false;
+      mermaidTheme = t;
+      showDiagram(0);
+    }
+  }
+
+  function initTheme() {
+    let t = null;
+    try { t = localStorage.getItem(THEME_KEY); } catch (e) { t = null; }
+    if (!t && window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) t = "light";
+    applyTheme(t || "dark");
+  }
 
   async function loadArchitecture() {
     let lastErr = null;
@@ -455,12 +776,25 @@
         if (!mermaidBlocks.length) throw new Error("no_mermaid");
         setupTabs(mermaidBlocks);
         return;
-      } catch (e) {
-        lastErr = e;
-      }
+      } catch (e) { lastErr = e; }
     }
     $("mermaid-box").innerHTML = '<div class="empty">ARCHITECTURE.md를 불러오지 못했습니다. <a href="https://github.com/cloudsnuchoi/2026NASA/blob/main/docs/ARCHITECTURE.md">GitHub에서 보기</a>' +
       (lastErr ? " (" + escapeHtml(String(lastErr.message || lastErr)) + ")" : "") + "</div>";
+  }
+
+  function extractMermaid(md) {
+    const blocks = [];
+    const parts = md.split(/(?=^## )/m);
+    parts.forEach(function (part) {
+      const titleMatch = part.match(/^##\s+(.+)$/m);
+      const title = titleMatch ? titleMatch[1].trim() : "다이어그램";
+      const fence = /```mermaid\s*([\s\S]*?)```/g;
+      let m;
+      while ((m = fence.exec(part))) {
+        blocks.push({ title: title, code: m[1].trim() });
+      }
+    });
+    return blocks;
   }
 
   function setupTabs(blocks) {
@@ -487,14 +821,16 @@
         escapeHtml(block.code) + "</pre></div>";
       return;
     }
-    if (!mermaidReady) {
+    const theme = currentTheme() === "light" ? "neutral" : "dark";
+    if (!mermaidReady || mermaidTheme !== currentTheme()) {
       window.mermaid.initialize({
         startOnLoad: false,
-        theme: "dark",
+        theme: theme,
         securityLevel: "strict",
         fontFamily: "Pretendard, Noto Sans KR, system-ui, sans-serif",
       });
       mermaidReady = true;
+      mermaidTheme = currentTheme();
     }
     const id = "mmd-" + idx + "-" + Date.now();
     try {
@@ -506,17 +842,53 @@
     }
   }
 
+  function bindChrome() {
+    $("theme-toggle").addEventListener("click", function () {
+      applyTheme(currentTheme() === "dark" ? "light" : "dark");
+    });
+    $("refresh-btn").addEventListener("click", function () { refresh("manual"); });
+    $("token-save").addEventListener("click", function () {
+      const v = ($("token-input").value || "").trim();
+      if (!v) return;
+      setToken(v);
+      $("token-input").value = "";
+      updateTokenState();
+      refresh("manual");
+    });
+    $("token-clear").addEventListener("click", function () {
+      setToken("");
+      $("token-input").value = "";
+      updateTokenState();
+      refresh("manual");
+    });
+    updateTokenState();
+  }
+
+  function updateTokenState() {
+    $("token-state").textContent = hasToken()
+      ? "이 브라우저에 토큰이 저장되어 있습니다. 한도가 올라갑니다. 광범위 토큰은 사용하지 마세요."
+      : "토큰 없음 · 비인증 한도 60회/시간";
+  }
+
   function boot() {
+    initTheme();
+    bindChrome();
     tickCountdown();
     setInterval(tickCountdown, 1000);
     const cache = loadCache();
-    if (cache && cache.issues) {
+    if (cache && (cache.issues || cache.comments)) {
       renderAll(cache);
       const b = rateMessage(cache.rate, cache.fetchedAt, true, null);
       setBanner(b.msg + " · 최신 데이터 요청 중", "");
+    } else {
+      $("member-cards").innerHTML = TEAM.map(function (mem) {
+        return '<article class="member-card"><h3 class="member-name">' + escapeHtml(mem.name) +
+          '</h3><p class="member-meta">' + escapeHtml(mem.role) + " · @" + escapeHtml(mem.login) +
+          '</p><p class="task-text empty">불러오는 중…</p></article>';
+      }).join("");
     }
     refresh("boot");
-    setInterval(function () { refresh("interval"); }, REFRESH_MS);
+    setInterval(function () { refresh("interval"); }, COMMENT_REFRESH_MS);
     loadArchitecture();
   }
 

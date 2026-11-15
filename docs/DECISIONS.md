@@ -84,3 +84,9 @@
 - **결정 (문서·현황판).** 시스템 그림의 원본은 [ARCHITECTURE.md](./ARCHITECTURE.md) (전체 구조, 빌드 파이프라인, 서비스 파이프라인, 의사결정 모델, 협업 흐름, AI 4층·알고리즘). 진행 현황은 `docs/dashboard/` 정적 페이지가 공개 레포 GitHub REST API를 비인증으로 읽어 표시하고, GitHub Pages(`main`의 `/docs`)로 연다.
 - **확인 (역할).** Hylē = 풀스택·오케스트레이터. MATLAB = 김윤성, 김우찬. UI/UX = 고지은, 하지민. three.js 복셀 시뮬 = 강다은. VPS 서버 에이전트가 Postgres 17 + PostGIS + pgvector + pg_trgm (`/srv/hackathon`)으로 적재 중. crawl4ai는 RAG 근거 문서용이며 P0 다운로드 다음이다.
 
+## 2026-11-15 11:40 · 라이브 현황판·STATUS 댓글
+
+- **결정 (상태 프로토콜).** 팀원(또는 그 사람의 Codex/agy)은 이슈에 고정 형식의 `STATUS:` 댓글을 남긴다. 시작·막힘·완료 때와 최소 30분마다. 첫 줄은 `STATUS: 🟢 진행 중` 또는 `🔴 막힘` / `🟡 리뷰 대기` / `✅ 완료`, 이어서 `작업:`, `진행률: NN%`, 선택으로 `막힌 점:`, `다음:`. 형식은 [PROMPTS.md](./PROMPTS.md) 0.1절, [AGENTS.md](../AGENTS.md), [ONBOARDING.md](./ONBOARDING.md).
+- **결정 (현황판).** [dashboard](./dashboard/index.html)는 팀원 카드(현재 작업, 상태, 진행률, 이슈, 상대 시각, 30/60분 지연 경고, 열린 PR)를 맨 위에 두고, 마감 카운트다운·체크리스트 구간, 영역 진행률, PR 대기열, 최근 활동을 보여 준다. 이슈 댓글 API(`since`, 최신순, `per_page=100`)와 localStorage 캐시로 비인증 한도(60/시간) 안에서 2분마다 갱신한다. 선택 토큰은 브라우저 localStorage에만 저장한다.
+- **결정 (GitHub 로그인 매핑).** `cloudsnuchoi` = Hylē, `ssbb215356` = 김윤성, `flyingbear-code` = 김우찬, `jieun-Ribby` = 고지은, `hahah383` = 하지민, `kangdaeun2005` = 강다은. 대시보드 `LOGIN_MAP` 한 곳에서만 고친다.
+- **결정 (30분 점검).** Hylē/봇의 30분 레포 점검은 `STATUS:` 댓글을 읽어 막힘·지연·리뷰 대기를 보고한다.

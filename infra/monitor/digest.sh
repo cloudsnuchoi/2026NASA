@@ -28,3 +28,24 @@ echo "## Merged in last ${STALE_MIN} min"
 since=$(date -u -d "-${STALE_MIN} min" +%Y-%m-%dT%H:%M:%SZ)
 gh pr list -R "$REPO" --state merged --limit 50 --json number,title,mergedAt \
   | jq -r --arg s "$since" '.[] | select(.mergedAt >= $s) | "- #\(.number) \(.title)"'
+
+echo
+echo "## Latest STATUS comments (per author)"
+since=$(date -u -d "2026-11-14T15:00:00Z" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-1d +%Y-%m-%dT00:00:00Z)
+gh api "repos/${REPO}/issues/comments?since=${since}&per_page=100&sort=updated&direction=desc" \
+  | jq -r '
+      [ .[] | select(.body | startswith("STATUS:") or test("^STATUS:"))
+        | {
+            login: .user.login,
+            created: .created_at,
+            updated: .updated_at,
+            url: .html_url,
+            issue: (.issue_url | split("/") | last),
+            body: .body
+          }
+      ]
+      | group_by(.login)
+      | map(sort_by(.updated) | last)
+      | .[]
+      | "- **\(.login)** #\(.issue) \(.updated) — \((.body | split("\n") | map(select(length>0)) | .[0:3] | join(" / ")))"'
+echo

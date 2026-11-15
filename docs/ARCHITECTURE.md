@@ -279,7 +279,7 @@ flowchart LR
 
 - 상태의 원본은 GitHub(이슈·PR·커밋). Mattermost는 지시와 보고.
 - 프롬프트 끝의 마무리 블록이 브랜치·커밋·PR을 만든다. MATLAB 두 명은 git을 쓰지 않는다.
-- 30분마다 레포 점검 다이제스트. 매시 10분 팀 싱크.
+- 30분마다 레포 점검 다이제스트가 이슈의 `STATUS:` 댓글(진행 중·막힘·리뷰 대기·완료, 30/60분 지연)을 읽는다. 라이브 현황은 [docs/dashboard](./dashboard/index.html). 매시 10분 팀 싱크.
 - CI 워크플로 파일(`.github/workflows/`)은 이 작업에서 추가하지 않는다. 토큰에 `workflow` 범위가 없다. 초안은 `infra/ci/ci.yml`.
 
 ---

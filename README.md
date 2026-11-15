@@ -38,7 +38,7 @@ These documents are frozen in Korean. Identifiers in code stay English.
 | Doc | Role |
 | --- | --- |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, **build vs service pipelines**, decision model, collaboration workflow, AI 4 layers and algorithms |
-| [docs/dashboard/](docs/dashboard/index.html) | Live hackathon status (issues, PRs, commits, countdown). Also on [GitHub Pages](https://cloudsnuchoi.github.io/2026NASA/dashboard/) |
+| [docs/dashboard/](docs/dashboard/index.html) | Live team board: per-member `STATUS:` comments, countdown, area bars, PR queue. Also on [GitHub Pages](https://cloudsnuchoi.github.io/2026NASA/dashboard/) |
 | [docs/TEAM_SPEC.md](docs/TEAM_SPEC.md) | Product lock status, user flow & screens, requirement traceability, data mapping, AI 4-layer architecture, data spike, roles & handoff contracts, CLI guide, timeline |
 | [docs/PRD.md](docs/PRD.md) | Problem, users, decision, scope, success criteria, demo, cut order |
 | [docs/SOT.md](docs/SOT.md) | Datasets, IDs/units/CRS, aggregation, directories, DB schema, API contract |
