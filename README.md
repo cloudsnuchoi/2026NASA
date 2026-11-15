@@ -1,5 +1,13 @@
 # 2026NASA · Field Shift
 
+## Demo video & paper
+
+- Demo video: https://drive.google.com/file/d/1mrTBy1BNMSToOB3PpFKjQZMX_heUaC02/view?usp=drive_link
+- Paper (PDF, drafted with SI, references verified via OpenAlex): https://cloudsnuchoi.github.io/2026NASA/paper/artfarm_paper.pdf
+
+[![ART FARM paper, page 1](frontend/assets/paper/page-1.png)](https://cloudsnuchoi.github.io/2026NASA/paper/artfarm_paper.pdf)
+
+
 **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · **Status dashboard:** [docs/dashboard/](docs/dashboard/index.html) ([GitHub Pages](https://cloudsnuchoi.github.io/2026NASA/dashboard/))
 
 Readable Pages (Korean): [현황판](https://cloudsnuchoi.github.io/2026NASA/dashboard/) · [로드맵·체크리스트](https://cloudsnuchoi.github.io/2026NASA/roadmap.html) · [데이터셋](https://cloudsnuchoi.github.io/2026NASA/data.html) · [아키텍처·파이프라인](https://cloudsnuchoi.github.io/2026NASA/architecture.html) · [AI 모델](https://cloudsnuchoi.github.io/2026NASA/models.html) · [개요/PRD](https://cloudsnuchoi.github.io/2026NASA/overview.html) · [팀](https://cloudsnuchoi.github.io/2026NASA/team.html)

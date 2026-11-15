@@ -3,7 +3,7 @@
 Fields in the order of the Space Apps project submission form. Copy the text inside each block. Generated 2026-11-15 20:30 KST, v2 updated 21:10 KST, v3 updated 22:00 KST (links, data usage check `DATA-USAGE-CHECK.md`) from `submission.md`, `si-use.md`, `data-links.md`; numbers and sources are in the `SOURCES` comment at the end of `submission.md`.
 
 Open items before pressing Submit:
-- TODO(founder): replace `<VIDEO_URL>` in §3 with the demo video link (recording plan in `demo-script.md`).
+- Done: demo video link is in §3.
 - Check the live tunnel URL in §4 and §5 against `/srv/hackathon/state/status/demo_url.txt`; it changes after a server restart.
 - Check the SI checkbox labels on the live form against section 6 below; tick only the ones that match.
 
@@ -24,10 +24,10 @@ ART FARM (Field Shift: Adapting Farms with NASA Data) helps Corn Belt farmers co
 ## 3. Project Demonstration link
 
 ```
-<VIDEO_URL>
+https://drive.google.com/file/d/1mrTBy1BNMSToOB3PpFKjQZMX_heUaC02/view?usp=drive_link
 ```
 
-(Placeholder: the founder records the demo video and pastes its URL here. The slides link moved to §4 and to the top of §5.)
+(Demo video by Kang Daeun. The slides link is in §4 and at the top of §5.)
 
 ## 4. Project link
 
@@ -42,6 +42,7 @@ If the form takes one URL, paste the block above (the static snapshot never goes
 - Backup (static snapshot): https://cloudsnuchoi.github.io/2026NASA/demo/
 - Code: https://github.com/cloudsnuchoi/2026NASA
 - Slides: https://cloudsnuchoi.github.io/2026NASA/submission/slides/
+- Paper: https://cloudsnuchoi.github.io/2026NASA/paper/artfarm_paper.pdf
 ```
 
 The live URL is a Cloudflare quick tunnel and changes when the server restarts. Before pressing Submit, compare it with `/srv/hackathon/state/status/demo_url.txt` (also published as `docs/demo/live_url.json`).
@@ -53,6 +54,7 @@ The live URL is a Cloudflare quick tunnel and changes when the server restarts. 
 - Backup (static snapshot): https://cloudsnuchoi.github.io/2026NASA/demo/
 - Code: https://github.com/cloudsnuchoi/2026NASA
 - Slides: https://cloudsnuchoi.github.io/2026NASA/submission/slides/
+- Paper: https://cloudsnuchoi.github.io/2026NASA/paper/artfarm_paper.pdf
 
 *"What should I plant next year so both my soil and my wallet survive?"*
 
