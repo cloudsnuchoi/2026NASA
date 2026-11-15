@@ -79,7 +79,7 @@ class Config:
     memo_async: bool = True
     design_channels: List[str] = field(default_factory=lambda: ["uiux-design"])
     matlab_rooms: List[str] = field(default_factory=lambda: ["1on1-woochan", "1on1-yoonsung", "1on1-jimin", "1on1-jieun"])
-    fix_queue: Path = Path("/srv/hackathon/state/fixq")  # MATLAB fix jobs for the write-capable fix lane  # answer questions, deep model by default
+    fix_queue: Path = HERE / "state" / "fixq"  # VPS sets FIX_QUEUE=/srv/hackathon/state/fixq (tests stay local)  # answer questions, deep model by default
     progress_every: float = 30.0  # seconds between "still thinking" edits for deep answers
     doc_budget: int = 60000
     max_tokens: int = 2500

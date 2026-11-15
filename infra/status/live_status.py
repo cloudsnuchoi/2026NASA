@@ -225,6 +225,22 @@ def public_checks(base: str) -> dict:
     return out
 
 
+MATLAB_PEOPLE = [
+    ("woochan", "matlab-hyle", ("v8_cards_20fields.csv", "coefficients_sources.csv")),
+    ("yoonsung", "matlab-2", ("drought_compare_2012.png", "drought_compare_2012_summary.csv")),
+    ("jimin", "matlab-3", ("baresoil_days_20fields.csv",)),
+    ("jieun", "matlab-4", ("fig_p10p90.png", "fig_backtest2012.png")),
+]
+
+
+def matlab_connected(user: str, container: str) -> bool:
+    """Connected = an SSH tunnel session for the user now, or a MATLAB process running in their container
+    (MATLAB only starts after the person's own MathWorks sign-in). No secrets read."""
+    if any(line.split()[0] == user for line in sh(["ps", "-eo", "user,cmd"]).splitlines()[1:] if "sshd" in line and line.split()):
+        return True
+    return bool(sh(["docker", "exec", container, "pgrep", "-f", "MATLAB"], timeout=10).strip())
+
+
 def demo_url() -> str | None:
     p = Path("/srv/hackathon/state/status/demo_url.txt")
     try:
@@ -286,8 +302,16 @@ def build() -> dict:
     ]
     ai_items = [item(x["name"], x["status"] == "done", x["detail"]) for x in ai]
     mfiles = {p.name for p in MATLAB_DIR.glob("*.csv")} if MATLAB_DIR.exists() else set()
-    matlab = [item(f, f in mfiles) for f in
-              ("coefficients.csv", "field_dekad.csv", "field_season.csv", "drought_2012_county.csv", "climate_annual.csv", "calibration_params.csv")]
+    matlab = [item(f"윤성 1차 CSV: {f}", f in mfiles) for f in ("drought_2012_county.csv", "climate_annual.csv", "calibration_params.csv")]
+    for who, cont, outs in MATLAB_PEOPLE:
+        have = all((MATLAB_DIR / "outputs" / who / o).exists() for o in outs)
+        if have:
+            stage, ok = "✅ 결과 파일 있음", True
+        elif matlab_connected(who, cont):
+            stage, ok = "🟡 접속함·작업 중", False
+        else:
+            stage, ok = "🔑 접속 전", False
+        matlab.append(item(f"{who}: " + " + ".join(outs), ok, stage))
     ui = [
         item("frontend/ 코드 (main)", "frontend/index.html" in paths),
         item("공개 데모 접속 200 (로그인 없음)", pub.get("home") == 200, f"{demo or '데모 URL 없음'}"),
@@ -313,7 +337,7 @@ def build() -> dict:
         item("live 현황 (tmux live)", "live" in names),
     ]
     lanes = [("data", "데이터", data), ("engine", "엔진·API", engine), ("ai", "AI 모델", ai_items), ("matlab", "MATLAB", matlab),
-             ("ui", "UI", ui), ("sim", "시뮬", sim), ("infra", "인프라·봇", infra)]
+             ("ui", "UI", ui), ("infra", "인프라·봇", infra)]  # 시뮬 = Stretch (19:30 링크 없음), 진행률 계산에서 제외
     lanes_out = [{"id": i, "name": n, "pct": round(100 * sum(x["status"] == "done" for x in its) / len(its)), "items": its} for i, n, its in lanes]
 
     mm = mm_activity(cache)
@@ -343,6 +367,8 @@ def build() -> dict:
         "generated_at": t.isoformat(timespec="seconds"), "deadline": DEADLINE.isoformat(), "remaining_min": max(0, int((DEADLINE - t).total_seconds() // 60)),
         "chat_url": chat, "demo_url": demo_url(), "lanes": lanes_out, "tmux": tmux, "people": people, "blockers": blockers, "next": nxt,
         "merged_prs": g.get("merged", []) if isinstance(g, dict) else [], "ai_models": ai,
+        "stretch": [{"name": "복셀 시뮬 (다은)", "status": "stretch",
+                     "detail": "19:30까지 공개 링크 없음 → Stretch, 진행률 계산 제외" if not sim[0]["status"] == "done" else "sim/ 코드 있음"}],
         "lane_agents_done": {n: lane_done(n) for n in ("l1", "l2", "prd", "l4", "l5")},
     }
     CACHE.parent.mkdir(parents=True, exist_ok=True)
