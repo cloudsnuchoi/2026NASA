@@ -105,3 +105,11 @@
 
 - **결정 (임베딩).** RAG 임베딩은 `intfloat/multilingual-e5-small`(MIT, 384차원, 한국어·영어)이다. SOT 5절 DDL의 `vector(1536)`을 `vector(384)`로 바꾼다. 데이터 레인(`feat/26-data-spike`, `sql/001_sot_schema.sql`)이 이미 384로 적재했다. Hylē 승인.
   - 문서 청크는 `passage: `, 질의는 `query: ` 접두사를 붙인다. 중국에서 개발된 모델은 쓰지 않는다(주최 측 비권장).
+
+## 2026-11-15 18:57 · PRD 최종 동결 (ART FARM, 두 단계, 정직성) · MATLAB 원인
+
+- **동결 (이름).** 제품 이름 **ART FARM**, 부제 **"Field Shift: Adapting Farms with NASA Data"**. 사이트·프론트·제출·슬라이드 공통. 디자인팀 요청(로고 "ART FARM", 전부 영어) 반영. Hylē 최종 지시.
+- **동결 (두 단계).** **Tier 1 Quick Screen**: 콘벨트 어디서나 네 꼭짓점 + 작물 2–3개(Corn/Soy/Wheat, 같은 작물 연속 금지), NASA POWER 10년 + USGS 3DEP + FAO-56/FAO-33, 모든 결과에 "screening estimate", 순위 없음. 계약 `POST /quick`(SOT 6.0, 구현은 계획). **Tier 2 Deep Analysis**: 다각형이 데모 필지 20개(Story IA 12, McLean IL 3, Lancaster NE 3, Union OH 2)와 겹치면 model_api 전략 A–D 카드(P10–P90, CVaR, 2012 백테스트, Prithvi/CDL, `/explain`). Corn+Soy → A·B 강조, Wheat 추가 → C도 강조, D(알팔파)는 참고 카드. 밖이면 "Deep analysis available in 4 pilot counties". 목업의 원형 구역은 4개 카운티 프리셋으로 바꾼다.
+- **동결 (정직성).** 보장 문구·"Recommended"·순위 금지. 출처 없는 숫자 삭제. 경제 가정(목업 `CROP_DB`)은 "assumption" + USDA ERS/NASS 출처·연도, 확인 못 하면 정보 공백. Kc는 FAO-56 Table 12(옥수수 mid 1.20, 대두 1.15, 밀 1.15)로 바꾸거나 목업 값과의 차이를 툴팁에 보인다. "Water saving %"·"soil organic matter index"는 relative-index 툴팁. 결과 화면의 "MATLAB engine" 표기는 "FAO-56 engine (ported from team MATLAB prototype V8)"으로 바꾼다. 상세는 PRD 4절.
+- **확인 (구현 상태).** `/strategies/compare` 응답에 `rank` 필드가 남아 있다. UI는 표시·정렬에 쓰지 않는다. 필드 제거는 별도 이슈(계약 테스트 동반).
+- **원인 (MATLAB이 서버에서 안 돌던 문제).** 스크립트 **파일 이름이 파일 안의 로컬 함수 이름과 같았다**(`select_cornbelt_4vertices`). MATLAB에서 스크립트 파일 이름과 같은 이름의 로컬 함수를 두면 스크립트로 실행되지 않는다. **서버(VPS MATLAB) 문제가 아니다.** 해결: 파일 이름이나 함수 이름 중 하나를 바꾼다(V8 `FieldShift_LiveAPI_Engineeee.m`의 함수는 `select_cornbelt_4vertices_noaddon`). MATLAB은 계속 오프라인 전용이고, V8 수식은 Tier 1 엔진으로 이식한다.

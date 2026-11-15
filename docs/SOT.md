@@ -1,7 +1,7 @@
 # SOT · Source of Truth
 
 팀 **아몰라** · `cloudsnuchoi/2026NASA`  
-동결: **2026-11-15 08:00–10:00 Asia/Seoul (KST)**. 갱신: **2026-11-15 08:20 KST** (1.5절), **2026-11-15 11:10 KST** (1.6절 두 층 공간, QuickStats 선택 + NASS 일괄 대체, Story County `19169` 동결).
+동결: **2026-11-15 08:00–10:00 Asia/Seoul (KST)**. 갱신: **2026-11-15 08:20 KST** (1.5절), **2026-11-15 11:10 KST** (1.6절 두 층 공간, QuickStats 선택 + NASS 일괄 대체, Story County `19169` 동결). **최종 갱신 2026-11-15 18:57 KST**: 제품 이름 **ART FARM**(부제 *Field Shift: Adapting Farms with NASA Data*), 화면 두 단계 **Tier 1 Quick Screen / Tier 2 Deep Analysis**(1.7절), `POST /quick` 계약(6.0절).
 
 이 문서가 **데이터, 식별자, 단위, 좌표계, 집계, 디렉터리, DB 스키마, API 계약**의 단일 원본이다. 코드·이슈·에이전트는 여기와 다른 필드명, 단위, 엔드포인트를 만들지 않는다. 바꾸려면 이슈와 PR이 필요하다.
 
@@ -89,6 +89,17 @@ GAEZ, GRACE/GRACE-FO, NLCD, LANDFIRE, GEDI, VIIRS, ERA5 등. (**NAIP와 NLDAS는
 
 저장 위치: 원본 `/srv/hackathon/data/raw/<dataset>/` (SOT 약칭 `/data/raw`). 1층 집계와 2층 래스터를 같은 데이터셋 폴더 안에서 `tier1_county/`와 `tier2_story/`처럼 구분해도 된다. 가공은 `/srv/hackathon/data/processed/vN`.
 
+
+### 1.7 화면 두 단계 Tier 1 / Tier 2 (2026-11-15 18:57 KST 동결)
+
+1.6절의 **데이터 두 층**(카운티 집계 / 필지 30 m)은 그대로다. 그 위에 **화면 두 단계**를 둔다. 상세 제품 규칙은 [PRD.md](./PRD.md) 4–6절.
+
+| 단계 | 범위 | 입력 | 엔드포인트 | 상태 |
+| --- | --- | --- | --- | --- |
+| **Tier 1 Quick Screen** | 콘벨트 12개 주 안의 임의 네 꼭짓점 다각형 | NASA POWER 일별 2016–2025(다각형 중심점), USGS 3DEP 꼭짓점 고도, FAO-56 Kc(Table 12), FAO-33 Ky | `POST /quick` (6.0절) | **계획** (계약 동결, 구현 진행 중) |
+| **Tier 2 Deep Analysis** | 데모 필지 **20개**: Story IA `19169` 12, McLean IL `17113` 3, Lancaster NE `31109` 3, Union OH `39159` 2 | 1.6절 2층 데이터 + IMERG, NLDAS-2, GEOS-S2S, NEX-GDDP-CMIP6, Prithvi `vision_result` | 6절 기존 엔드포인트 (`/fields`, `/field/{id}/*`, `/strategies/compare`, `/validation/backtest`, `/explain`) | **구현됨** (model_api, VPS 내부) |
+
+Tier 2 진입 조건: Tier 1 다각형이 데모 필지 CSB 경계와 **겹칠 때**. 겹치지 않으면 `deep_analysis.available=false`와 문구 `"Deep analysis available in 4 pilot counties"`.
 
 ---
 
@@ -375,6 +386,78 @@ CREATE TABLE calibration_param (
 ```json
 { "error": { "code": "not_found", "message": "Unknown field_id" } }
 ```
+
+### 6.0 Tier 1 `POST /quick` (2026-11-15 18:57 KST 동결, **계획**)
+
+Tier 1 Quick Screen. 엔진 표기 `"FAO-56 engine (ported from team MATLAB prototype V8)"`. MATLAB 런타임을 부르지 않는다. **순위 필드를 두지 않는다**(`rank`, `score_rank`, `recommended` 금지). 아래 예시의 `<…>`는 형식 표시이며 실제 값이 아니다.
+
+요청:
+
+```json
+{
+  "polygon": [
+    { "lat": 42.0890, "lon": -93.6750 },
+    { "lat": 42.0890, "lon": -93.6700 },
+    { "lat": 42.0850, "lon": -93.6700 },
+    { "lat": 42.0850, "lon": -93.6750 }
+  ],
+  "crops": ["corn", "soybean"],
+  "lang": "en"
+}
+```
+
+- `polygon`: 꼭짓점 **정확히 4개**, EPSG:4326 `lat`/`lon` (십진수 도). 자기교차 금지. 콘벨트 12개 주 밖이면 `400 out_of_service_area`.
+- `crops`: `corn`, `soybean`, `wheat` 중 **서로 다른 2–3개**. 그 밖이면 `400 invalid_request`.
+- 윤작 열거: 선택 작물의 순환 배열 중 **같은 작물이 연속하지 않는** 것만(순환 끝–처음 포함). 순서는 열거 순서이며 의미 없다.
+
+응답:
+
+```json
+{
+  "tier": "quick",
+  "label": "screening estimate",
+  "engine": "FAO-56 engine (ported from team MATLAB prototype V8)",
+  "polygon": { "area_ha": "<float>", "perimeter_m": "<float>", "centroid": { "lat": "<float>", "lon": "<float>" } },
+  "terrain": { "elevation_m": { "min": "<float>", "max": "<float>", "mean": "<float>" }, "slope_pct": "<float|null>", "source": "USGS 3DEP Elevation Point Query Service" },
+  "climate": { "source": "NASA POWER daily (point at polygon centroid)", "period": { "start": "2016-01-01", "end": "2025-12-31" }, "precip_mm_yr": "<float>", "et0_mm_yr": "<float>", "t2m_mean_c": "<float>" },
+  "cards": [
+    {
+      "sequence": ["corn", "soybean"],
+      "label": "screening estimate",
+      "metrics": [
+        { "name": "crop_water_demand_mm_yr", "value": "<float>", "unit": "mm/yr", "kind": "estimate", "method": "FAO-56 Kc x ET0" },
+        { "name": "water_deficit_ratio", "value": "<float>", "unit": "ratio_0_1", "kind": "estimate", "method": "FAO-56 water balance" },
+        { "name": "water_saving_vs_cs", "value": "<float|null>", "unit": "%", "kind": "relative_index", "tooltip": "Relative index vs. corn-soybean baseline. Not a guarantee." }
+      ],
+      "info_gaps": ["No field-level soil test", "No irrigation data", "Economic assumptions are regional averages"],
+      "assumptions": [
+        { "name": "kc_mid_corn", "value": 1.20, "unit": "-", "label": "assumption", "source": "FAO-56 Table 12", "year": 1998 },
+        { "name": "corn_price", "value": "<float|null>", "unit": "USD/bu", "label": "assumption", "source": "USDA ERS|NASS <table name>", "year": "<int>" }
+      ]
+    }
+  ],
+  "deep_analysis": {
+    "available": false,
+    "field_ids": [],
+    "highlight_strategies": [],
+    "message": "Deep analysis available in 4 pilot counties"
+  },
+  "sources": [ { "name": "NASA POWER", "url": "https://power.larc.nasa.gov/" }, { "name": "USGS 3DEP", "url": "https://www.usgs.gov/3d-elevation-program" }, { "name": "FAO-56", "url": "https://www.fao.org/3/x0490e/x0490e00.htm" } ],
+  "disclaimer": "Screening estimate. This tool does not replace farmer judgment."
+}
+```
+
+규칙:
+
+- 모든 카드에 `label: "screening estimate"`, `info_gaps`(빈 배열이면 안 됨), `assumptions`(각 항목 `label: "assumption"`, `source`, `year`).
+- `assumptions[].source`/`year`를 확인하지 못한 경제 값은 **넣지 않고** `info_gaps`에 적는다. `value: null`로 남겨도 되지만 화면에 숫자를 그리지 않는다.
+- Kc는 FAO-56 Table 12(옥수수 mid 1.20, 대두 mid 1.15, 밀 mid 1.15. ini/end 같은 표). Ky는 FAO-33. 표와 대조하지 못한 계수는 `"source": "unverified"`.
+- `kind: "relative_index"`인 지표는 화면에 relative-index 툴팁 필수.
+- 미래 기후 값은 Tier 1에 두지 않는다(분포 규칙. 미래는 Tier 2 `climate/outlook`).
+- POWER·3DEP 호출 실패 시 값은 `null`, 해당 사실을 `info_gaps`에 적는다. 대체값을 채우지 않는다.
+- `deep_analysis.available=true`이면 `field_ids`에 겹치는 데모 필지, `highlight_strategies`에 선택 작물과 맞는 전략: `corn`+`soybean` → `["A","B"]`, `wheat` 포함 → `["A","B","C"]`. `D`는 항상 참고 카드이며 강조 목록에 넣지 않는다.
+
+**Tier 2 화면 규칙 (기존 응답).** `POST /strategies/compare` 응답에는 현재 `rank` 필드가 있다(2026-11-15 18:57 확인). UI는 `rank`를 **표시하거나 정렬에 쓰지 않는다**. 필드 제거는 계획(별도 이슈, 계약 테스트와 함께).
 
 ### `GET /health`
 
