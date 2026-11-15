@@ -1,0 +1,431 @@
+{
+ "generated_at": "2026-11-15T15:55:04+09:00",
+ "deadline": "2026-11-15T22:00:00+09:00",
+ "remaining_min": 364,
+ "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
+ "lanes": [
+  {
+   "id": "data",
+   "name": "데이터",
+   "pct": 100,
+   "items": [
+    {
+     "label": "POWER 일별 12주 1995–2025",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "CDL 카운티 작물 비율",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "CSB 필지 경계",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "SSURGO 필지 토양",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "HLS NDVI 데모 필지",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "SMAP L3 (맥락)",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "NLDAS-2 월별",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "IMERG 일별 2010–2025 (16개 연도)",
+     "status": "done",
+     "detail": "18개 연도 적재"
+    },
+    {
+     "label": "NEX-GDDP 2개 모델 이상 (API)",
+     "status": "done",
+     "detail": "2개 모델"
+    },
+    {
+     "label": "GEOS-S2S 다음 시즌 (API)",
+     "status": "done",
+     "detail": "멤버 10"
+    },
+    {
+     "label": "대비 데모 필지 (3개 카운티 이상)",
+     "status": "done",
+     "detail": "데모 필지 20개, 4개 카운티"
+    }
+   ]
+  },
+  {
+   "id": "engine",
+   "name": "엔진·API",
+   "pct": 83,
+   "items": [
+    {
+     "label": "model_api 상시 실행",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "Story 데모 필지 목록 /fields",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "전략 비교 MC·CVaR",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "2012 백테스트 전략별 차이",
+     "status": "done",
+     "detail": "서로 다른 물 부족 값 4개"
+    },
+    {
+     "label": "필지별 결과 차이 (A P50 범위 > 0.02)",
+     "status": "done",
+     "detail": "A P50 범위 [0.447, 0.504]"
+    },
+    {
+     "label": "공개 데모 배포 (#15)",
+     "status": "progress",
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "ai",
+   "name": "AI 모델",
+   "pct": 80,
+   "items": [
+    {
+     "label": "Prithvi 작물 분류",
+     "status": "progress",
+     "detail": "crop_pred=None, agreement_with_cdl=None"
+    },
+    {
+     "label": "GEOS-S2S 다음 시즌 분포",
+     "status": "done",
+     "detail": "앙상블 멤버 10"
+    },
+    {
+     "label": "NEX-GDDP 2030년대",
+     "status": "done",
+     "detail": "모델 2개"
+    },
+    {
+     "label": "Monte Carlo·CVaR",
+     "status": "done",
+     "detail": "전략별 P50 {'B': 0.584, 'C': 0.569, 'D': 0.533, 'A': 0.484}"
+    },
+    {
+     "label": "/explain (DeepSeek)",
+     "status": "done",
+     "detail": "6.1 s, deepseek-flash"
+    }
+   ]
+  },
+  {
+   "id": "matlab",
+   "name": "MATLAB",
+   "pct": 17,
+   "items": [
+    {
+     "label": "coefficients.csv",
+     "status": "progress",
+     "detail": ""
+    },
+    {
+     "label": "field_dekad.csv",
+     "status": "progress",
+     "detail": ""
+    },
+    {
+     "label": "field_season.csv",
+     "status": "progress",
+     "detail": ""
+    },
+    {
+     "label": "drought_2012_county.csv",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "climate_annual.csv",
+     "status": "progress",
+     "detail": ""
+    },
+    {
+     "label": "calibration_params.csv",
+     "status": "progress",
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "ui",
+   "name": "UI",
+   "pct": 0,
+   "items": [
+    {
+     "label": "frontend/package.json",
+     "status": "progress",
+     "detail": ""
+    },
+    {
+     "label": "S0–S3 (#12)",
+     "status": "progress",
+     "detail": ""
+    },
+    {
+     "label": "S4 전략 탭 (#13)",
+     "status": "progress",
+     "detail": ""
+    },
+    {
+     "label": "S5–S7 (#14)",
+     "status": "progress",
+     "detail": ""
+    },
+    {
+     "label": "공개 배포 (#15)",
+     "status": "progress",
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "sim",
+   "name": "시뮬",
+   "pct": 0,
+   "items": [
+    {
+     "label": "sim/ 코드",
+     "status": "progress",
+     "detail": ""
+    },
+    {
+     "label": "복셀 시뮬 (#30)",
+     "status": "progress",
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "infra",
+   "name": "인프라·봇",
+   "pct": 100,
+   "items": [
+    {
+     "label": "Mattermost",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "봇 (tmux bot)",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "러너 (tmux runner)",
+     "status": "done",
+     "detail": ""
+    },
+    {
+     "label": "SSH 공개키 자동 등록 (keywatch)",
+     "status": "done",
+     "detail": "root 프로세스로 확인"
+    },
+    {
+     "label": "main CI 최근 성공",
+     "status": "done",
+     "detail": "success"
+    },
+    {
+     "label": "live 현황 (tmux live)",
+     "status": "done",
+     "detail": ""
+    }
+   ]
+  }
+ ],
+ "tmux": [
+  {
+   "name": "api",
+   "model": "—",
+   "task": "model_api 상시 실행 (:8090)",
+   "last_activity": "15:50"
+  },
+  {
+   "name": "bot",
+   "model": "DeepSeek Flash + Codex sol/terra + Claude",
+   "task": "Mattermost 오케스트레이터 봇",
+   "last_activity": "15:29"
+  },
+  {
+   "name": "fields2",
+   "model": "claude-opus-5-5",
+   "task": "대비 데모 필지 추가",
+   "last_activity": "15:20"
+  },
+  {
+   "name": "imerg",
+   "model": "claude-sonnet-5-5",
+   "task": "IMERG·NLDAS-2 카운티 적재",
+   "last_activity": "13:59"
+  },
+  {
+   "name": "live",
+   "model": "—",
+   "task": "이 현황 생성기 (5분)",
+   "last_activity": "15:54"
+  },
+  {
+   "name": "mm-tunnel",
+   "model": "—",
+   "task": "Mattermost Cloudflare 터널",
+   "last_activity": "12:11"
+  },
+  {
+   "name": "prithvi",
+   "model": "claude-opus-5-5",
+   "task": "Prithvi 작물 분류 추론",
+   "last_activity": "15:42"
+  },
+  {
+   "name": "runner",
+   "model": "—",
+   "task": "GitHub Actions 러너",
+   "last_activity": "13:09"
+  }
+ ],
+ "people": [
+  {
+   "name": "김우찬",
+   "user": "woochan",
+   "mattermost_last": "15:09",
+   "repo_last": null
+  },
+  {
+   "name": "김윤성",
+   "user": "yoonsung",
+   "mattermost_last": "14:47",
+   "repo_last": null
+  },
+  {
+   "name": "고지은",
+   "user": "jieun",
+   "mattermost_last": "15:50",
+   "repo_last": null
+  },
+  {
+   "name": "하지민",
+   "user": "jimin",
+   "mattermost_last": "14:56",
+   "repo_last": null
+  },
+  {
+   "name": "강다은",
+   "user": "daeun",
+   "mattermost_last": "13:47",
+   "repo_last": null
+  },
+  {
+   "name": "Hylē",
+   "user": "hyle",
+   "mattermost_last": "15:30",
+   "repo_last": "15:28"
+  }
+ ],
+ "blockers": [],
+ "next": [
+  "MATLAB: coefficients.csv",
+  "MATLAB: field_dekad.csv",
+  "MATLAB: field_season.csv"
+ ],
+ "merged_prs": [
+  {
+   "number": 42,
+   "title": "fix(orchestrator): 봇 답변 품질 (MATLAB 경로·TASKS 맥락·툴박스/토큰 규칙·안내 템플릿·캡처 읽기)",
+   "merged_at": "2026-11-15T06:28:12Z"
+  },
+  {
+   "number": 41,
+   "title": "fix(model): 전략이 물수지에 실제로 반영되게 수정 (QA P1 E1·E3·E4) + NLDAS 반영",
+   "merged_at": "2026-11-15T06:14:42Z"
+  },
+  {
+   "number": 40,
+   "title": "feat(orchestrator): 디자인 채널은 사람이 쓴 모든 글에 답 + PRD 결정 메모",
+   "merged_at": "2026-11-15T06:05:22Z"
+  },
+  {
+   "number": 39,
+   "title": "test(qa): model_api 라이브 E2E + DB 점검 SQL + QA 보고서",
+   "merged_at": "2026-11-15T06:00:08Z"
+  },
+  {
+   "number": 38,
+   "title": "feat(orchestrator): 답변 대기 표시·디자인 채널 봇·접속 순서 맥락 + docs/LANES.md",
+   "merged_at": "2026-11-15T05:44:29Z"
+  },
+  {
+   "number": 36,
+   "title": "data(spike): 두 층 데이터 적재 + go/no-go 보고서",
+   "merged_at": "2026-11-15T05:34:40Z"
+  },
+  {
+   "number": 37,
+   "title": "feat(model): model_api FastAPI 실제 DB 연결 (/simulate 등)",
+   "merged_at": "2026-11-15T05:31:52Z"
+  },
+  {
+   "number": 35,
+   "title": "feat(orchestrator): 방 메모·공유 대화 기록·재시작 복구 + 심화 모델 Codex sol→terra→Claude→DeepSeek",
+   "merged_at": "2026-11-15T05:25:00Z"
+  }
+ ],
+ "ai_models": [
+  {
+   "name": "Prithvi 작물 분류",
+   "status": "progress",
+   "detail": "crop_pred=None, agreement_with_cdl=None"
+  },
+  {
+   "name": "GEOS-S2S 다음 시즌 분포",
+   "status": "done",
+   "detail": "앙상블 멤버 10"
+  },
+  {
+   "name": "NEX-GDDP 2030년대",
+   "status": "done",
+   "detail": "모델 2개"
+  },
+  {
+   "name": "Monte Carlo·CVaR",
+   "status": "done",
+   "detail": "전략별 P50 {'B': 0.584, 'C': 0.569, 'D': 0.533, 'A': 0.484}"
+  },
+  {
+   "name": "/explain (DeepSeek)",
+   "status": "done",
+   "detail": "6.1 s, deepseek-flash"
+  }
+ ],
+ "lane_agents_done": {
+  "imerg": false,
+  "fields2": false,
+  "site": true,
+  "prithvi": false
+ }
+}
