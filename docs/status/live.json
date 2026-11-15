@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T16:10:39+09:00",
+ "generated_at": "2026-11-15T16:15:45+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 349,
+ "remaining_min": 344,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "lanes": [
   {
@@ -47,7 +47,7 @@
     {
      "label": "IMERG 일별 2010–2025 (16개 연도)",
      "status": "done",
-     "detail": "20개 연도 적재"
+     "detail": "21개 연도 적재"
     },
     {
      "label": "NEX-GDDP 2개 모델 이상 (API)",
@@ -313,7 +313,7 @@
   {
    "name": "김윤성",
    "user": "yoonsung",
-   "mattermost_last": "14:47",
+   "mattermost_last": "16:15",
    "repo_last": null
   },
   {
