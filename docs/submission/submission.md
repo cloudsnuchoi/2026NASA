@@ -12,11 +12,16 @@ ART FARM
 
 ## Summary
 
-<!-- word count: 162 words (counted with `wc -w` on the paragraph below) -->
+<!-- word count: 162 words (counted with `wc -w` on the paragraph below; rechecked 22:15 KST, v3) -->
 
 ART FARM (Field Shift: Adapting Farms with NASA Data) helps Corn Belt farmers compare crop rotations for soil health and weather and water resilience without being told what to plant. It has two tiers. Quick Screen works anywhere in the Corn Belt: the farmer clicks four corners and gets a screening estimate built from ten years of NASA POWER weather, USGS elevation and FAO-56 crop water formulas. Deep Analysis covers 20 pilot fields in four counties (Iowa, Illinois, Nebraska, Ohio). There, a Monte Carlo water-balance engine compares four strategies: corn-soybean, plus a rye cover, plus a small grain, or plus alfalfa. Results come as P10–P90 ranges with a worst-10% tail (CVaR), a replay of the real 2012 drought, and climate ranges from NASA GEOS-S2S and NEX-GDDP-CMIP6. NASA's Prithvi model checks crop labels against USDA maps. An AI explainer may only quote numbers that the engine returned. Every card lists drawbacks, information gaps and a reminder to confirm with a field soil test.
 
 ## Project Details
+
+- Live (dynamic engine on our server): https://watts-astrology-asus-blessed.trycloudflare.com
+- Backup (static snapshot): https://cloudsnuchoi.github.io/2026NASA/demo/
+- Code: https://github.com/cloudsnuchoi/2026NASA
+- Slides: https://cloudsnuchoi.github.io/2026NASA/submission/slides/
 
 *"What should I plant next year so both my soil and my wallet survive?"*
 
@@ -81,12 +86,6 @@ With only four counties, these are consistency checks, not statistical proof. **
 - **고지은** — UI/UX + MATLAB slide figures
 - **하지민** — UI/UX + MATLAB NDVI bare-soil analysis
 - **강다은** — 3D simulation (planned) + demo video
-
-### Links
-
-- Project (static snapshot): https://cloudsnuchoi.github.io/2026NASA/demo/
-- Live server (team VPS; may go offline after judging): https://watts-astrology-asus-blessed.trycloudflare.com
-- Slides: https://cloudsnuchoi.github.io/2026NASA/submission/slides/
 
 ### Benefits & Impact
 

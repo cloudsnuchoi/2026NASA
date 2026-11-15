@@ -1,9 +1,10 @@
 # ART FARM — Space Apps submission form (copy-paste)
 
-Fields in the order of the Space Apps project submission form. Copy the text inside each block. Generated 2026-11-15 20:30 KST, v2 updated 21:10 KST from `submission.md`, `si-use.md`, `data-links.md`; numbers and sources are in the `SOURCES` comment at the end of `submission.md`.
+Fields in the order of the Space Apps project submission form. Copy the text inside each block. Generated 2026-11-15 20:30 KST, v2 updated 21:10 KST, v3 updated 22:15 KST (links, data usage check `DATA-USAGE-CHECK.md`) from `submission.md`, `si-use.md`, `data-links.md`; numbers and sources are in the `SOURCES` comment at the end of `submission.md`.
 
 Open items before pressing Submit:
-- TODO(Hylē): demo video link, if the form asks for one (owner: 강다은; recording plan in `demo-script.md`).
+- TODO(founder): replace `<VIDEO_URL>` in §3 with the demo video link (recording plan in `demo-script.md`).
+- Check the live tunnel URL in §4 and §5 against `/srv/hackathon/state/status/demo_url.txt`; it changes after a server restart.
 - Check the SI checkbox labels on the live form against section 6 below; tick only the ones that match.
 
 ---
@@ -14,7 +15,7 @@ Open items before pressing Submit:
 ART FARM
 ```
 
-## 2. Summary (162 words, counted with whitespace split)
+## 2. Summary (162 words, counted with whitespace split; rechecked 22:15 KST for v3, text unchanged)
 
 ```
 ART FARM (Field Shift: Adapting Farms with NASA Data) helps Corn Belt farmers compare crop rotations for soil health and weather and water resilience without being told what to plant. It has two tiers. Quick Screen works anywhere in the Corn Belt: the farmer clicks four corners and gets a screening estimate built from ten years of NASA POWER weather, USGS elevation and FAO-56 crop water formulas. Deep Analysis covers 20 pilot fields in four counties (Iowa, Illinois, Nebraska, Ohio). There, a Monte Carlo water-balance engine compares four strategies: corn-soybean, plus a rye cover, plus a small grain, or plus alfalfa. Results come as P10–P90 ranges with a worst-10% tail (CVaR), a replay of the real 2012 drought, and climate ranges from NASA GEOS-S2S and NEX-GDDP-CMIP6. NASA's Prithvi model checks crop labels against USDA maps. An AI explainer may only quote numbers that the engine returned. Every card lists drawbacks, information gaps and a reminder to confirm with a field soil test.
@@ -23,8 +24,10 @@ ART FARM (Field Shift: Adapting Farms with NASA Data) helps Corn Belt farmers co
 ## 3. Project Demonstration link
 
 ```
-https://cloudsnuchoi.github.io/2026NASA/submission/slides/
+<VIDEO_URL>
 ```
+
+(Placeholder: the founder records the demo video and pastes its URL here. The slides link moved to §4 and to the top of §5.)
 
 ## 4. Project link
 
@@ -32,11 +35,25 @@ https://cloudsnuchoi.github.io/2026NASA/submission/slides/
 https://cloudsnuchoi.github.io/2026NASA/demo/
 ```
 
-(Static snapshot, fixed. The live server is named inside Project Details.)
+If the form takes one URL, paste the block above (the static snapshot never goes offline). If it takes a list or free text, use:
+
+```
+- Live (dynamic engine on our server): https://watts-astrology-asus-blessed.trycloudflare.com
+- Backup (static snapshot): https://cloudsnuchoi.github.io/2026NASA/demo/
+- Code: https://github.com/cloudsnuchoi/2026NASA
+- Slides: https://cloudsnuchoi.github.io/2026NASA/submission/slides/
+```
+
+The live URL is a Cloudflare quick tunnel and changes when the server restarts. Before pressing Submit, compare it with `/srv/hackathon/state/status/demo_url.txt` (also published as `docs/demo/live_url.json`).
 
 ## 5. Project Details
 
 ```markdown
+- Live (dynamic engine on our server): https://watts-astrology-asus-blessed.trycloudflare.com
+- Backup (static snapshot): https://cloudsnuchoi.github.io/2026NASA/demo/
+- Code: https://github.com/cloudsnuchoi/2026NASA
+- Slides: https://cloudsnuchoi.github.io/2026NASA/submission/slides/
+
 *"What should I plant next year so both my soil and my wallet survive?"*
 
 Every autumn, a corn-soybean farmer in Iowa makes a choice that is hard to undo. Add a cereal rye cover? Bring in wheat or oats? Try alfalfa? The answer touches the soil, the water and next year's harvest, and the weather that decides it is uncertain. Satellites see things the farmer cannot see from the ground: how many days the soil lies bare, how dry the root zone was in a drought year, how warm and wet the next seasons may be. But that information is spread across many NASA and USDA archives, in formats a farmer has no time to learn.
@@ -100,12 +117,6 @@ With only four counties, these are consistency checks, not statistical proof. **
 - **고지은** — UI/UX + MATLAB slide figures
 - **하지민** — UI/UX + MATLAB NDVI bare-soil analysis
 - **강다은** — 3D simulation (planned) + demo video
-
-### Links
-
-- Project (static snapshot): https://cloudsnuchoi.github.io/2026NASA/demo/
-- Live server (team VPS; may go offline after judging): https://watts-astrology-asus-blessed.trycloudflare.com
-- Slides: https://cloudsnuchoi.github.io/2026NASA/submission/slides/
 
 ### Benefits & Impact
 
