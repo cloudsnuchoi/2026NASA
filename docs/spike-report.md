@@ -74,3 +74,10 @@ No secrets in repo. No data files committed.
 
 ### NAIP (item 9) — Go (search only, nothing downloaded)
 - Planetary Computer STAC `naip`, pin at Story (-93.51, 42.01): 2015 (1 m), 2017 (1 m), 2019 (0.6 m), 2021 (0.6 m), 2023 (0.3 m), 2025 (0.6 m) = 6 vintages, 4 tiles each. >=3 needed. Tiles not stored (sim lane downloads on demand). Licence per AWS registry: public domain with attribution.
+
+### NEX-GDDP-CMIP6 (item 7) — Go
+- Public CC0 dataset (AWS Open Data `s3://nex-gddp-cmip6`, us-west-2; file attributes say `cmip6_license: CC-BY-SA 4.0` -> cite both; tech note + access date 2026-11-15). Direct S3 download of the global 0.25 deg files (180-245 MB per var-year) ran at ~0.5 MB/s here (one anonymous s3fs `get` was fast, threaded gets hung / returned zero-filled files). **Used NCCS THREDDS NCSS server-side bbox subset** (lat 36-49.5, lon 255-281 E; 4.6 MB/file, ~20-27 s) — `data_pipeline/nex_gddp_tier1.py` (4 threads).
+- Models x scenarios: ACCESS-CM2, MPI-ESM1-2-HR, GFDL-ESM4 (member r1i1p1f1, v2.0 files) x historical 1985-2014, ssp245 and ssp585 2031-2040 x pr, tasmax, tasmin. 450 files requested.
+- `county_scenario_year`: per county (nearest 0.25 deg cell to the representative point; not field-specific), per year, season ANN/MAM/JJA mean: `504900` rows total. Rows by model: ACCESS-CM2:504900. Units: tas* degC, pr mm/day (mean daily). Delta method (future window mean minus 1985-2014 mean, per model) is computed downstream from this table; no bias correction beyond what NEX-GDDP applies.
+- Sanity (Story 19169): ACCESS-CM2 hist JJA tasmax 28.8 degC vs POWER 1995-2014 28.5 degC. JJA tasmax 2031-2040 minus 1985-2014: ACCESS-CM2 ssp245 +2.1; ACCESS-CM2 ssp585 +3.4. Annual precip change: ACCESS-CM2 ssp245 6.5%; ACCESS-CM2 ssp585 3.1%.
+- Windows are 10-yr means from single realisation r1i1p1f1 per model: internal variability is large; show as range across models/scenarios, never as a point forecast.
