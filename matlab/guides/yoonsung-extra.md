@@ -1,5 +1,7 @@
 # 김윤성 추가 MATLAB 3종 · ART FARM
 
+> 할 일: **work/run_all_yoonsung.m 열고 Run ▶만 누르세요.** 추가 세트 3개도 함께 실행됩니다. 결과와 오류는 봇이 run_log에서 자동으로 읽어요. 캡처·복사 필요 없어요.
+
 스크립트와 입력 준비 마감은 **21:00 KST**, 팀원 실행·결과 확인은 **22:00 KST**까지입니다. 서버가 배치한 파일을 열고 **EDITOR → Run ▶**만 누르세요. 코드 수정이나 입력값 입력은 필요 없습니다.
 
 윤성님 브라우저 포트는 **8889** (`http://localhost:8889`), 지민님은 **8890**입니다. 기존 SSH 포워딩과 본인 MathWorks 로그인을 사용합니다. 윤성님 Current Folder는 `~/Documents/MATLAB/work/`입니다. 데이터 경로는 MATLAB 컨테이너 기준입니다. **예상 소요:** 스크립트당 1분 이내(총 약 3분). 이 호스트에서는 MATLAB 실행 시간을 아직 측정하지 못했습니다. 직접 데이터 경로로 열 때는 `/data/processed/v1/matlab/work/yoonsung/`에서도 같은 파일을 찾을 수 있습니다.
