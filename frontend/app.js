@@ -101,7 +101,7 @@
     for (let i = 0; i < a.length; i++) for (let j = 0; j < b.length; j++) if (segX(a[i], a[(i + 1) % a.length], b[j], b[(j + 1) % b.length])) return true;
     return false;
   }
-  const inCornBelt = ([lo, la]) => la >= 36 && la <= 49 && lo >= -104 && lo <= -80;
+  const inCornBelt = ([lo, la]) => la >= 36 && la <= 48 && lo >= -104 && lo <= -80;
 
   // ------------------------------------------------------------------ map
   let map, userLayer, vertexLayer, demoLayers = {};
@@ -147,7 +147,7 @@
   function addVertex(p) {
     if (state.preset) { state.vertices = []; state.preset = null; }
     if (state.vertices.length >= 4) { toast("4 corners placed — Undo or Clear to redraw."); return; }
-    if (!inCornBelt(p)) { toast("Outside the US Corn Belt screening area (36–49°N, 80–104°W)."); return; }
+    if (!inCornBelt(p)) { toast("Outside the US Corn Belt screening area (36–48°N, 80–104°W)."); return; }
     state.vertices.push(p);
     redraw();
   }
@@ -415,7 +415,7 @@
             <div>Crop water demand ETc: ${dist(c.history?.etc_mm, " mm")}</div>
             <div>Effective rain: ${dist(c.history?.effective_precip_mm, " mm")}</div>
             <div>Irrigation deficit: ${dist(c.history?.irrigation_deficit_mm, " mm")}</div>
-            <div>Years with deficit: <strong>${c.history ? fmt(c.history.water_stress?.share_of_years_with_deficit * 100) + "%" : "—"}</strong></div>
+            <div>Years with deficit: <strong>${c.history?.water_stress?.share_of_years_with_deficit != null ? fmt(c.history.water_stress.share_of_years_with_deficit * 100) + "%" : GAP}</strong></div>
             <div class="pt-1 border-t border-slate-100">Scenario range deficit: ${dist(c.projection?.irrigation_deficit_mm, " mm")}</div>
           </div></div>`).join("")}</div>
       <h3 class="font-extrabold text-[#173a2b] mb-1">Rotation candidates (not ranked)</h3>

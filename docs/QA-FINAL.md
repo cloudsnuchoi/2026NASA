@@ -1,0 +1,22 @@
+# L5 public demo QA — 2026-11-15
+
+Tested the public tunnel without login on 2026-11-15, approximately 19:27–19:32 KST, with Chromium via `/srv/hackathon/venv`. Screenshots capture the deployed site unless marked local. The deployed checkout and this worktree are separate: `infra/web/run_web.sh` runs from its own repository root and `infra/web/app.py` serves that root's `frontend/`. The running process's working directory could not be established from this sandbox; no redeployment was attempted. Local fixes require integration and redeployment before public retest.
+
+| Check | Result | Evidence screenshot under `docs/screens/qa/` | Fix commit |
+| --- | --- | --- | --- |
+| Story, IA: two crops; map → loading → Tier 1 + Tier 2 | PASS | `story-map.png`, `story-results.png` | — |
+| McLean, IL: three crops; map → loading → Tier 1 + Tier 2 | PASS | `mclean-map.png`, `mclean-results.png` | — |
+| Lancaster, NE: two crops; map → loading → Tier 1 + Tier 2 | PASS | `lancaster-map.png`, `lancaster-results.png` | — |
+| Union, OH: three crops; map → loading → Tier 1 + Tier 2 | PASS | `union-map.png`, `union-results.png` | — |
+| Rotation candidates have no consecutive duplicates | PASS in engine tests, both two and three crops; public flows completed | `story-results.png`, `mclean-results.png` | — |
+| Outside demo fields | PASS for map tier and resulting Tier 2 availability notice with `/quick` mocked as failed; successful live outside-field calculation not independently verified | `outside-failure-mobile.png` | — |
+| Honesty: screening label, engine wording, map attribution, SI explanation, relative-index tooltip | PASS for observed labels and source inspection; image generation provenance remains unconfirmed (`docs/submission/si-use.md`), so image SI disclosure cannot be verified | `story-map.png`, `story-results.png` | — |
+| Honesty: percentages footer | FIXED locally: `frontend/index.html` incorrectly described **all** percentages as relative to A, including CDL agreement and years with deficit; now restricted to strategy comparison percentages | `story-results.png` shows pre-fix public site | uncommitted; Git metadata read-only |
+| Screening geographic bounds | FIXED locally: `frontend/app.js` allowed 48–49°N although `model_api/quick.py` rejects above 48°N; local Chromium rejected 48.5°N | `local-null-gap.png` (local, mocked API) | uncommitted; Git metadata read-only |
+| Missing deficit share | FIXED locally: `frontend/app.js` rendered a null deficit share as `0%` through JavaScript coercion; local Chromium displays information gap | `local-null-gap.png` (local, mocked API) | uncommitted; Git metadata read-only |
+| Explain vs simulation | PASS for Story A: explain says 181 winter bare days; `/simulate` reports P50 181 and the strategy card shows 181. Explain's 526 mm/yr matches `eta_mm.p50 = 526.041` rounded, although that metric is not displayed on the card. Other answer numbers were not exhaustively audited. | `story-results.png` (card; explanation captured in browser output, not screenshot) | — |
+| External failure | PASS: public Chromium `/api/quick` mocked 503 displays information gap without fallback values. Separate cold-cache mock tests for upstream NASA POWER/NWS failure returned null data and gaps: `venv-api/bin/python -m pytest -q model_api/tests/test_quick.py` → 11 passed. | `outside-failure-mobile.png` | — |
+| Mobile 390 × 844 | PASS for story, map, and outside-field failure results: document width 390 px in each; successful Tier 2 mobile results not independently verified | `mobile-story.png`, `mobile-map.png`, `outside-failure-mobile.png` | — |
+| Public tunnel / rate limit | PASS: `curl` `/` and `/api/health` returned 200; 65 consecutive health requests yielded 57 × 200 and 8 × 429 (prior requests already counted). The limit affects the caller for the current sliding minute. | No screenshot (curl) | — |
+
+No price/yield/cost economics were observed in the checked Tier 1 results; the engine explicitly omits unsourced economics. Image provenance requires owner confirmation. No claim is made that every generated explanation or every public screen has been exhaustively audited. `node --check frontend/app.js` and `git diff --check` passed. Commit creation failed because the linked worktree Git metadata is mounted read-only (`index.lock: Read-only file system`); the supervisor must commit the local changes and screenshots in an environment with Git write access.
