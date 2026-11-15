@@ -21,7 +21,9 @@ import urllib.request
 from pathlib import Path
 
 KST = dt.timezone(dt.timedelta(hours=9))
-DEADLINE = dt.datetime(2026, 11, 15, 22, 0, tzinfo=KST)
+DEADLINE = dt.datetime(2026, 11, 15, 23, 30, tzinfo=KST)  # final submission
+MILESTONES = [("1차 제출", dt.datetime(2026, 11, 15, 21, 0, tzinfo=KST)), ("동결", dt.datetime(2026, 11, 15, 23, 0, tzinfo=KST)),
+              ("최종 제출", DEADLINE)]
 REPO = "cloudsnuchoi/2026NASA"
 API = os.environ.get("API_URL", "http://127.0.0.1:8090")
 MM = os.environ.get("MM_URL", "http://127.0.0.1:8065")
@@ -364,7 +366,8 @@ def build() -> dict:
         pass
     t = now()
     data_out = {
-        "generated_at": t.isoformat(timespec="seconds"), "deadline": DEADLINE.isoformat(), "remaining_min": max(0, int((DEADLINE - t).total_seconds() // 60)),
+        "generated_at": t.isoformat(timespec="seconds"), "deadline": DEADLINE.isoformat(),
+        "schedule": [{"name": n, "at": m.isoformat(), "remaining_min": max(0, int((m - t).total_seconds() // 60))} for n, m in MILESTONES], "remaining_min": max(0, int((DEADLINE - t).total_seconds() // 60)),
         "chat_url": chat, "demo_url": demo_url(), "lanes": lanes_out, "tmux": tmux, "people": people, "blockers": blockers, "next": nxt,
         "merged_prs": g.get("merged", []) if isinstance(g, dict) else [], "ai_models": ai,
         "stretch": [{"name": "복셀 시뮬 (다은)", "status": "stretch",
@@ -379,7 +382,8 @@ def build() -> dict:
 def to_md(d: dict) -> str:
     icon = {"done": "✅", "progress": "🟡", "blocked": "🔴"}
     L = [f"# 아몰라 실시간 현황 · {d['generated_at'][11:16]} KST", "",
-         f"제출 목표 22:00 KST까지 **{d['remaining_min'] // 60}시간 {d['remaining_min'] % 60}분** 남음. 팀 채팅: {d.get('chat_url') or '—'}", "",
+         "일정: " + " · ".join(f"{x['name']} {x['at'][11:16]}" + (f" ({x['remaining_min'] // 60}시간 {x['remaining_min'] % 60}분 남음)" if x['remaining_min'] else " (지남)") for x in d.get("schedule", [])),
+         f"최종 제출 23:30 KST까지 **{d['remaining_min'] // 60}시간 {d['remaining_min'] % 60}분** 남음. 팀 채팅: {d.get('chat_url') or '—'} · 데모: {d.get('demo_url') or '—'}", "",
          "| 레인 | 진행 | 완료/전체 |", "| --- | --- | --- |"]
     for ln in d["lanes"]:
         done = sum(x["status"] == "done" for x in ln["items"])
