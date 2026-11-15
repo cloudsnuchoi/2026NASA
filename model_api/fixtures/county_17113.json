@@ -165,9 +165,7 @@
   "native_resolution_note": "Context-cell data (tens of km), not field-precise.",
   "info_gaps": []
  },
- "info_gaps": [
-  "GPM IMERG not loaded; POWER precipitation used"
- ],
+ "info_gaps": [],
  "sources": [
   "POWER",
   "CDL",

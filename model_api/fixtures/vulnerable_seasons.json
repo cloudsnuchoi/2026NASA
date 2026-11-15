@@ -17,6 +17,9 @@
    "t2m_anomaly_c": 1.36,
    "smap_sm_anomaly": -0.0437,
    "smap_unit": "cm3/cm3 difference vs SMAP 2015-2024 same-season mean",
+   "nldas_rootmoist_anomaly_kg_m2": -7.7,
+   "nldas_anomaly_year": 2025,
+   "nldas_unit": "kg/m2 (mm water) difference vs NLDAS-2 Noah 1995-2024 same-season mean root-zone moisture",
    "climatology": {
     "precip_mm": 247.7,
     "precip_p20_mm": 201.3,
@@ -26,7 +29,7 @@
     "drought_year_fraction": 0.13,
     "wet_year_fraction": 0.2
    },
-   "notes": "SMAP is a context-cell assignment, not a field-precise measurement."
+   "notes": "SMAP and NLDAS-2 are context-cell assignments, not field-precise measurements."
   },
   {
    "season": "summer",
@@ -40,6 +43,9 @@
    "t2m_anomaly_c": 0.04,
    "smap_sm_anomaly": 0.0399,
    "smap_unit": "cm3/cm3 difference vs SMAP 2015-2024 same-season mean",
+   "nldas_rootmoist_anomaly_kg_m2": 35.9,
+   "nldas_anomaly_year": 2025,
+   "nldas_unit": "kg/m2 (mm water) difference vs NLDAS-2 Noah 1995-2024 same-season mean root-zone moisture",
    "climatology": {
     "precip_mm": 323.5,
     "precip_p20_mm": 237.2,
@@ -49,7 +55,7 @@
     "drought_year_fraction": 0.23,
     "wet_year_fraction": 0.2
    },
-   "notes": "SMAP is a context-cell assignment, not a field-precise measurement."
+   "notes": "SMAP and NLDAS-2 are context-cell assignments, not field-precise measurements."
   },
   {
    "season": "fall",
@@ -61,6 +67,9 @@
    "t2m_anomaly_c": 1.78,
    "smap_sm_anomaly": -0.0128,
    "smap_unit": "cm3/cm3 difference vs SMAP 2015-2024 same-season mean",
+   "nldas_rootmoist_anomaly_kg_m2": 15.2,
+   "nldas_anomaly_year": 2025,
+   "nldas_unit": "kg/m2 (mm water) difference vs NLDAS-2 Noah 1995-2024 same-season mean root-zone moisture",
    "climatology": {
     "precip_mm": 182.4,
     "precip_p20_mm": 136.9,
@@ -70,7 +79,7 @@
     "drought_year_fraction": 0.2,
     "wet_year_fraction": 0.2
    },
-   "notes": "SMAP is a context-cell assignment, not a field-precise measurement."
+   "notes": "SMAP and NLDAS-2 are context-cell assignments, not field-precise measurements."
   },
   {
    "season": "winter",
@@ -82,6 +91,9 @@
    "t2m_anomaly_c": -0.21,
    "smap_sm_anomaly": null,
    "smap_unit": "cm3/cm3 difference vs SMAP 2015-2024 same-season mean",
+   "nldas_rootmoist_anomaly_kg_m2": -26.9,
+   "nldas_anomaly_year": 2026,
+   "nldas_unit": "kg/m2 (mm water) difference vs NLDAS-2 Noah 1995-2024 same-season mean root-zone moisture",
    "climatology": {
     "precip_mm": 82.3,
     "precip_p20_mm": 61.1,
@@ -91,7 +103,7 @@
     "drought_year_fraction": 0.23,
     "wet_year_fraction": 0.23
    },
-   "notes": "SMAP is a context-cell assignment, not a field-precise measurement."
+   "notes": "SMAP and NLDAS-2 are context-cell assignments, not field-precise measurements."
   }
  ],
  "sources": [
@@ -105,8 +117,17 @@
   },
   {
    "source_id": "imerg",
-   "native_resolution": "nominal 0.1 deg (not loaded)"
+   "native_resolution": "nominal 0.1 deg",
+   "loaded": true,
+   "period": "2016-2025"
+  },
+  {
+   "source_id": "nldas",
+   "native_resolution": "nominal 0.125 deg (NLDAS-2 Noah monthly)",
+   "loaded": true,
+   "period": "1995-01..2025-12"
   }
  ],
+ "info_gaps": [],
  "notes": "Hazard flags: drought/heavy_rain if >= 15 % of baseline seasons are < 75 % / > 125 % of mean precipitation; heat if >= 3 days/season with Tmax > 32 C; frost if >= 5 days with Tmin < 0 C (team defaults)."
 }

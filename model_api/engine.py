@@ -359,11 +359,7 @@ def _crop_for_year(hist_map: dict[int, str], base: tuple[str, ...], y: int, y_re
     return c if c else base[(y - y_ref) % len(base)]
 
 
-def _with_imerg_precip(repo, fips: str, ym: dict, years: list[int]) -> tuple[dict, list[int]]:
-    try:
-        im = repo.imerg_daily(fips)
-    except Exception:
-        im = None
+def _with_imerg_precip(im: dict | None, ym: dict, years: list[int]) -> tuple[dict, list[int]]:
     if im is None:
         return ym, []
     yrs = [int(y) for y in ym["years"]]
@@ -388,9 +384,6 @@ def field_calibration(repo, loc: dict, ym: dict, prm: dict, base: tuple[str, ...
                       (county context cell, not field-precise).
     """
     fid = loc["field"]["field_id"] if loc["field"] else None
-    key = hashlib.sha1(json.dumps([fid, loc["county_fips"], prm, base], sort_keys=True, default=str).encode()).hexdigest()
-    if key in _calib_cache:
-        return _calib_cache[key]
     yrs = [int(y) for y in ym["years"]]
     hist_map = {h["year"]: h["crop_name"] for h in (loc.get("hist") or [])}
     et_year: dict[int, float] = {}
@@ -402,11 +395,21 @@ def field_calibration(repo, loc: dict, ym: dict, prm: dict, base: tuple[str, ...
             by[r["date"].year] = by.get(r["date"].year, 0.0) + r["value"]
             cnt[r["date"].year] = cnt.get(r["date"].year, 0) + 1
         et_year = {y: v for y, v in by.items() if cnt[y] == 5 and y in yrs and (y - 1) in yrs}
-    nldas = []
     try:
         nldas = [r for r in repo.nldas_monthly(loc["county_fips"]) if r.get("rootmoist_kg_m2") is not None]
     except Exception:
         nldas = []
+    try:
+        im = repo.imerg_daily(loc["county_fips"])
+    except Exception:
+        im = None
+    data_sig = [sorted(et_year.items()), len(nldas), round(float(sum(r["rootmoist_kg_m2"] for r in nldas)), 3),
+                0 if im is None else [len(im["date"]), round(float(np.nansum(im["precip_mm"])), 3)]]
+    key = hashlib.sha1(json.dumps([fid, loc["county_fips"], prm, base, sorted(hist_map.items()), data_sig],
+                                  sort_keys=True, default=str).encode()).hexdigest()
+    with _cache_lock:
+        if key in _calib_cache:
+            return _calib_cache[key]
     span = sorted(et_year) if et_year else [y for y in yrs if y >= yrs[-1] - 9]
     span = [y for y in range(span[0], span[-1] + 1) if y in yrs]
     if not span or (span[0] - 1) not in yrs:
@@ -421,7 +424,7 @@ def field_calibration(repo, loc: dict, ym: dict, prm: dict, base: tuple[str, ...
     p1 = dict(prm, kc_field_scale=1.0)
     # POWER precipitation is ~20 % drier than IMERG in Story County; calibrating Kc against OpenET with POWER rain
     # would turn that rain bias into a Kc bias. Use IMERG daily rain for the calibration years it fully covers.
-    ym_cal, imerg_years = _with_imerg_precip(repo, loc["county_fips"], ym, run_years)
+    ym_cal, imerg_years = _with_imerg_precip(im, ym, run_years)
     mc = hydro.run_mc(ym_cal, [hydro.historical_spec()], [cyc], p1, loc["lat"], 1, 0, year_draws=draws,
                       phases=np.zeros((1, 1), int), n_scored=len(span), n_spinup=1, trace=True)
     eta = mc["trace"]["eta_mm"][0, 0, 0]
