@@ -61,6 +61,9 @@ def run_job(job: dict) -> None:
     wd = WORK / user
     wd.mkdir(parents=True, exist_ok=True)
     script = SCRIPT.get(user, "")
+    js = str(job.get("script") or "")  # mwatch jobs name the failing script (run_all runs several per person)
+    if re.fullmatch(r"[A-Za-z]\w*\.m", js) and (wd / js).is_file():
+        script = js
     agent_sha_file = wd / ".agent_sha.json"
     shas = json.loads(agent_sha_file.read_text()) if agent_sha_file.exists() else {}
     user_edited = bool(script) and shas.get(script) not in ("", None) and shas.get(script) != sha(wd / script)
@@ -94,7 +97,8 @@ Finish with ONE final line of JSON only: {{"status":"fixed"|"refused"|"no_change
             shas[name] = sha(wd / name)
             agent_sha_file.write_text(json.dumps(shas))
         msg = (f"@{user} 🛠️ **수정 완료, 다시 Run 해 주세요**\n- 고친 내용: {res.get('change', '')}\n"
-               f"- 다시 열 파일: `work/{name}`\n- MATLAB에서 그 파일을 열고 **Run ▶ 다시 눌러 주세요**. 또 오류가 나면 빨간 글자를 그대로 붙여 주세요!")
+               f"- 다시 열 파일: `work/{name}`\n- MATLAB에서 그 파일을 열고 **Run ▶ 다시 눌러 주세요**. 또 오류가 나면 빨간 글자를 그대로 붙여 주세요!\n"
+               f"- 닫았다 열 필요 없이 `run_all_{user}.m` 을 다시 Run ▶ 해도 돼요 (run_all이 rehash/clear 를 해 줘요).")
         log = f"- {time.strftime('%H:%M')} {name}: {res.get('change', '')}"
     elif res.get("status") == "refused":
         msg = f"@{user} 🙏 이 요청은 지금 작업 목적({PURPOSE.get(user)})과 맞지 않아 수정하지 않았어요. 이유: {res.get('reason', '')}"
