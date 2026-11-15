@@ -1,6 +1,6 @@
-# 아몰라 실시간 현황 · 18:08 KST
+# 아몰라 실시간 현황 · 18:13 KST
 
-제출 목표 22:00 KST까지 **3시간 51분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **3시간 46분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -94,7 +94,7 @@
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 18:07 | — |
+| 김우찬 | 18:13 | — |
 | 김윤성 | 16:35 | — |
 | 고지은 | 15:50 | — |
 | 하지민 | 14:56 | — |
