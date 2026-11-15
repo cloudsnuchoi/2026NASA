@@ -20,7 +20,7 @@
     </div>
   </header>
   <main class="wrap">
-    <p class="src-note">GEOS-S2S와 NEX-GDDP는 우리가 학습하는 모델이 아니라 NASA가 제공하는 <strong>물리 예보·시나리오 데이터</strong>입니다. Chronos-Bolt는 동결 문서(PRD·SOT·DECISIONS)에 없어 <strong>선택·P1</strong>로만 적었습니다. 수확량 예측을 본편 목적함수로 두지 않습니다.</p>
+    <p class="src-note">GEOS-S2S와 NEX-GDDP는 우리가 학습하는 모델이 아니라 NASA가 제공하는 <strong>물리 예보·시나리오 데이터</strong>입니다. Chronos-Bolt는 동결 문서(PRD·SOT·DECISIONS)에 없어 <strong>선택·P1</strong>로만 적었습니다. 수확량 예측을 본편 목적함수로 두지 않습니다. 중앙 LLM 제공자는 DeepSeek(OpenAI 호환)로 결정되었고, 모델 id <code>deepseek-v4.1-flash</code>는 <strong>미검증</strong>입니다.</p>
     <div class="table-wrap">
       <table class="data-table" id="models">
         <thead>
@@ -61,7 +61,7 @@
       { name: "NASA GEOS-S2S-3", role: "L2 물리 계절 예보 데이터 (우리가 학습하지 않음)", input: "월 초기화 앙상블, 0.5° 칸", output: "다음 시즌 강수·기온 아노말리 분포 → scenario_climate", runs: "오프라인 사전 계산, 김윤성", key: "없음 (NCCS datashare 공개 목록)", pri: "P0", status: "실패 시 과거 30년 분포로 대체. Earthdata 키 불필요", note: "3년 결정론적 예보 금지. 필지 정밀 값처럼 표시하지 않음" },
       { name: "NASA NEX-GDDP-CMIP6", role: "L2 기후 시나리오 데이터 (다모델, 우리가 학습하지 않음)", input: "SSP2-4.5/5-8.5, pr/tas/tasmax/tasmin", output: "2030s delta 분포 → scenario_climate", runs: "오프라인 사전 계산, 김우찬", key: "없음 (S3/THREDDS, CC0)", pri: "P0", status: "Earthdata 키 불필요", note: "기준 1985–2014, 미래 2031–2040" },
       { name: "몬테카를로 물수지 + CVaR + 7축 점수", role: "L3 시뮬레이션 (라이브 엔진)", input: "POWER/IMERG 등 피처, SSURGO AWC, Kc, 시나리오 이동, 슬라이더", output: "P10/P50/P90, CVaR, 전략 카드 점수. 단일 정답 없음", runs: "사전 계산 + FastAPI 재가중, Hylē, model_api/", key: "없음", pri: "P0", status: "설계 동결. 구현은 이슈 따름", note: "연 재표본 N=500–1000. 확정 kg/ha 금지. 수확량은 본편 목적함수가 아님" },
-      { name: "LLM tool-calling", role: "L4 설명", input: "사용자 질문 + FastAPI JSON (profile, compare, evidence 등)", output: "설명 문장. 숫자는 도구 JSON 경로 각주만", runs: "런타임 /explain, Hylē", key: "예. OpenAI 호환 LLM API 키 1개 (공급자·모델명 미정, SOT 7절)", pri: "P0", status: "키·모델 미정", note: "숫자를 생성·수정하지 않음" },
+      { name: "LLM tool-calling (DeepSeek)", role: "L4 설명. 오케스트레이터 중앙 LLM도 같은 제공자", input: "사용자 질문 + FastAPI JSON (profile, compare, evidence 등)", output: "설명 문장. 숫자는 도구 JSON 경로 각주만", runs: "제품: 런타임 /explain, Hylē. 오케스트레이터: VPS bridge.py", key: "예. DeepSeek API 키 1개 (OpenAI 호환). OPENAI_BASE_URL=https://api.deepseek.com, 모델은 ORCH_MODEL 등으로 변경 가능", pri: "P0", status: "제공자 DeepSeek 결정 (12:28). 모델 id deepseek-v4.1-flash는 미검증. 키는 .env에만", note: "숫자를 생성·수정하지 않음. 정확한 모델 id는 DeepSeek 콘솔·문서에서 확인" },
       { name: "임베딩 + pgvector RAG", role: "L4 근거 인용 전용", input: "evidence_chunk (가이드·NRCS·피복 문헌)", output: "짧은 인용 + DOI/URL. 없으면 insufficient_evidence", runs: "VPS Postgres 17, rag/", key: "임베딩 모델에 따라 다를 수 있음 (모델·차원 미정). 실패 시 pg_trgm 키워드", pri: "P0 (컷 가능)", status: "실패 시 키워드+DOI 테이블", note: "데이터 탐색용이 아님. 별도 Pinecone/Milvus 없음" },
       { name: "Chronos-Bolt (시계열 기반 모델)", role: "선택: 수량·NDVI 시계열 예보 보조", input: "문서 미기재. 제안은 수량 또는 NDVI 시계열", output: "문서 미기재. 본편 목적함수로 쓰지 않음", runs: "제안: CPU 자체 호스팅 (키 없음). 동결 경로 아님", key: "없음 (제안)", pri: "선택·P1", status: "PRD·SOT·DECISIONS에 없음. 이번 주말 본편 전제 아님", note: "넣더라도 옆축·실험. 수확량 극대화로 승격하지 않음" }
     ];

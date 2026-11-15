@@ -90,3 +90,12 @@
 - **결정 (현황판).** [dashboard](./dashboard/index.html)는 팀원 카드(현재 작업, 상태, 진행률, 이슈, 상대 시각, 30/60분 지연 경고, 열린 PR)를 맨 위에 두고, 마감 카운트다운·체크리스트 구간, 영역 진행률, PR 대기열, 최근 활동을 보여 준다. 이슈 댓글 API(`since`, 최신순, `per_page=100`)와 localStorage 캐시로 비인증 한도(60/시간) 안에서 2분마다 갱신한다. 선택 토큰은 브라우저 localStorage에만 저장한다.
 - **결정 (GitHub 로그인 매핑).** `cloudsnuchoi` = Hylē, `ssbb215356` = 김윤성, `flyingbear-code` = 김우찬, `jieun-Ribby` = 고지은, `hahah383` = 하지민, `kangdaeun2005` = 강다은. 대시보드 `LOGIN_MAP` 한 곳에서만 고친다.
 - **결정 (30분 점검).** Hylē/봇의 30분 레포 점검은 `STATUS:` 댓글을 읽어 막힘·지연·리뷰 대기를 보고한다.
+
+## 2026-11-15 12:28 · 오케스트레이터·중앙 LLM
+
+- **결정 (오케스트레이터·중앙 LLM).** 제공자는 **DeepSeek**이다. API는 **OpenAI 호환**이다.
+  - 베이스 URL: `https://api.deepseek.com`
+  - 사용할 모델 이름: `deepseek-v4.1-flash`. **정확한 모델 id는 아직 검증하지 않았다.** DeepSeek 콘솔·문서에서 확인한 뒤 `.env`의 `ORCH_MODEL`만 고친다.
+  - 키: DeepSeek API 키 1개 (`OPENAI_API_KEY`, git에 올리지 않음).
+  - 베이스 URL과 모델은 `infra/orchestrator/.env`의 `OPENAI_BASE_URL`, `ORCH_MODEL`로 **설정에서 바꾸며**, 코드에 고정하지 않는다. `bridge.py`가 이미 이 변수를 읽는다.
+- 이 결정은 중앙 오케스트레이터(`infra/orchestrator/bridge.py`)에 해당한다. 제품 L4 `/explain`도 OpenAI 호환 키 1개가 필요하며, 따로 가르지 않는 한 같은 제공자(DeepSeek)를 전제로 한다. 제품 쪽 모델 id를 이 값으로 동결했다고 보지는 않는다.

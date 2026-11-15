@@ -37,10 +37,23 @@ Mattermost 1:1 채널(`1on1-<username>`)과 팀 채널(@orchestrator 멘션)에�
   - Mattermost는 `/`로 시작하는 메시지를 서버 명령으로 가로챈다. 그래서 `!`를 쓴다.
 - 봇은 GitHub에 쓰지 않는다. 머지, 이슈 수정, MATLAB 결과 커밋은 Hylē(또는 Hylē의 에이전트)가 한다.
 
+
+## LLM
+
+제공자는 **DeepSeek**(OpenAI 호환). 베이스 URL과 모델은 `.env`에서 바꾸며, 코드에 고정하지 않는다. `bridge.py`는 `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `ORCH_MODEL`을 읽는다.
+
+| 변수 | 기본·예시 | 설명 |
+| --- | --- | --- |
+| `OPENAI_API_KEY` | (비움) | DeepSeek API 키. `.env`에만 두고 커밋하지 않는다. |
+| `OPENAI_BASE_URL` | `https://api.deepseek.com` | OpenAI 호환 엔드포인트. 다른 호환 제공자로 바꿀 수 있다. |
+| `ORCH_MODEL` | `deepseek-v4.1-flash` | 호출할 모델 이름. **정확한 모델 id는 아직 검증하지 않았다.** 콘솔·문서에서 확인한 뒤 여기만 고친다. |
+
+결정 원문: [docs/DECISIONS.md](../../docs/DECISIONS.md) (2026-11-15 12:28). 옵션 A(공식 Agents 플러그인)를 보조로 켤 때도 같은 OpenAI Compatible 설정(DeepSeek 베이스 URL·모델·키)을 쓰면 된다.
+
 ## 실행
 
 ```bash
-cp .env.example .env    # OPENAI_API_KEY, ORCH_MODEL 입력. MM_BOT_TOKEN은 provision.sh가 넣음
+cp .env.example .env    # OPENAI_API_KEY, OPENAI_BASE_URL, ORCH_MODEL 입력. MM_BOT_TOKEN은 provision.sh가 넣음
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python bridge.py --dry-run --mock-llm     # 오프라인, 키 없이
 .venv/bin/python bridge.py --dry-run                # 오프라인, 실제 LLM
