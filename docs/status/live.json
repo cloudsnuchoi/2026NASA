@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T19:53:09+09:00",
+ "generated_at": "2026-11-15T19:56:40+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 126,
+ "remaining_min": 123,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -139,7 +139,7 @@
   {
    "id": "matlab",
    "name": "MATLAB",
-   "pct": 57,
+   "pct": 71,
    "items": [
     {
      "label": "윤성 1차 CSV: drought_2012_county.csv",
@@ -168,13 +168,13 @@
     },
     {
      "label": "jimin: baresoil_days_20fields.csv",
-     "status": "progress",
-     "detail": "🟡 접속함·작업 중"
+     "status": "done",
+     "detail": "✅ 결과 파일 있음"
     },
     {
      "label": "jieun: fig_p10p90.png + fig_backtest2012.png",
      "status": "progress",
-     "detail": "🔑 접속 전"
+     "detail": "🟡 접속함·작업 중"
     }
    ]
   },
@@ -223,7 +223,7 @@
   {
    "id": "infra",
    "name": "인프라·봇",
-   "pct": 100,
+   "pct": 83,
    "items": [
     {
      "label": "Mattermost",
@@ -247,8 +247,8 @@
     },
     {
      "label": "main CI 최근 성공",
-     "status": "done",
-     "detail": "success"
+     "status": "progress",
+     "detail": null
     },
     {
      "label": "live 현황 (tmux live)",
@@ -305,7 +305,7 @@
    "name": "web",
    "model": "—",
    "task": "프론트+API 프록시 (:8095)",
-   "last_activity": "19:08"
+   "last_activity": "19:55"
   },
   {
    "name": "web-tunnel",
@@ -318,13 +318,13 @@
   {
    "name": "김우찬",
    "user": "woochan",
-   "mattermost_last": "19:38",
+   "mattermost_last": "19:55",
    "repo_last": null
   },
   {
    "name": "김윤성",
    "user": "yoonsung",
-   "mattermost_last": "19:44",
+   "mattermost_last": "19:55",
    "repo_last": null
   },
   {
@@ -336,7 +336,7 @@
   {
    "name": "하지민",
    "user": "jimin",
-   "mattermost_last": "19:51",
+   "mattermost_last": "19:54",
    "repo_last": null
   },
   {
@@ -349,16 +349,31 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "19:31"
+   "repo_last": "19:55"
   }
  ],
  "blockers": [],
  "next": [
   "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv",
-  "MATLAB: jimin: baresoil_days_20fields.csv",
-  "MATLAB: jieun: fig_p10p90.png + fig_backtest2012.png"
+  "MATLAB: jieun: fig_p10p90.png + fig_backtest2012.png",
+  "UI: 공개 URL QA (docs/QA-FINAL.md)"
  ],
  "merged_prs": [
+  {
+   "number": 58,
+   "title": "feat(web): AI 생성 이미지 표시(사진 워터마크 + 로고 푸터) · SI 내역 확정",
+   "merged_at": "2026-11-15T10:55:15Z"
+  },
+  {
+   "number": 57,
+   "title": "fix: 테스트가 실제 수정 큐에 쓰던 문제 + live.json MATLAB 사람별 3단계 + 시뮬 Stretch",
+   "merged_at": "2026-11-15T10:52:29Z"
+  },
+  {
+   "number": 56,
+   "title": "feat(orchestrator,matlab): MATLAB 오류 → 에이전트 자동 수정 큐 + 오늘 저녁 역할표",
+   "merged_at": "2026-11-15T10:48:37Z"
+  },
   {
    "number": 55,
    "title": "fix(status): UI 레인 진행률을 공개 데모 실동작 점검으로",
@@ -383,21 +398,6 @@
    "number": 51,
    "title": "feat(matlab): L2 사전계산 파이프라인 + 사람별 가이드 (우찬·윤성·지민·지은)",
    "merged_at": "2026-11-15T10:14:05Z"
-  },
-  {
-   "number": 50,
-   "title": "docs(prd): PRD 확정 — ART FARM, 2층 구조(Quick Screen / Deep Analysis), 정직성 규칙",
-   "merged_at": "2026-11-15T10:06:16Z"
-  },
-  {
-   "number": 49,
-   "title": "feat(status,site): live.json demo_url + 사이트 '라이브 데모' 버튼 + 최종 레인 추적",
-   "merged_at": "2026-11-15T10:03:43Z"
-  },
-  {
-   "number": 47,
-   "title": "feat(model): Prithvi-EO 작물 분류 추론(CPU, 미세조정 없음) → vision_result",
-   "merged_at": "2026-11-15T07:52:11Z"
   }
  ],
  "ai_models": [

@@ -1,15 +1,15 @@
-# 아몰라 실시간 현황 · 19:53 KST
+# 아몰라 실시간 현황 · 19:56 KST
 
-제출 목표 22:00 KST까지 **2시간 6분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **2시간 3분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
 | 데이터 | 100% | 11/11 |
 | 엔진·API | 100% | 6/6 |
 | AI 모델 | 100% | 5/5 |
-| MATLAB | 57% | 4/7 |
+| MATLAB | 71% | 5/7 |
 | UI | 86% | 6/7 |
-| 인프라·봇 | 100% | 6/6 |
+| 인프라·봇 | 83% | 5/6 |
 
 ## 데이터 100%
 - ✅ POWER 일별 12주 1995–2025
@@ -39,14 +39,14 @@
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
 - ✅ /explain (DeepSeek) — 7.7 s, deepseek-flash
 
-## MATLAB 57%
+## MATLAB 71%
 - ✅ 윤성 1차 CSV: drought_2012_county.csv
 - ✅ 윤성 1차 CSV: climate_annual.csv
 - ✅ 윤성 1차 CSV: calibration_params.csv
 - 🟡 woochan: v8_cards_20fields.csv + coefficients_sources.csv — 🟡 접속함·작업 중
 - ✅ yoonsung: drought_compare_2012.png + drought_compare_2012_summary.csv — ✅ 결과 파일 있음
-- 🟡 jimin: baresoil_days_20fields.csv — 🟡 접속함·작업 중
-- 🟡 jieun: fig_p10p90.png + fig_backtest2012.png — 🔑 접속 전
+- ✅ jimin: baresoil_days_20fields.csv — ✅ 결과 파일 있음
+- 🟡 jieun: fig_p10p90.png + fig_backtest2012.png — 🟡 접속함·작업 중
 
 ## UI 86%
 - ✅ frontend/ 코드 (main)
@@ -57,12 +57,12 @@
 - ✅ 화면 캡처 docs/screens
 - 🟡 공개 URL QA (docs/QA-FINAL.md)
 
-## 인프라·봇 100%
+## 인프라·봇 83%
 - ✅ Mattermost
 - ✅ 봇 (tmux bot)
 - ✅ 러너 (tmux runner)
 - ✅ SSH 공개키 자동 등록 (keywatch) — root 프로세스로 확인
-- ✅ main CI 최근 성공 — success
+- 🟡 main CI 최근 성공
 - ✅ live 현황 (tmux live)
 
 ## 막힌 점
@@ -70,8 +70,8 @@
 
 ## 다음 할 일
 1. MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv
-2. MATLAB: jimin: baresoil_days_20fields.csv
-3. MATLAB: jieun: fig_p10p90.png + fig_backtest2012.png
+2. MATLAB: jieun: fig_p10p90.png + fig_backtest2012.png
+3. UI: 공개 URL QA (docs/QA-FINAL.md)
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
@@ -90,25 +90,25 @@
 | mfixq | ? | ? | 19:53 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | 12:11 |
 | runner | — | GitHub Actions 러너 | 13:09 |
-| web | — | 프론트+API 프록시 (:8095) | 19:08 |
+| web | — | 프론트+API 프록시 (:8095) | 19:55 |
 | web-tunnel | — | 공개 데모 터널 | 19:00 |
 
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 19:38 | — |
-| 김윤성 | 19:44 | — |
+| 김우찬 | 19:55 | — |
+| 김윤성 | 19:55 | — |
 | 고지은 | 19:49 | — |
-| 하지민 | 19:51 | — |
+| 하지민 | 19:54 | — |
 | 강다은 | 17:18 | — |
-| Hylē | 16:01 | 19:31 |
+| Hylē | 16:01 | 19:55 |
 
 ## 최근 머지된 PR
+- #58 feat(web): AI 생성 이미지 표시(사진 워터마크 + 로고 푸터) · SI 내역 확정
+- #57 fix: 테스트가 실제 수정 큐에 쓰던 문제 + live.json MATLAB 사람별 3단계 + 시뮬 Stretch
+- #56 feat(orchestrator,matlab): MATLAB 오류 → 에이전트 자동 수정 큐 + 오늘 저녁 역할표
 - #55 fix(status): UI 레인 진행률을 공개 데모 실동작 점검으로
 - #53 docs(submission): 제출 초안 — 문구·데이터 링크·SI·슬라이드 7장·영상 대본
 - #54 docs: DECISIONS·si-log 충돌 표시 제거
 - #52 feat(web): ART FARM 프론트(1층 Quick Screen /quick + 2층 Deep Analysis) + 공개 배포
 - #51 feat(matlab): L2 사전계산 파이프라인 + 사람별 가이드 (우찬·윤성·지민·지은)
-- #50 docs(prd): PRD 확정 — ART FARM, 2층 구조(Quick Screen / Deep Analysis), 정직성 규칙
-- #49 feat(status,site): live.json demo_url + 사이트 '라이브 데모' 버튼 + 최종 레인 추적
-- #47 feat(model): Prithvi-EO 작물 분류 추론(CPU, 미세조정 없음) → vision_result
