@@ -37,6 +37,9 @@ TMUX_INFO = {  # what each lane is; model names are the ones the lanes were star
     "live": ("—", "이 현황 생성기 (5분)"), "nudge": ("DeepSeek Flash", "타임라인 독촉 봇"), "runner": ("—", "GitHub Actions 러너"),
     "mm-tunnel": ("—", "Mattermost Cloudflare 터널"), "keywatch": ("—", "SSH 공개키 자동 등록 (root)"),
     "qa": ("claude-opus-5-5", "QA·E2E"), "fix": ("claude-opus-5-5", "엔진 P1 수정"),
+    "l1": ("claude-opus-5-5", "L1 프론트·/quick·배포"), "l2": ("codex gpt-6.1-sol", "L2 MATLAB 사전계산·검증"),
+    "prd": ("claude-opus-5-5", "PRD 확정 문서"), "l4": ("claude-opus-5-5", "L4 제출물"), "l5": ("codex gpt-6.1-terra", "L5 공개 URL QA"),
+    "web": ("—", "프론트+API 프록시 (:8095)"), "web-tunnel": ("—", "공개 데모 터널"),
 }
 
 
@@ -196,6 +199,15 @@ def tmux_sessions() -> list[dict]:
     return out
 
 
+def demo_url() -> str | None:
+    p = Path("/srv/hackathon/state/status/demo_url.txt")
+    try:
+        u = p.read_text(encoding="utf-8").strip()
+        return u if u.startswith("https://") else None
+    except OSError:
+        return None
+
+
 def lane_done(name: str) -> bool:
     p = Path(f"/srv/hackathon/logs/{name}-lane.jsonl")
     return p.exists() and f"{name.upper()}-LANE-DONE" in p.read_text(errors="replace")[-20000:]
@@ -296,9 +308,9 @@ def build() -> dict:
     t = now()
     data_out = {
         "generated_at": t.isoformat(timespec="seconds"), "deadline": DEADLINE.isoformat(), "remaining_min": max(0, int((DEADLINE - t).total_seconds() // 60)),
-        "chat_url": chat, "lanes": lanes_out, "tmux": tmux, "people": people, "blockers": blockers, "next": nxt,
+        "chat_url": chat, "demo_url": demo_url(), "lanes": lanes_out, "tmux": tmux, "people": people, "blockers": blockers, "next": nxt,
         "merged_prs": g.get("merged", []) if isinstance(g, dict) else [], "ai_models": ai,
-        "lane_agents_done": {n: lane_done(n) for n in ("imerg", "fields2", "site", "prithvi")},
+        "lane_agents_done": {n: lane_done(n) for n in ("l1", "l2", "prd", "l4", "l5")},
     }
     CACHE.parent.mkdir(parents=True, exist_ok=True)
     CACHE.write_text(json.dumps(cache), encoding="utf-8")
