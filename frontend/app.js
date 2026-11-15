@@ -10,7 +10,19 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const fmt = (v, d = 0) => (v === null || v === undefined || Number.isNaN(v) ? "—" : Number(v).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d }));
-  const GAP = '<span class="text-slate-400 italic">information gap</span>';
+  const GAP = '<span class="text-slate-600 italic">information gap</span>';
+  // One notation for every uncertainty range (UX audit F6)
+  const rng = (lo, hi, d = 0) => `<span class="rng text-xs text-slate-600">P10–P90 ${fmt(lo, d)}–${fmt(hi, d)}</span>`;
+  // Plain-language API errors; the raw message is kept for transparency (UX audit F8)
+  function friendly(msg) {
+    const m = String(msg || "");
+    if (/429|rate limit/i.test(m)) return "Too many requests from this network in the last minute (public demo limit). Wait about a minute, then retry.";
+    if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return "Network connection to the ART FARM server failed. Check your connection, then retry.";
+    if (/50[234]|upstream|unavailable/i.test(m)) return "A data service did not answer in time (server or upstream open-data API). Retry in a moment.";
+    return "The request could not be completed.";
+  }
+  const errBox = (title, msg) => `<div class="rounded-2xl bg-white border border-red-300 p-4 text-sm text-slate-700" role="alert"><strong class="text-red-800">${title}</strong> — ${esc(friendly(msg))} <span class="text-slate-600">Information gap: no fallback values are shown.</span>
+    <div class="mt-2 flex flex-wrap items-center gap-3"><button data-retry class="min-h-[44px] px-4 rounded-xl bg-[#173a2b] text-white text-xs font-bold">Retry</button><span class="text-xs text-slate-600">Detail: ${esc(msg)}</span></div></div>`;
   const REL_TIP = "Relative index vs strategy A (current practice), not a guarantee. Range shown is P10–P90.";
 
   const COUNTY = { "19169": "Story County, IA", "17113": "McLean County, IL", "31109": "Lancaster County, NE", "39159": "Union County, OH" };
@@ -59,6 +71,10 @@
   });
   $("#btn-skip-to-map")?.addEventListener("click", () => show("page-map"));
   $("#btn-start-location")?.addEventListener("click", () => show("page-map"));
+  $("#btn-hero-start")?.addEventListener("click", () => show("page-map"));
+  const COARSE = window.matchMedia?.("(pointer: coarse)").matches;
+  if (COARSE) $$(".pointer-word").forEach((e) => (e.textContent = "Tap"));
+  document.addEventListener("click", (e) => { if (e.target.closest("[data-retry]")) run(); });
 
   // story reveal
   const io = new IntersectionObserver((es) => es.forEach((x) => x.isIntersecting && x.target.classList.add("in-view")), { threshold: 0.18 });
@@ -123,6 +139,7 @@
   }
   async function loadDemoFields() {
     try {
+      Object.values(demoLayers).forEach((l) => map.removeLayer(l)); demoLayers = {};
       const fc = await api("/fields-geo");
       state.fields = fc.fields || [];
       for (const f of state.fields) {
@@ -141,7 +158,8 @@
           .addTo(map);
       }
     } catch (e) {
-      toast("Pilot field outlines unavailable: " + e.message);
+      state.fieldsError = e.message;
+      toast("Pilot field outlines unavailable — " + friendly(e.message), 5000);
     }
   }
   function addVertex(p) {
@@ -180,27 +198,37 @@
       ? `Overlaps pilot field ${state.hitField.field_id} (${COUNTY[state.hitField.county_fips] || ""}) — engine strategies A–D will be shown.`
       : "Deep analysis available in 4 pilot counties (Story IA, McLean IL, Lancaster NE, Union OH).";
     $("#btn-to-crops").disabled = !ready;
+    const hint = $("#map-hint");
+    if (hint) {
+      const verb = COARSE ? "Tap" : "Click";
+      hint.textContent = state.preset ? "Pilot field selected — Next: choose crops"
+        : v.length < 4 ? `${verb} corner ${v.length + 1} of 4` : "4 corners placed — Next: choose crops";
+    }
   }
   $("#btn-undo").addEventListener("click", () => { if (state.preset) state.vertices = []; else state.vertices.pop(); state.preset = null; redraw(); });
   $("#btn-clear").addEventListener("click", () => { state.vertices = []; state.preset = null; redraw(); });
   $$("[data-preset]").forEach((b) => b.addEventListener("click", () => {
     const f = state.fields.find((x) => x.county_fips === b.dataset.preset);
-    if (!f) { toast("Pilot fields still loading…"); return; }
+    if (!f) {
+      if (state.fieldsError) { state.fieldsError = null; toast("Retrying pilot field outlines…"); loadDemoFields(); }
+      else toast("Pilot fields still loading…");
+      return;
+    }
     usePresetField(f);
   }));
   $("#btn-to-crops").addEventListener("click", () => show("page-crops"));
 
   // ------------------------------------------------------------------ crops
   $("#crop-grid").innerHTML = CROPS.map((c) => `
-    <button data-crop="${c.id}" class="crop-card group text-left rounded-3xl overflow-hidden bg-white shadow border-2 border-transparent transition">
-      <div class="h-40 overflow-hidden"><img src="${c.img}" alt="${c.id} field" class="w-full h-full object-cover group-hover:scale-105 transition" /></div>
+    <button data-crop="${c.id}" aria-pressed="false" class="crop-card group text-left rounded-3xl overflow-hidden bg-white shadow border-2 border-transparent transition">
+      <div class="h-28 sm:h-40 overflow-hidden"><img src="${c.img}" alt="${c.id} field" class="w-full h-full object-cover group-hover:scale-105 transition" /></div>
       <div class="p-4 flex items-center justify-between"><div><div class="text-lg font-extrabold text-[#173a2b]">${c.id === "Soy" ? "Soybean" : c.id}</div>
-      <div class="text-[11px] text-slate-500">${c.note}</div></div><span class="crop-check w-7 h-7 rounded-full border-2 border-slate-300 flex items-center justify-center text-white font-bold">✓</span></div>
+      <div class="text-xs text-slate-600">${c.note}</div></div><span class="crop-check w-7 h-7 rounded-full border-2 border-slate-300 flex items-center justify-center text-white font-bold">✓</span></div>
     </button>`).join("");
   $$("[data-crop]").forEach((b) => b.addEventListener("click", () => {
     const id = b.dataset.crop, i = state.crops.indexOf(id);
     if (i >= 0) state.crops.splice(i, 1); else state.crops.push(id);
-    $$("[data-crop]").forEach((x) => x.classList.toggle("selected", state.crops.includes(x.dataset.crop)));
+    $$("[data-crop]").forEach((x) => { const on = state.crops.includes(x.dataset.crop); x.classList.toggle("selected", on); x.setAttribute("aria-pressed", String(on)); });
     $("#crop-selected").textContent = state.crops.length ? state.crops.map((c) => (c === "Soy" ? "Soybean" : c)).join(" · ") : "none";
     $("#btn-run").disabled = state.crops.length < 2;
   }));
@@ -252,13 +280,23 @@
     state.quick = q;
     renderTier2(d, fid);
     renderTier1(q);
+    renderNav(fid);
     show("page-results");
   }
+  function renderNav(fid) {
+    const link = (href, t) => `<a href="${href}" class="shrink-0 inline-flex items-center min-h-[44px] px-3 rounded-full bg-white border border-slate-300 text-[#173a2b]">${t}</a>`;
+    $("#results-nav").innerHTML = (fid ? link("#tier2", "Strategies A–D") : link("#tier2", "Pilot counties")) + link("#tier1", "Quick Screen") + (fid ? link("#s7", "Checklist") : "");
+  }
+  $("#results-nav")?.addEventListener("click", (e) => {
+    const a = e.target.closest("a[href^='#']"); if (!a) return;
+    e.preventDefault(); $(a.getAttribute("href"))?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
   function simplify(pts, n) { const s = Math.ceil(pts.length / n); return pts.filter((_, i) => i % s === 0); }
 
   // ------------------------------------------------------------------ Tier 2 (engine)
-  const PCT = (o) => (!o || o.p50 === null || o.p50 === undefined ? GAP
-    : `<span title="${REL_TIP}" class="underline decoration-dotted cursor-help">${o.p50 > 0 ? "+" : ""}${fmt(o.p50, 0)}%</span> <span class="text-[10px] text-slate-500">(P10–P90 ${fmt(o.p10, 0)} to ${fmt(o.p90, 0)})</span>`);
+  const PCT = (o, code) => (code === "A" ? `<strong>baseline</strong> <span class="text-xs text-slate-600">(A = reference for %)</span>`
+    : !o || o.p50 === null || o.p50 === undefined ? GAP
+    : `<span title="${REL_TIP}" class="underline decoration-dotted cursor-help font-bold">${o.p50 > 0 ? "+" : ""}${fmt(o.p50, 0)}%</span><br>${rng(o.p10, o.p90)}`);
   function matches(code) {
     const c = new Set(state.crops);
     if (code === "D") return false;
@@ -273,7 +311,7 @@
       el.innerHTML = `<div class="rounded-2xl bg-white border border-amber-300 p-4 text-sm text-slate-700">🔎 <strong>Deep analysis available in 4 pilot counties</strong> — Story IA, McLean IL, Lancaster NE, Union OH. Your field is outside the 20 demo fields, so only the Quick Screen below is shown. Use a preset on the map to see strategies A–D.</div>`;
       return;
     }
-    if (!d || d.__error) { el.innerHTML = `<div class="rounded-2xl bg-white border border-red-300 p-4 text-sm">Deep analysis engine unavailable (${esc(d?.__error)}). Information gap.</div>`; return; }
+    if (!d || d.__error) { el.innerHTML = errBox("Deep analysis engine unavailable", d?.__error); return; }
     const [sim, prof, bt] = d;
     state.sim = sim;
     const strat = [...sim.strategies].sort((a, b) => a.strategy_code.localeCompare(b.strategy_code));
@@ -289,22 +327,22 @@
         <div class="flex items-start justify-between gap-2 mb-2">
           <div><div class="text-xs font-bold text-slate-500">Strategy ${esc(s.strategy_code)} · ${esc(s.sequence)}</div>
           <h3 class="text-lg font-extrabold text-[#173a2b] leading-tight">${esc(s.label)}</h3>
-          <div class="text-[11px] text-slate-500">${esc(s.goal_label || "")}</div></div>
-          ${hl ? '<span class="shrink-0 px-2 py-0.5 rounded-full bg-[#82c341]/20 text-[#2f6b1d] text-[10px] font-extrabold">matches your crops</span>' : ""}
-          ${ref ? '<span class="shrink-0 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold">reference</span>' : ""}
+          <div class="text-xs text-slate-600">${esc(s.goal_label || "")}</div></div>
+          ${hl ? '<span class="shrink-0 px-2 py-0.5 rounded-full bg-[#82c341]/20 text-[#2f6b1d] text-[11px] font-extrabold">matches your crops</span>' : ""}
+          ${ref ? '<span class="shrink-0 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-extrabold">reference</span>' : ""}
         </div>
         <p class="text-xs text-slate-600 mb-3"><strong>Why:</strong> ${esc(s.why)}</p>
         <div class="grid grid-cols-2 gap-2 text-xs mb-3">
-          <div class="rounded-xl bg-slate-50 p-2"><div class="text-slate-500">Season water deficit P50</div><strong>${fmt(wd.p50)} mm/yr</strong><div class="text-[10px] text-slate-500">P10–P90 ${fmt(wd.p10)}–${fmt(wd.p90)} · CVaR<sub>10%</sub> ${fmt(wd.cvar)}</div></div>
-          <div class="rounded-xl bg-slate-50 p-2"><div class="text-slate-500">2012 drought backtest</div><strong>${b12 ? fmt(b12.season_water_deficit_mm) + " mm deficit" : GAP}</strong><div class="text-[10px] text-slate-500">${b12 ? fmt(b12.stress_days) + " stress days" : ""}</div></div>
-          <div class="rounded-xl bg-slate-50 p-2"><div class="text-slate-500">Winter bare days P50</div><strong>${fmt(m.winter_bare_days?.p50)}</strong></div>
-          <div class="rounded-xl bg-slate-50 p-2"><div class="text-slate-500">Water use vs A</div>${PCT(s.display?.water_use_pct)}</div>
+          <div class="rounded-xl bg-slate-50 p-2"><div class="text-slate-500">Season water deficit P50</div><strong>${fmt(wd.p50)} mm/yr</strong><div>${rng(wd.p10, wd.p90)}</div><div class="text-xs text-slate-600">CVaR 10%: ${fmt(wd.cvar)} mm</div></div>
+          <div class="rounded-xl bg-slate-50 p-2"><div class="text-slate-500">2012 drought backtest</div><strong>${b12 ? fmt(b12.season_water_deficit_mm) + " mm deficit" : GAP}</strong><div class="text-xs text-slate-600">${b12 ? fmt(b12.stress_days) + " stress days" : ""}</div></div>
+          <div class="rounded-xl bg-slate-50 p-2"><div class="text-slate-500">Winter bare days P50</div><strong>${m.winter_bare_days?.p50 != null ? fmt(m.winter_bare_days.p50) + " days" : GAP}</strong></div>
+          <div class="rounded-xl bg-slate-50 p-2"><div class="text-slate-500">Water use vs A</div>${PCT(s.display?.water_use_pct, s.strategy_code)}</div>
         </div>
         <div class="text-xs space-y-2 flex-1">
           <div><div class="font-bold text-emerald-800">Benefits</div><ul class="list-disc ml-4 text-slate-700">${(s.benefits || []).map((x) => `<li>${esc(x)}</li>`).join("") || `<li>${GAP}</li>`}</ul></div>
           <div><div class="font-bold text-amber-800">Trade-offs</div><ul class="list-disc ml-4 text-slate-700">${(s.cons || []).map((x) => `<li>${esc(x)}</li>`).join("") || "<li>none listed</li>"}</ul></div>
-          <div><div class="font-bold text-slate-700">Evidence</div><ul class="ml-1 text-slate-600">${(s.evidence || []).map((x) => `<li>• ${x.url ? `<a class="underline" target="_blank" rel="noopener" href="${esc(x.url)}">${esc(x.quote || x.url)}</a>` : esc(x.quote || "")}${x.doi ? ` (doi:${esc(x.doi)})` : ""}</li>`).join("")}</ul></div>
-          <div><div class="font-bold text-slate-700">Information gaps</div><ul class="list-disc ml-4 text-slate-500">${(s.info_gaps || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+          <details class="ev"><summary class="font-bold text-slate-700">Evidence (${(s.evidence || []).length} sources)</summary><ul class="ml-1 text-slate-600">${(s.evidence || []).map((x) => `<li>• ${x.url ? `<a class="underline" target="_blank" rel="noopener" href="${esc(x.url)}">${esc(x.quote || x.url)}</a>` : esc(x.quote || "")}${x.doi ? ` (doi:${esc(x.doi)})` : ""}</li>`).join("")}</ul></details>
+          <div><div class="font-bold text-slate-700">Information gaps</div><ul class="list-disc ml-4 text-slate-600">${(s.info_gaps || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
           <div><div class="font-bold text-red-800">Check locally</div><ul class="list-disc ml-4 text-slate-700">${(s.local_review_risks || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
         </div>
         <button data-explain="${esc(s.strategy_code)}" class="mt-3 px-3 py-2 rounded-xl bg-[#173a2b] text-white text-xs font-bold hover:bg-[#24543e]">Explain this strategy (AI, numbers from engine only)</button>
@@ -321,29 +359,29 @@
           <div class="rounded-2xl bg-white/10 p-3"><div class="text-amber-200 font-bold">Prithvi-EO crop map (vision)</div>
             <div>Predicted: <strong>${esc(v.crop_pred || "—")}</strong> · bare fraction ${fmt(v.bare_fraction, 2)}</div>
             <div>Agreement with USDA CDL: <strong>${v.agreement_with_cdl != null ? fmt(v.agreement_with_cdl * 100, 0) + "%" : "—"}</strong></div>
-            <div class="text-[10px] text-emerald-100/60 break-all">${esc(v.model_id || "")}</div></div>
+            <div class="text-xs text-emerald-100/80 break-all">${esc(v.model_id || "")}</div></div>
           <div class="rounded-2xl bg-white/10 p-3"><div class="text-amber-200 font-bold">USDA CDL history</div>
             <div class="flex flex-wrap gap-1 mt-1">${cdl.map((c) => `<span class="px-1.5 py-0.5 rounded bg-white/15">${c.year}: ${esc(c.crop)}</span>`).join("")}</div></div>
           <div class="rounded-2xl bg-white/10 p-3"><div class="text-amber-200 font-bold">Field context</div>
             <div>Soil OM ${fmt(prof.soil?.om_pct, 1)}% · AWC ${fmt(prof.soil?.awc_cm_cm, 2)} cm/cm · ${esc(prof.soil?.drainagecl || "")}</div>
             <div>Precip ${fmt(prof.precip_mm_yr)} mm/yr · NDVI peak ${fmt(prof.ndvi_peak, 2)}</div>
-            <div class="text-[10px] text-emerald-100/60">${esc(prof.disclaimer || "")}</div></div>
+            <div class="text-xs text-emerald-100/80">${esc(prof.disclaimer || "")}</div></div>
         </div>
       </div>
       <div class="rounded-3xl bg-white shadow p-5 mb-5">
         <div class="flex flex-wrap justify-between items-baseline gap-2"><h3 class="font-extrabold text-[#173a2b]">Season water deficit — possible range (P10–P90) and CVaR<sub>10%</sub></h3>
-        <span class="text-[11px] text-slate-500">mm/yr · bar = P10–P90, line = P50, ◆ = CVaR (mean of worst 10%), ● = 2012 backtest</span></div>
-        <div class="h-64"><canvas id="dist-chart"></canvas></div>
+        <span class="text-xs text-slate-600">mm/yr · bar = P10–P90, line = P50, ◆ = CVaR (mean of worst 10%), ● = 2012 backtest (one season) · green = matches your crops</span></div>
+        <div class="h-72"><canvas id="dist-chart" role="img" aria-label="Season water deficit per strategy: P10–P90 range, P50, CVaR and 2012 backtest; the same values are written on each strategy card below"></canvas></div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-5">${cards}</div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="rounded-3xl bg-white shadow p-5"><h3 class="font-extrabold text-[#173a2b] mb-2">Information gaps</h3>
           <ul class="list-disc ml-5 text-xs text-slate-600">${[...(prof.info_gaps || []), ...(sim.info_gaps || [])].map((x) => `<li>${esc(typeof x === "string" ? x : x.message || x.item || JSON.stringify(x))}</li>`).join("")}</ul></div>
-        <div class="rounded-3xl bg-amber-50 border border-amber-300 shadow p-5"><h3 class="font-extrabold text-[#173a2b] mb-1">S7 · Human judgement checklist</h3>
-          <p class="text-[11px] text-slate-600 mb-2">ART FARM does not replace your judgement. Before acting, check these with your agronomist or extension office:</p>
+        <div id="s7" class="s7 scroll-mt-16 rounded-3xl bg-amber-50 border border-amber-300 shadow p-5"><h3 class="font-extrabold text-[#173a2b] mb-1">S7 · Human judgement checklist</h3>
+          <p class="text-xs text-slate-600 mb-2">ART FARM does not replace your judgement. Before acting, check these with your agronomist or extension office:</p>
           <ul class="text-xs space-y-1">${risks.map((r) => `<li><label class="flex gap-2"><input type="checkbox" class="mt-0.5"> <span>${esc(r)}</span></label></li>`).join("")}
           <li><label class="flex gap-2"><input type="checkbox" class="mt-0.5"> <span>In-field soil test (not provided by this tool)</span></label></li></ul>
-          <p class="text-[10px] text-slate-500 mt-2">${esc(sim.disclaimer || "")}</p></div>
+          <p class="text-xs text-slate-600 mt-2">${esc(sim.disclaimer || "")}</p></div>
       </div>`;
     drawChart(strat, btBy);
     $$("[data-explain]").forEach((b) => b.addEventListener("click", () => explain(b, fid)));
@@ -356,13 +394,13 @@
       data: {
         labels,
         datasets: [
-          { type: "bar", label: "P10–P90", data: wd.map((w) => [w.p10, w.p90]), backgroundColor: strat.map((s) => (matches(s.strategy_code) ? "rgba(130,195,65,.55)" : "rgba(36,84,62,.25)")), borderColor: "#24543e", borderWidth: 1, borderSkipped: false, barPercentage: 0.5 },
+          { type: "bar", label: "P10–P90", pointStyle: "rect", data: wd.map((w) => [w.p10, w.p90]), backgroundColor: strat.map((s) => (matches(s.strategy_code) ? "rgba(130,195,65,.55)" : "rgba(36,84,62,.25)")), borderColor: "#24543e", borderWidth: 1, borderSkipped: false, barPercentage: 0.5 },
           { type: "scatter", label: "P50", data: wd.map((w, i) => ({ x: labels[i], y: w.p50 })), pointStyle: "line", pointRadius: 18, borderWidth: 3, borderColor: "#173a2b" },
           { type: "scatter", label: "CVaR 10%", data: wd.map((w, i) => ({ x: labels[i], y: w.cvar })), pointStyle: "rectRot", pointRadius: 6, backgroundColor: "#d97706" },
           { type: "scatter", label: "2012 backtest", data: strat.map((s, i) => ({ x: labels[i], y: btBy[s.strategy_code]?.metrics?.season_water_deficit_mm ?? null })), pointRadius: 6, backgroundColor: "#b91c1c" },
         ],
       },
-      options: { maintainAspectRatio: false, scales: { y: { title: { display: true, text: "mm/yr" }, beginAtZero: true } }, plugins: { legend: { position: "bottom" } } },
+      options: { maintainAspectRatio: false, scales: { y: { title: { display: true, text: "mm/yr" }, beginAtZero: true } }, plugins: { legend: { position: "bottom", labels: { usePointStyle: true, font: { size: 12 } } } } },
     });
   }
   async function explain(btn, fid) {
@@ -371,16 +409,16 @@
     try {
       const r = await api("/explain", { body: { field_id: fid, strategy_code: code, lang: "en", question: `Why might strategy ${code} fit or not fit this field, and what should I check locally?` } });
       out.textContent = (r.answer || "").replace(/\*\*/g, "") + (r.insufficient_evidence ? "\n[insufficient evidence in the library]" : "") + "\n— AI-generated explanation (SI); verify locally.";
-    } catch (e) { out.textContent = "Explanation unavailable: " + e.message; }
+    } catch (e) { out.textContent = "Explanation unavailable — " + friendly(e.message) + " (detail: " + e.message + ")"; }
     btn.disabled = false;
   }
 
   // ------------------------------------------------------------------ Tier 1 (quick screen)
-  const dist = (o, u = "") => (!o ? GAP : `<strong>${fmt(o.p50)}</strong>${u} <span class="text-[10px] text-slate-500">P10–P90 ${fmt(o.p10)}–${fmt(o.p90)}</span>`);
+  const dist = (o, u = "") => (!o ? GAP : `<strong>${fmt(o.p50)}</strong>${u} ${rng(o.p10, o.p90)}`);
   function renderTier1(q) {
     const el = $("#tier1");
     if (!q || q.__error) {
-      el.innerHTML = `<div class="rounded-2xl bg-white border border-red-300 p-4 text-sm">Quick Screen unavailable (${esc(q?.__error)}). Information gap — no fallback values are shown.</div>`;
+      el.innerHTML = errBox("Quick Screen unavailable", q?.__error);
       return;
     }
     const g = q.geometry || {}, ch = q.climate_history, fc = q.forecast_anomaly, pj = q.climate_projection;
@@ -388,20 +426,20 @@
     el.innerHTML = `
       <div class="rounded-3xl bg-white shadow p-6 mb-5 border-l-8 border-[#82c341]">
         <div class="flex flex-wrap items-baseline justify-between gap-2">
-          <div><div class="text-xs font-bold uppercase tracking-widest text-[#5a9e2e]">Tier 1 · Quick Screen</div>
-          <h2 class="text-2xl font-extrabold text-[#173a2b]">${esc(q.engine)}</h2></div>
+          <div><div class="text-xs font-bold uppercase tracking-widest text-[#3d7a1f]">Tier 1 · Quick Screen</div>
+          <h2 class="text-2xl font-extrabold text-[#173a2b]">Quick Screen for your field</h2><div class="text-xs text-slate-600">${esc(q.engine)}</div></div>
           <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-extrabold uppercase">${esc(q.label)}</span>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4 text-sm">
-          <div class="rounded-xl bg-[#f3f5ee] p-3"><div class="text-[11px] text-slate-500">Area (WGS84)</div><strong>${fmt(g.area_ha, 2)} ha</strong></div>
-          <div class="rounded-xl bg-[#f3f5ee] p-3"><div class="text-[11px] text-slate-500">Perimeter</div><strong>${fmt(g.perimeter_km, 3)} km</strong></div>
-          <div class="rounded-xl bg-[#f3f5ee] p-3"><div class="text-[11px] text-slate-500">Elevation (USGS 3DEP, centroid)</div><strong>${q.elevation ? fmt(q.elevation.value_m, 1) + " m" : GAP}</strong></div>
-          <div class="rounded-xl bg-[#f3f5ee] p-3"><div class="text-[11px] text-slate-500">Mean temp ${ch ? esc(ch.period) : ""} (NASA POWER)</div>${ch ? dist(ch.mean?.t2m_c, " °C") : GAP}</div>
-          <div class="rounded-xl bg-[#f3f5ee] p-3"><div class="text-[11px] text-slate-500">Annual precip / ET₀ (NASA POWER)</div>${ch ? `${dist(ch.mean?.precip_mm, " mm")}<br>${dist(ch.mean?.et0_mm, " mm")}` : GAP}</div>
+          <div class="rounded-xl bg-[#f3f5ee] p-3"><div class="text-xs text-slate-600">Area (WGS84)</div><strong>${fmt(g.area_ha, 2)} ha</strong></div>
+          <div class="rounded-xl bg-[#f3f5ee] p-3"><div class="text-xs text-slate-600">Perimeter</div><strong>${fmt(g.perimeter_km, 3)} km</strong></div>
+          <div class="rounded-xl bg-[#f3f5ee] p-3"><div class="text-xs text-slate-600">Elevation (USGS 3DEP, centroid)</div><strong>${q.elevation ? fmt(q.elevation.value_m, 1) + " m" : GAP}</strong></div>
+          <div class="rounded-xl bg-[#f3f5ee] p-3"><div class="text-xs text-slate-600">Mean temp ${ch ? esc(ch.period) : ""} (NASA POWER)</div>${ch ? dist(ch.mean?.t2m_c, " °C") : GAP}</div>
+          <div class="rounded-xl bg-[#f3f5ee] p-3"><div class="text-xs text-slate-600">Annual precip / ET₀ (NASA POWER)</div>${ch ? `${dist(ch.mean?.precip_mm, " mm")}<br>${dist(ch.mean?.et0_mm, " mm")}` : GAP}</div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 text-xs">
-          <div class="rounded-xl border border-slate-200 p-3"><div class="font-bold text-[#173a2b]">NWS 7-day forecast anomaly</div>${fc && fc.anomaly_c != null ? `<strong>${fc.anomaly_c > 0 ? "+" : ""}${fmt(fc.anomaly_c, 1)} °C</strong> vs ${esc(fc.baseline)}<div class="text-[10px] text-slate-500">${esc(fc.note)}</div>` : GAP}</div>
-          <div class="rounded-xl border border-slate-200 p-3"><div class="font-bold text-[#173a2b]">Possible range (scenario) · climate model</div>${pj ? Object.entries(pj.periods || {}).map(([k, p]) => `<div>${esc(k)}: ${fmt(p.t2m_mean_c, 1)} °C · precip ${dist(p.precip_mm_per_year, " mm/yr")}</div>`).join("") + `<div class="text-[10px] text-slate-500">${esc(pj.source)} — ${esc(pj.note)}</div>` : GAP}</div>
+          <div class="rounded-xl border border-slate-200 p-3"><div class="font-bold text-[#173a2b]">NWS 7-day forecast anomaly</div>${fc && fc.anomaly_c != null ? `<strong>${fc.anomaly_c > 0 ? "+" : ""}${fmt(fc.anomaly_c, 1)} °C</strong> vs ${esc(fc.baseline)}<div class="text-xs text-slate-600">${esc(fc.note)}</div>` : GAP}</div>
+          <div class="rounded-xl border border-slate-200 p-3"><div class="font-bold text-[#173a2b]">Possible range (scenario) · climate model</div>${pj ? Object.entries(pj.periods || {}).map(([k, p]) => `<div>${esc(k)}: ${fmt(p.t2m_mean_c, 1)} °C · precip ${dist(p.precip_mm_per_year, " mm/yr")}</div>`).join("") + `<div class="text-xs text-slate-600">${esc(pj.source)} — ${esc(pj.note)}</div>` : GAP}</div>
         </div>
       </div>
       <h3 class="font-extrabold text-[#173a2b] mb-2">Crop water balance (FAO-56) — ${esc(q.label)}</h3>
@@ -409,9 +447,9 @@
         <div class="rounded-3xl bg-white shadow overflow-hidden">
           <div class="h-24 overflow-hidden"><img src="${(CROPS.find((x) => x.id === c.crop) || {}).img || ""}" class="w-full h-full object-cover" alt=""></div>
           <div class="p-4 text-xs space-y-1.5">
-            <div class="flex justify-between items-baseline"><h4 class="text-lg font-extrabold text-[#173a2b]">${name(c.crop)}</h4><span class="text-[10px] text-amber-700 font-bold">${esc(c.label)}</span></div>
-            <div title="${esc(c.kc?.source)} ${esc(c.kc?.note || "")}" class="cursor-help">K<sub>c</sub> ini/mid/end: <strong>${c.kc?.ini} / ${c.kc?.mid} / ${c.kc?.end}</strong> <span class="text-slate-400">(FAO-56 Table 12)</span></div>
-            <div>Season ${esc(c.season_window?.start)} → ${esc(c.season_window?.end)} <span class="text-slate-400">(assumption)</span></div>
+            <div class="flex justify-between items-baseline"><h4 class="text-lg font-extrabold text-[#173a2b]">${name(c.crop)}</h4><span class="text-xs text-amber-700 font-bold">${esc(c.label)}</span></div>
+            <div title="${esc(c.kc?.source)} ${esc(c.kc?.note || "")}" class="cursor-help">K<sub>c</sub> ini/mid/end: <strong>${c.kc?.ini} / ${c.kc?.mid} / ${c.kc?.end}</strong> <span class="text-slate-500">(FAO-56 Table 12)</span></div>
+            <div>Season ${esc(c.season_window?.start)} → ${esc(c.season_window?.end)} <span class="text-slate-500">(assumption)</span></div>
             <div>Crop water demand ETc: ${dist(c.history?.etc_mm, " mm")}</div>
             <div>Effective rain: ${dist(c.history?.effective_precip_mm, " mm")}</div>
             <div>Irrigation deficit: ${dist(c.history?.irrigation_deficit_mm, " mm")}</div>
@@ -419,21 +457,21 @@
             <div class="pt-1 border-t border-slate-100">Scenario range deficit: ${dist(c.projection?.irrigation_deficit_mm, " mm")}</div>
           </div></div>`).join("")}</div>
       <h3 class="font-extrabold text-[#173a2b] mb-1">Rotation candidates (not ranked)</h3>
-      <p class="text-[11px] text-slate-500 mb-2">No crop repeats back-to-back. Order is arbitrary — compare trade-offs yourself. Sequences with the same crops in a different order share the same seasonal averages in this screening model (order effects such as N credit are not modelled).</p>
+      <p class="text-xs text-slate-600 mb-2">No crop repeats back-to-back. Order is arbitrary — compare trade-offs yourself. Sequences with the same crops in a different order share the same seasonal averages in this screening model (order effects such as N credit are not modelled).</p>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">${(q.rotation_candidates || []).map((r) => `
         <div class="rounded-2xl bg-white shadow p-4 text-xs">
-          <div class="text-[11px] text-slate-500">Candidate ${r.candidate}</div>
+          <div class="text-xs text-slate-600">Candidate ${r.candidate}</div>
           <div class="text-base font-extrabold text-[#173a2b] mb-2">${r.sequence.map(name).join(" → ")}</div>
           <div>Mean season ETc: <strong>${fmt(r.mean_season_etc_mm)} mm</strong></div>
           <div>Mean irrigation deficit: <strong>${fmt(r.mean_season_irrigation_deficit_mm)} mm</strong></div>
-          <div>Water-use index: ${r.relative_water_use_index ? `<strong title="${esc(r.relative_water_use_index.tooltip)}" class="underline decoration-dotted cursor-help">${fmt(r.relative_water_use_index.value, 1)}</strong> <span class="text-slate-400">${esc(r.relative_water_use_index.unit)}</span>` : GAP}</div>
+          <div>Water-use index: ${r.relative_water_use_index ? `<strong title="${esc(r.relative_water_use_index.tooltip)}" class="underline decoration-dotted cursor-help">${fmt(r.relative_water_use_index.value, 1)}</strong> <span class="text-slate-500">${esc(r.relative_water_use_index.unit)}</span>` : GAP}</div>
         </div>`).join("")}</div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="rounded-2xl bg-white shadow p-4 text-xs"><h4 class="font-extrabold text-[#173a2b] mb-1">Information gaps</h4><ul class="list-disc ml-5 text-slate-600">${(q.info_gaps || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
         <div class="rounded-2xl bg-white shadow p-4 text-xs"><h4 class="font-extrabold text-[#173a2b] mb-1">Assumptions & sources</h4>
           <ul class="list-disc ml-5 text-slate-600">${(q.economic_assumptions || []).map((a) => `<li>${esc(a.name || a.item || "")}: ${esc(a.value)} ${esc(a.unit || "")} — ${esc(a.source)} ${esc(a.year || "")} <em>(assumption)</em></li>`).join("")}
           ${(q.sources || []).map((s) => `<li>${esc(s)}</li>`).join("")}</ul>
-          <p class="text-[10px] text-slate-500 mt-2">${esc(q.disclaimer)}</p></div>
+          <p class="text-xs text-slate-600 mt-2">${esc(q.disclaimer)}</p></div>
       </div>`;
   }
 
