@@ -1,0 +1,179 @@
+{
+ "county_fips": "17113",
+ "state_alpha": "IL",
+ "name": "McLean",
+ "area_km2": 3072.4,
+ "centroid": {
+  "type": "Point",
+  "coordinates": [
+   -88.86313655775638,
+   40.508141
+  ]
+ },
+ "tier": "county",
+ "field_level_available": false,
+ "climate": {
+  "period": {
+   "start": "1995-01-01",
+   "end": "2024-12-31"
+  },
+  "precip_mm_yr": 979.7,
+  "t2m_mean_c": 10.84,
+  "frost_days_yr": 127.3,
+  "heat_days_yr": 11.6,
+  "source_id": "power"
+ },
+ "crop_share": {
+  "latest_year": 2025,
+  "latest": {
+   "Corn": 0.4209,
+   "Soybeans": 0.3926,
+   "Winter Wheat": 0.002,
+   "Rye": 0.0002,
+   "Oats": 0.0004,
+   "Alfalfa": 0.0045,
+   "Other Hay/Non Alfalfa": 0.0032
+  },
+  "corn_soy_share_by_year": {
+   "2008": 0.8212,
+   "2009": 0.81,
+   "2010": 0.8178,
+   "2011": 0.8316,
+   "2012": 0.8121,
+   "2013": 0.8099,
+   "2014": 0.8178,
+   "2015": 0.8183,
+   "2016": 0.8209,
+   "2017": 0.8202,
+   "2018": 0.8208,
+   "2019": 0.8188,
+   "2020": 0.8253,
+   "2021": 0.8193,
+   "2022": 0.8181,
+   "2023": 0.8158,
+   "2024": 0.8314,
+   "2025": 0.8135
+  },
+  "source_id": "cdl",
+  "unit": "fraction of classified county pixels"
+ },
+ "yield_bu_ac": {
+  "2021": {
+   "corn": 205.7,
+   "soybeans": 67.4
+  },
+  "2022": {
+   "corn": 232.3,
+   "soybeans": 68.8
+  },
+  "2023": {
+   "corn": 223.3,
+   "soybeans": 71.8
+  },
+  "2024": {
+   "corn": 246.7,
+   "soybeans": 74.2
+  },
+  "2025": {
+   "corn": 243.1,
+   "soybeans": 74.0
+  }
+ },
+ "yield_unit": "bu/ac (USDA NASS county, bulk file)",
+ "smap": {
+  "product": "SPL3SMP.009",
+  "unit": "cm3/cm3",
+  "mean_all": 0.2345,
+  "mean_latest_year": 0.2244,
+  "latest_year": 2025,
+  "period": "2015-04-01..2025-10-28",
+  "native_resolution": "nominal 36 km L3",
+  "notes": "Context-cell value, not field-precise."
+ },
+ "outlook": {
+  "field_id": null,
+  "county_fips": "17113",
+  "next_season": {
+   "source_id": "geos_s2s",
+   "init": "2026-10",
+   "period": "2027-JJ",
+   "pr_anomaly_pct": {
+    "p10": -47.41,
+    "p50": -6.93,
+    "p90": 34.6
+   },
+   "tas_anomaly_c": {
+    "p10": -0.47,
+    "p50": 1.43,
+    "p90": 2.13
+   },
+   "n_members": 10,
+   "native_resolution": "0.5 deg",
+   "baseline": "NASA POWER 1995-2024 same months (no hindcast bias correction)",
+   "seasons_available": [
+    "JJ",
+    "MAM"
+   ]
+  },
+  "mid_century": [
+   {
+    "source_id": "nex_gddp",
+    "scenario": "ssp245",
+    "period": "2031-2040",
+    "baseline_period": "1985-2014",
+    "pr_change_pct": {
+     "min": -2.62,
+     "p50": 2.23,
+     "max": 7.09
+    },
+    "tasmax_change_c": {
+     "min": 1.43,
+     "p50": 1.55,
+     "max": 1.67
+    },
+    "n_models": 2,
+    "models": [
+     "ACCESS-CM2",
+     "MPI-ESM1-2-HR"
+    ],
+    "season": "ANN"
+   },
+   {
+    "source_id": "nex_gddp",
+    "scenario": "ssp585",
+    "period": "2031-2040",
+    "baseline_period": "1985-2014",
+    "pr_change_pct": {
+     "min": 3.26,
+     "p50": 3.79,
+     "max": 4.32
+    },
+    "tasmax_change_c": {
+     "min": 1.44,
+     "p50": 2.07,
+     "max": 2.69
+    },
+    "n_models": 2,
+    "models": [
+     "ACCESS-CM2",
+     "MPI-ESM1-2-HR"
+    ],
+    "season": "ANN"
+   }
+  ],
+  "label": "Possible ranges (scenarios), not a forecast of a single future.",
+  "native_resolution_note": "Context-cell data (tens of km), not field-precise.",
+  "info_gaps": []
+ },
+ "info_gaps": [
+  "GPM IMERG not loaded; POWER precipitation used"
+ ],
+ "sources": [
+  "POWER",
+  "CDL",
+  "NASS",
+  "SMAP",
+  "GEOS-S2S",
+  "NEX-GDDP-CMIP6"
+ ]
+}

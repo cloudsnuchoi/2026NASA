@@ -1,0 +1,67 @@
+{
+ "field_id": "191825003869023",
+ "years": [
+  {
+   "year": 2025,
+   "precip_mm": 914.1,
+   "et_mm": 681.0,
+   "ndvi_peak": 0.908,
+   "t2m_mean_c": 10.27,
+   "frost_days": 127,
+   "heat_days": 8,
+   "crop_cdl": "Soybeans",
+   "naip_thumb_url": null
+  },
+  {
+   "year": 2024,
+   "precip_mm": 894.8,
+   "et_mm": 697.0,
+   "ndvi_peak": 0.899,
+   "t2m_mean_c": 11.49,
+   "frost_days": 118,
+   "heat_days": 18,
+   "crop_cdl": "Corn",
+   "naip_thumb_url": null
+  },
+  {
+   "year": 2023,
+   "precip_mm": 627.6,
+   "et_mm": 685.0,
+   "ndvi_peak": 0.884,
+   "t2m_mean_c": 11.22,
+   "frost_days": 140,
+   "heat_days": 35,
+   "crop_cdl": "Soybeans",
+   "naip_thumb_url": null
+  },
+  {
+   "year": 2022,
+   "precip_mm": 676.9,
+   "et_mm": 785.0,
+   "ndvi_peak": null,
+   "t2m_mean_c": 9.45,
+   "frost_days": 152,
+   "heat_days": 35,
+   "crop_cdl": "Corn",
+   "naip_thumb_url": null
+  },
+  {
+   "year": 2021,
+   "precip_mm": 648.0,
+   "et_mm": 646.0,
+   "ndvi_peak": null,
+   "t2m_mean_c": 11.08,
+   "frost_days": 133,
+   "heat_days": 47,
+   "crop_cdl": "Soybeans",
+   "naip_thumb_url": null
+  }
+ ],
+ "sources": [
+  "POWER",
+  "OpenET",
+  "HLS",
+  "CDL"
+ ],
+ "notes": "precip/t2m: NASA POWER county point; et_mm: OpenET Ensemble monthly sum (12 months only); ndvi_peak: 95th percentile of valid HLS NDVI that year. NAIP thumbnails not loaded."
+}

@@ -1,0 +1,179 @@
+{
+ "county_fips": "19169",
+ "state_alpha": "IA",
+ "name": "Story",
+ "area_km2": 1485.7,
+ "centroid": {
+  "type": "Point",
+  "coordinates": [
+   -93.46520869919132,
+   42.036972
+  ]
+ },
+ "tier": "field",
+ "field_level_available": true,
+ "climate": {
+  "period": {
+   "start": "1995-01-01",
+   "end": "2024-12-31"
+  },
+  "precip_mm_yr": 838.1,
+  "t2m_mean_c": 9.72,
+  "frost_days_yr": 143.4,
+  "heat_days_yr": 19.8,
+  "source_id": "power"
+ },
+ "crop_share": {
+  "latest_year": 2025,
+  "latest": {
+   "Corn": 0.4379,
+   "Soybeans": 0.2891,
+   "Winter Wheat": 0.0001,
+   "Rye": 0.0001,
+   "Oats": 0.0025,
+   "Alfalfa": 0.0067,
+   "Other Hay/Non Alfalfa": 0.0043
+  },
+  "corn_soy_share_by_year": {
+   "2008": 0.7437,
+   "2009": 0.7345,
+   "2010": 0.7482,
+   "2011": 0.7499,
+   "2012": 0.7404,
+   "2013": 0.7439,
+   "2014": 0.7458,
+   "2015": 0.7481,
+   "2016": 0.7499,
+   "2017": 0.7502,
+   "2018": 0.7512,
+   "2019": 0.7589,
+   "2020": 0.7597,
+   "2021": 0.7417,
+   "2022": 0.7367,
+   "2023": 0.7323,
+   "2024": 0.7405,
+   "2025": 0.727
+  },
+  "source_id": "cdl",
+  "unit": "fraction of classified county pixels"
+ },
+ "yield_bu_ac": {
+  "2021": {
+   "corn": 201.2,
+   "soybeans": 63.6
+  },
+  "2022": {
+   "corn": 207.1,
+   "soybeans": 60.0
+  },
+  "2023": {
+   "corn": 211.4,
+   "soybeans": 64.1
+  },
+  "2024": {
+   "corn": 215.5,
+   "soybeans": 63.2
+  },
+  "2025": {
+   "corn": 204.0,
+   "soybeans": 63.6
+  }
+ },
+ "yield_unit": "bu/ac (USDA NASS county, bulk file)",
+ "smap": {
+  "product": "SPL3SMP.009",
+  "unit": "cm3/cm3",
+  "mean_all": 0.2072,
+  "mean_latest_year": 0.2053,
+  "latest_year": 2025,
+  "period": "2015-04-01..2025-10-28",
+  "native_resolution": "nominal 36 km L3",
+  "notes": "Context-cell value, not field-precise."
+ },
+ "outlook": {
+  "field_id": null,
+  "county_fips": "19169",
+  "next_season": {
+   "source_id": "geos_s2s",
+   "init": "2026-10",
+   "period": "2027-JJ",
+   "pr_anomaly_pct": {
+    "p10": -53.48,
+    "p50": -27.27,
+    "p90": 3.42
+   },
+   "tas_anomaly_c": {
+    "p10": -1.32,
+    "p50": 0.42,
+    "p90": 0.83
+   },
+   "n_members": 10,
+   "native_resolution": "0.5 deg",
+   "baseline": "NASA POWER 1995-2024 same months (no hindcast bias correction)",
+   "seasons_available": [
+    "JJ",
+    "MAM"
+   ]
+  },
+  "mid_century": [
+   {
+    "source_id": "nex_gddp",
+    "scenario": "ssp245",
+    "period": "2031-2040",
+    "baseline_period": "1985-2014",
+    "pr_change_pct": {
+     "min": -1.43,
+     "p50": 2.53,
+     "max": 6.49
+    },
+    "tasmax_change_c": {
+     "min": 1.52,
+     "p50": 1.62,
+     "max": 1.72
+    },
+    "n_models": 2,
+    "models": [
+     "ACCESS-CM2",
+     "MPI-ESM1-2-HR"
+    ],
+    "season": "ANN"
+   },
+   {
+    "source_id": "nex_gddp",
+    "scenario": "ssp585",
+    "period": "2031-2040",
+    "baseline_period": "1985-2014",
+    "pr_change_pct": {
+     "min": -2.19,
+     "p50": 0.44,
+     "max": 3.07
+    },
+    "tasmax_change_c": {
+     "min": 1.51,
+     "p50": 2.18,
+     "max": 2.85
+    },
+    "n_models": 2,
+    "models": [
+     "ACCESS-CM2",
+     "MPI-ESM1-2-HR"
+    ],
+    "season": "ANN"
+   }
+  ],
+  "label": "Possible ranges (scenarios), not a forecast of a single future.",
+  "native_resolution_note": "Context-cell data (tens of km), not field-precise.",
+  "info_gaps": []
+ },
+ "info_gaps": [
+  "GPM IMERG not loaded; POWER precipitation used"
+ ],
+ "sources": [
+  "POWER",
+  "CDL",
+  "NASS",
+  "SMAP",
+  "GEOS-S2S",
+  "NEX-GDDP-CMIP6"
+ ]
+}

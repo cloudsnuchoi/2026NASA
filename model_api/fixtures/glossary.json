@@ -1,0 +1,116 @@
+{
+ "terms": [
+  {
+   "term_id": "evapotranspiration",
+   "ko": "증발산",
+   "en": "Evapotranspiration",
+   "short_ko": "토양 증발과 식물 증산으로 땅에서 대기로 나가는 물의 양(mm).",
+   "short_en": "Water leaving the land by soil evaporation plus plant transpiration (mm).",
+   "source_url": "https://www.fao.org/3/x0490e/x0490e00.htm"
+  },
+  {
+   "term_id": "reference_et",
+   "ko": "기준 증발산(ET0)",
+   "en": "Reference evapotranspiration (ET0)",
+   "short_ko": "잘 관리된 기준 잔디면의 증발산. FAO-56 Penman-Monteith로 계산.",
+   "short_en": "ET of a well-watered reference grass surface, computed with FAO-56 Penman-Monteith.",
+   "source_url": "https://www.fao.org/3/x0490e/x0490e00.htm"
+  },
+  {
+   "term_id": "crop_coefficient",
+   "ko": "작물계수(Kc)",
+   "en": "Crop coefficient (Kc)",
+   "short_ko": "작물 증발산 = Kc × ET0. 작물·생육 단계마다 다르다.",
+   "short_en": "Crop ET = Kc x ET0; varies by crop and growth stage.",
+   "source_url": "https://www.fao.org/3/x0490e/x0490e00.htm"
+  },
+  {
+   "term_id": "soil_moisture_anomaly",
+   "ko": "토양수분 아노말리",
+   "en": "Soil moisture anomaly",
+   "short_ko": "같은 칸의 평년 대비 토양수분 차이. SMAP은 수십 km 칸 값이다.",
+   "short_en": "Difference from the same cell's normal soil moisture. SMAP cells are tens of km wide.",
+   "source_url": "https://nsidc.org/data/spl3smp"
+  },
+  {
+   "term_id": "ndvi",
+   "ko": "NDVI(식생지수)",
+   "en": "NDVI",
+   "short_ko": "근적외·적색 반사로 계산한 녹색 식생 지표(무차원).",
+   "short_en": "Normalized difference vegetation index from near-infrared and red reflectance (dimensionless).",
+   "source_url": "https://www.earthdata.nasa.gov/data/projects/hls"
+  },
+  {
+   "term_id": "frost_risk",
+   "ko": "서리 위험",
+   "en": "Frost risk",
+   "short_ko": "최저기온이 0 °C 아래로 내려가는 날의 빈도.",
+   "short_en": "How often daily minimum temperature drops below 0 C.",
+   "source_url": null
+  },
+  {
+   "term_id": "water_balance",
+   "ko": "물수지",
+   "en": "Water balance",
+   "short_ko": "토양수분 = 이전 + 강수 − 증발산 − 유출 − 배수. 하루 단위 계산.",
+   "short_en": "Soil water = previous + rain - ET - runoff - drainage, computed daily.",
+   "source_url": "https://www.fao.org/3/x0490e/x0490e00.htm"
+  },
+  {
+   "term_id": "cvar",
+   "ko": "CVaR(조건부 위험값)",
+   "en": "CVaR",
+   "short_ko": "몬테카를로 표본 중 가장 나쁜 10 %의 평균. 꼬리 위험(회복력) 지표.",
+   "short_en": "Mean of the worst 10 % of Monte Carlo samples: a tail-risk (resilience) measure.",
+   "source_url": null
+  },
+  {
+   "term_id": "monte_carlo",
+   "ko": "몬테카를로",
+   "en": "Monte Carlo",
+   "short_ko": "과거 기상 연도를 무작위로 다시 뽑아 여러 번 계산해 분포를 얻는 방법.",
+   "short_en": "Re-running the model on randomly resampled past weather years to get a distribution.",
+   "source_url": null
+  },
+  {
+   "term_id": "cover_crop",
+   "ko": "피복작물",
+   "en": "Cover crop",
+   "short_ko": "수확 뒤 맨땅을 덮으려고 심는 작물(예: 겨울 호밀).",
+   "short_en": "A crop grown to cover otherwise bare soil after harvest (e.g., winter cereal rye).",
+   "source_url": null
+  },
+  {
+   "term_id": "nitrogen_fixation",
+   "ko": "질소 고정",
+   "en": "Nitrogen fixation",
+   "short_ko": "콩과 작물(대두·알팔파)이 뿌리혹 세균으로 공기 중 질소를 쓰는 과정.",
+   "short_en": "Legumes (soybean, alfalfa) using root-nodule bacteria to take nitrogen from the air.",
+   "source_url": null
+  },
+  {
+   "term_id": "deep_rooted_crop",
+   "ko": "심근 작물",
+   "en": "Deep-rooted crop",
+   "short_ko": "뿌리가 깊게 내려 깊은 토양수분을 쓰는 작물(예: 알팔파).",
+   "short_en": "A crop whose roots reach deep soil water (e.g., alfalfa).",
+   "source_url": null
+  },
+  {
+   "term_id": "satellite_vs_ground",
+   "ko": "위성 vs 지상 관측",
+   "en": "Satellite vs ground observation",
+   "short_ko": "위성 값은 칸(수십 m–수십 km) 평균이다. 필지 안 차이는 현장 확인이 필요하다.",
+   "short_en": "Satellite values are cell averages (tens of m to tens of km); within-field differences need checking on the ground.",
+   "source_url": null
+  },
+  {
+   "term_id": "bare_period",
+   "ko": "맨땅 기간",
+   "en": "Bare-soil period",
+   "short_ko": "NDVI가 낮아 살아 있는 식생이 거의 없는 기간.",
+   "short_en": "A period with very little living vegetation (low NDVI).",
+   "source_url": null
+  }
+ ]
+}

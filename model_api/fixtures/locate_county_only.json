@@ -1,0 +1,10 @@
+{
+ "in_service_area": false,
+ "service_tier": "county",
+ "field_id": null,
+ "county_fips": "17019",
+ "state_alpha": "IL",
+ "area_ha": null,
+ "geometry": null,
+ "message": "Outside the field-level service area (Story County, IA). County-level summary: /county/17019"
+}

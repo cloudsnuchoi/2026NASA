@@ -1,0 +1,110 @@
+{
+ "field_id": "191825003869023",
+ "years": [
+  2012
+ ],
+ "county_yield_bu_ac": {
+  "2012": {
+   "corn": 157.6,
+   "soybeans": 48.9
+  }
+ },
+ "yield_unit": "bu/ac",
+ "results": [
+  {
+   "strategy_code": "A",
+   "year": 2012,
+   "observed_sequence": "C-C",
+   "observed_cdl": "Corn",
+   "notes": "Deterministic water balance driven by the actual POWER weather of this year (previous year as spin-up); observed CDL crop used for A. County yield is context only (NASS bulk file). 2012 is the US drought stress year.",
+   "metrics": {
+    "season_water_deficit_mm": 344.0,
+    "stress_days": 85.0,
+    "season_etc_mm": 732.9,
+    "eta_mm": 450.8,
+    "runoff_mm": 10.7,
+    "drainage_mm": 155.0,
+    "offseason_drainage_mm": 121.0,
+    "living_cover_days": 151.0,
+    "winter_bare_days": 181.0,
+    "veg_index_days": 95.5,
+    "precip_mm": 582.5,
+    "modelled_crop": "corn",
+    "unit": "mm or days in the scored year"
+   }
+  },
+  {
+   "strategy_code": "B",
+   "year": 2012,
+   "observed_sequence": null,
+   "observed_cdl": null,
+   "notes": "Deterministic water balance driven by the actual POWER weather of this year (previous year as spin-up); observed CDL crop used for A. County yield is context only (NASS bulk file). 2012 is the US drought stress year.",
+   "metrics": {
+    "season_water_deficit_mm": 344.0,
+    "stress_days": 85.0,
+    "season_etc_mm": 732.9,
+    "eta_mm": 530.8,
+    "runoff_mm": 3.8,
+    "drainage_mm": 77.6,
+    "offseason_drainage_mm": 43.6,
+    "living_cover_days": 350.0,
+    "winter_bare_days": 9.0,
+    "veg_index_days": 252.4,
+    "precip_mm": 582.5,
+    "modelled_crop": "corn",
+    "unit": "mm or days in the scored year"
+   }
+  },
+  {
+   "strategy_code": "C",
+   "year": 2012,
+   "observed_sequence": null,
+   "observed_cdl": null,
+   "notes": "Deterministic water balance driven by the actual POWER weather of this year (previous year as spin-up); observed CDL crop used for A. County yield is context only (NASS bulk file). 2012 is the US drought stress year.",
+   "metrics": {
+    "season_water_deficit_mm": 344.0,
+    "stress_days": 85.0,
+    "season_etc_mm": 732.9,
+    "eta_mm": 530.8,
+    "runoff_mm": 3.8,
+    "drainage_mm": 85.8,
+    "offseason_drainage_mm": 51.8,
+    "living_cover_days": 350.0,
+    "winter_bare_days": 9.0,
+    "veg_index_days": 252.4,
+    "precip_mm": 582.5,
+    "modelled_crop": "corn",
+    "unit": "mm or days in the scored year"
+   }
+  },
+  {
+   "strategy_code": "D",
+   "year": 2012,
+   "observed_sequence": null,
+   "observed_cdl": null,
+   "notes": "Deterministic water balance driven by the actual POWER weather of this year (previous year as spin-up); observed CDL crop used for A. County yield is context only (NASS bulk file). 2012 is the US drought stress year.",
+   "metrics": {
+    "season_water_deficit_mm": 344.0,
+    "stress_days": 85.0,
+    "season_etc_mm": 732.9,
+    "eta_mm": 407.4,
+    "runoff_mm": 10.7,
+    "drainage_mm": 90.0,
+    "offseason_drainage_mm": 56.0,
+    "living_cover_days": 151.0,
+    "winter_bare_days": 181.0,
+    "veg_index_days": 95.5,
+    "precip_mm": 582.5,
+    "modelled_crop": "corn",
+    "unit": "mm or days in the scored year"
+   }
+  }
+ ],
+ "sources": [
+  "CDL",
+  "CSB",
+  "POWER",
+  "SSURGO",
+  "NASS"
+ ]
+}

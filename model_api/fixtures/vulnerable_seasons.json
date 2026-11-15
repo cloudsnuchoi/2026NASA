@@ -1,0 +1,112 @@
+{
+ "field_id": "191825003869023",
+ "county_fips": "19169",
+ "period": {
+  "start": "1995-01-01",
+  "end": "2024-12-31"
+ },
+ "seasons": [
+  {
+   "season": "spring",
+   "hazards": [
+    "frost",
+    "heavy_rain"
+   ],
+   "anomaly_year": 2025,
+   "precip_anomaly_mm": -15.5,
+   "t2m_anomaly_c": 1.36,
+   "smap_sm_anomaly": -0.0437,
+   "smap_unit": "cm3/cm3 difference vs SMAP 2015-2024 same-season mean",
+   "climatology": {
+    "precip_mm": 247.7,
+    "precip_p20_mm": 201.3,
+    "t2m_c": 9.47,
+    "heat_days_tmax_gt_32c": 0.3,
+    "frost_days_tmin_lt_0c": 32.2,
+    "drought_year_fraction": 0.13,
+    "wet_year_fraction": 0.2
+   },
+   "notes": "SMAP is a context-cell assignment, not a field-precise measurement."
+  },
+  {
+   "season": "summer",
+   "hazards": [
+    "drought",
+    "heat",
+    "heavy_rain"
+   ],
+   "anomaly_year": 2025,
+   "precip_anomaly_mm": 182.5,
+   "t2m_anomaly_c": 0.04,
+   "smap_sm_anomaly": 0.0399,
+   "smap_unit": "cm3/cm3 difference vs SMAP 2015-2024 same-season mean",
+   "climatology": {
+    "precip_mm": 323.5,
+    "precip_p20_mm": 237.2,
+    "t2m_c": 23.1,
+    "heat_days_tmax_gt_32c": 16.8,
+    "frost_days_tmin_lt_0c": 0.0,
+    "drought_year_fraction": 0.23,
+    "wet_year_fraction": 0.2
+   },
+   "notes": "SMAP is a context-cell assignment, not a field-precise measurement."
+  },
+  {
+   "season": "fall",
+   "hazards": [
+    "frost"
+   ],
+   "anomaly_year": 2025,
+   "precip_anomaly_mm": -44.4,
+   "t2m_anomaly_c": 1.78,
+   "smap_sm_anomaly": -0.0128,
+   "smap_unit": "cm3/cm3 difference vs SMAP 2015-2024 same-season mean",
+   "climatology": {
+    "precip_mm": 182.4,
+    "precip_p20_mm": 136.9,
+    "t2m_c": 10.82,
+    "heat_days_tmax_gt_32c": 2.8,
+    "frost_days_tmin_lt_0c": 24.5,
+    "drought_year_fraction": 0.2,
+    "wet_year_fraction": 0.2
+   },
+   "notes": "SMAP is a context-cell assignment, not a field-precise measurement."
+  },
+  {
+   "season": "winter",
+   "hazards": [
+    "bare_soil_erosion"
+   ],
+   "anomaly_year": 2025,
+   "precip_anomaly_mm": -31.3,
+   "t2m_anomaly_c": -0.21,
+   "smap_sm_anomaly": null,
+   "smap_unit": "cm3/cm3 difference vs SMAP 2015-2024 same-season mean",
+   "climatology": {
+    "precip_mm": 82.3,
+    "precip_p20_mm": 61.1,
+    "t2m_c": -4.82,
+    "heat_days_tmax_gt_32c": 0.0,
+    "frost_days_tmin_lt_0c": 85.8,
+    "drought_year_fraction": 0.23,
+    "wet_year_fraction": 0.23
+   },
+   "notes": "SMAP is a context-cell assignment, not a field-precise measurement."
+  }
+ ],
+ "sources": [
+  {
+   "source_id": "power",
+   "native_resolution": "see API metadata (MERRA-2 ~0.5 x 0.625 deg for met vars)"
+  },
+  {
+   "source_id": "smap",
+   "native_resolution": "nominal 36 km L3 (SPL3SMP)"
+  },
+  {
+   "source_id": "imerg",
+   "native_resolution": "nominal 0.1 deg (not loaded)"
+  }
+ ],
+ "notes": "Hazard flags: drought/heavy_rain if >= 15 % of baseline seasons are < 75 % / > 125 % of mean precipitation; heat if >= 3 days/season with Tmax > 32 C; frost if >= 5 days with Tmin < 0 C (team defaults)."
+}

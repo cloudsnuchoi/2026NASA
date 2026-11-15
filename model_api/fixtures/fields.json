@@ -1,0 +1,200 @@
+{
+ "county_fips": "19169",
+ "demo_only": true,
+ "total": 12,
+ "fields": [
+  {
+   "field_id": "191825000014952",
+   "county_fips": "19169",
+   "state_alpha": "IA",
+   "area_ha": 28.7178850474578,
+   "csb_version": "CSB 2018-2025 rev23",
+   "lon": -93.67501967147395,
+   "lat": 42.08901274869595,
+   "centroid": {
+    "type": "Point",
+    "coordinates": [
+     -93.67501967147395,
+     42.08901274869595
+    ]
+   }
+  },
+  {
+   "field_id": "191825001175247",
+   "county_fips": "19169",
+   "state_alpha": "IA",
+   "area_ha": 47.4221598239996,
+   "csb_version": "CSB 2018-2025 rev23",
+   "lon": -93.37327632743037,
+   "lat": 42.20796130865259,
+   "centroid": {
+    "type": "Point",
+    "coordinates": [
+     -93.37327632743037,
+     42.20796130865259
+    ]
+   }
+  },
+  {
+   "field_id": "191825001176098",
+   "county_fips": "19169",
+   "state_alpha": "IA",
+   "area_ha": 34.6181369453645,
+   "csb_version": "CSB 2018-2025 rev23",
+   "lon": -93.38365186904299,
+   "lat": 42.12792141732413,
+   "centroid": {
+    "type": "Point",
+    "coordinates": [
+     -93.38365186904299,
+     42.12792141732413
+    ]
+   }
+  },
+  {
+   "field_id": "191825001176345",
+   "county_fips": "19169",
+   "state_alpha": "IA",
+   "area_ha": 34.9730939802716,
+   "csb_version": "CSB 2018-2025 rev23",
+   "lon": -93.3983393236534,
+   "lat": 42.10317283146309,
+   "centroid": {
+    "type": "Point",
+    "coordinates": [
+     -93.3983393236534,
+     42.10317283146309
+    ]
+   }
+  },
+  {
+   "field_id": "191825001176875",
+   "county_fips": "19169",
+   "state_alpha": "IA",
+   "area_ha": 68.4857305011362,
+   "csb_version": "CSB 2018-2025 rev23",
+   "lon": -93.56482861076316,
+   "lat": 42.05873605138929,
+   "centroid": {
+    "type": "Point",
+    "coordinates": [
+     -93.56482861076316,
+     42.05873605138929
+    ]
+   }
+  },
+  {
+   "field_id": "191825001177094",
+   "county_fips": "19169",
+   "state_alpha": "IA",
+   "area_ha": 56.6505119617831,
+   "csb_version": "CSB 2018-2025 rev23",
+   "lon": -93.33770304248014,
+   "lat": 42.038179720196084,
+   "centroid": {
+    "type": "Point",
+    "coordinates": [
+     -93.33770304248014,
+     42.038179720196084
+    ]
+   }
+  },
+  {
+   "field_id": "191825002945908",
+   "county_fips": "19169",
+   "state_alpha": "IA",
+   "area_ha": 70.2317796141996,
+   "csb_version": "CSB 2018-2025 rev23",
+   "lon": -93.65152970397133,
+   "lat": 41.88303579635111,
+   "centroid": {
+    "type": "Point",
+    "coordinates": [
+     -93.65152970397133,
+     41.88303579635111
+    ]
+   }
+  },
+  {
+   "field_id": "191825003867870",
+   "county_fips": "19169",
+   "state_alpha": "IA",
+   "area_ha": 68.7192674183125,
+   "csb_version": "CSB 2018-2025 rev23",
+   "lon": -93.35244073715373,
+   "lat": 41.96050426379843,
+   "centroid": {
+    "type": "Point",
+    "coordinates": [
+     -93.35244073715373,
+     41.96050426379843
+    ]
+   }
+  },
+  {
+   "field_id": "191825003868071",
+   "county_fips": "19169",
+   "state_alpha": "IA",
+   "area_ha": 33.8090982792962,
+   "csb_version": "CSB 2018-2025 rev23",
+   "lon": -93.49861909169286,
+   "lat": 41.93997775983999,
+   "centroid": {
+    "type": "Point",
+    "coordinates": [
+     -93.49861909169286,
+     41.93997775983999
+    ]
+   }
+  },
+  {
+   "field_id": "191825003868102",
+   "county_fips": "19169",
+   "state_alpha": "IA",
+   "area_ha": 45.1803745858127,
+   "csb_version": "CSB 2018-2025 rev23",
+   "lon": -93.36474765632585,
+   "lat": 41.940876074706495,
+   "centroid": {
+    "type": "Point",
+    "coordinates": [
+     -93.36474765632585,
+     41.940876074706495
+    ]
+   }
+  },
+  {
+   "field_id": "191825003868954",
+   "county_fips": "19169",
+   "state_alpha": "IA",
+   "area_ha": 62.7722851189994,
+   "csb_version": "CSB 2018-2025 rev23",
+   "lon": -93.56578823454254,
+   "lat": 41.873143102149385,
+   "centroid": {
+    "type": "Point",
+    "coordinates": [
+     -93.56578823454254,
+     41.873143102149385
+    ]
+   }
+  },
+  {
+   "field_id": "191825003869023",
+   "county_fips": "19169",
+   "state_alpha": "IA",
+   "area_ha": 37.4929376090151,
+   "csb_version": "CSB 2018-2025 rev23",
+   "lon": -93.54311718558031,
+   "lat": 41.86582183338467,
+   "centroid": {
+    "type": "Point",
+    "coordinates": [
+     -93.54311718558031,
+     41.86582183338467
+    ]
+   }
+  }
+ ],
+ "notes": "Demo fields = the 12 Story County CSB fields with OpenET + HLS series. CSB polygons are not ownership parcels."
+}
