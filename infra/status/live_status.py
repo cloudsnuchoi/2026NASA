@@ -242,6 +242,8 @@ EXTRA_SETS = [
     ("jimin", "jimin_growing_season", "growing_season_20fields.csv"),
     ("jimin", "jimin_ndvi_anomaly", "ndvi_anomaly.png"),
     ("jimin", "jimin_bare_vs_rye", "bare_vs_strategyB.csv"),
+    ("yoonsung", "yoonsung_nass_compare", "nass_compare_2012.png"),
+    ("jieun", "jieun_slide_fig3", "fig3_yoonsung_extra.png"),
 ]
 
 
