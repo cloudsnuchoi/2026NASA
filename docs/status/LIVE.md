@@ -1,14 +1,14 @@
-# 아몰라 실시간 현황 · 22:05 KST
+# 아몰라 실시간 현황 · 22:10 KST
 
-일정: 1차 제출 21:00 (지남) · 동결 23:00 (0시간 54분 남음) · 최종 제출 23:30 (1시간 24분 남음)
-최종 제출 23:30 KST까지 **1시간 24분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (0시간 49분 남음) · 최종 제출 23:30 (1시간 19분 남음)
+최종 제출 23:30 KST까지 **1시간 19분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
 | 데이터 | 100% | 11/11 |
 | 엔진·API | 100% | 6/6 |
 | AI 모델 | 100% | 5/5 |
-| MATLAB | 69% | 9/13 |
+| MATLAB | 62% | 8/13 |
 | UI | 100% | 7/7 |
 | 인프라·봇 | 100% | 6/6 |
 
@@ -40,7 +40,7 @@
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
 - ✅ /explain (DeepSeek) — 6.7 s, deepseek-flash
 
-## MATLAB 69%
+## MATLAB 62%
 - ✅ 윤성 1차 CSV: drought_2012_county.csv
 - ✅ 윤성 1차 CSV: climate_annual.csv
 - ✅ 윤성 1차 CSV: calibration_params.csv
@@ -48,7 +48,7 @@
 - ✅ yoonsung: drought_compare_2012.png + drought_compare_2012_summary.csv — ✅ 결과 파일 있음
 - ✅ jimin: baresoil_days_20fields.csv — ✅ 결과 파일 있음
 - ✅ jieun: fig_p10p90.png + fig_backtest2012.png — ✅ 결과 파일 있음
-- ✅ yoonsung 추가: yoonsung_nldas_2012 — nldas_vs_engine_2012.png
+- 🟡 yoonsung 추가: yoonsung_nldas_2012 — nldas_vs_engine_2012.png
 - ✅ yoonsung 추가: yoonsung_season_anomaly — season_anomaly_1995_2025.png
 - ✅ yoonsung 추가: yoonsung_s2s_box — s2s_vs_history_box.png
 - 🟡 jimin 추가: jimin_growing_season — growing_season_20fields.csv
@@ -77,8 +77,8 @@
 
 ## 다음 할 일
 1. MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv
-2. MATLAB: jimin 추가: jimin_growing_season
-3. MATLAB: jimin 추가: jimin_ndvi_anomaly
+2. MATLAB: yoonsung 추가: yoonsung_nldas_2012
+3. MATLAB: jimin 추가: jimin_growing_season
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19

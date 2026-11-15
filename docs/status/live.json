@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T22:05:17+09:00",
+ "generated_at": "2026-11-15T22:10:26+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -10,15 +10,15 @@
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 54
+   "remaining_min": 49
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 84
+   "remaining_min": 79
   }
  ],
- "remaining_min": 84,
+ "remaining_min": 79,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -156,7 +156,7 @@
   {
    "id": "matlab",
    "name": "MATLAB",
-   "pct": 69,
+   "pct": 62,
    "items": [
     {
      "label": "윤성 1차 CSV: drought_2012_county.csv",
@@ -195,7 +195,7 @@
     },
     {
      "label": "yoonsung 추가: yoonsung_nldas_2012",
-     "status": "done",
+     "status": "progress",
      "detail": "nldas_vs_engine_2012.png"
     },
     {
@@ -440,8 +440,8 @@
  "blockers": [],
  "next": [
   "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv",
-  "MATLAB: jimin 추가: jimin_growing_season",
-  "MATLAB: jimin 추가: jimin_ndvi_anomaly"
+  "MATLAB: yoonsung 추가: yoonsung_nldas_2012",
+  "MATLAB: jimin 추가: jimin_growing_season"
  ],
  "merged_prs": [
   {
