@@ -77,7 +77,9 @@ class Config:
     history_turns: int = 20  # turns (user+assistant pairs) shared by every model in a room
     memory_dir: Path = HERE / "state" / "memory"
     memo_async: bool = True
-    design_channels: List[str] = field(default_factory=lambda: ["uiux-design"])  # answer questions, deep model by default
+    design_channels: List[str] = field(default_factory=lambda: ["uiux-design"])
+    matlab_rooms: List[str] = field(default_factory=lambda: ["1on1-woochan", "1on1-yoonsung", "1on1-jimin", "1on1-jieun"])
+    fix_queue: Path = Path("/srv/hackathon/state/fixq")  # MATLAB fix jobs for the write-capable fix lane  # answer questions, deep model by default
     progress_every: float = 30.0  # seconds between "still thinking" edits for deep answers
     doc_budget: int = 60000
     max_tokens: int = 2500
@@ -111,6 +113,7 @@ class Config:
         c.state_path = Path(e("STATE_PATH", str(c.state_path)))
         c.history_turns = int(e("HISTORY_TURNS", c.history_turns))
         c.memory_dir = Path(e("MEMORY_DIR", str(c.memory_dir)))
+        c.fix_queue = Path(e("FIX_QUEUE", str(c.fix_queue)))
         c.design_channels = [x.strip() for x in e("DESIGN_CHANNELS", ",".join(c.design_channels)).split(",") if x.strip()]
         c.codex_bin = e("CODEX_BIN", c.codex_bin)
         c.codex_models = [m.strip() for m in e("CODEX_MODELS", ",".join(c.codex_models)).split(",") if m.strip()]
@@ -371,6 +374,7 @@ DEEP_RE = re.compile(
     r"데이터|dataset|좌표|EPSG|보간|interpol|회귀|regression|통계|분산|표준편차",
     re.I,
 )
+MATLAB_FIX_RE = re.compile(r"Error|error using|오류|에러|FAILED|failed|고쳐|수정해|안 ?돼|안 ?됨|exception|K>>", re.I)
 SSH_KEY_RE = re.compile(r"^\s*`*\s*(ssh-ed25519|ssh-rsa) ", re.M)
 SECRET_ENV = re.compile(r"(KEY|TOKEN|SECRET|PASSWORD|PASS|COOKIE|AUTH)", re.I)
 MODEL_LABEL = {"flash": "DeepSeek V4.1 Flash", "fallback": "DeepSeek V4.1 Flash thinking (심화 모델 실패·시간 초과 대체)"}
@@ -709,7 +713,24 @@ class Orchestrator:
             reply = self._ask(inc.channel_name, member, text, images=images)
         finally:
             self._tl.ctx = None
+        if inc.channel_name in self.cfg.matlab_rooms and not is_hyle and (MATLAB_FIX_RE.search(msg) or images):
+            if self.enqueue_fix(inc, member, msg, len(images)):
+                reply += ("\n\n🛠️ 이 오류는 서버 에이전트가 **스크립트를 직접 고쳐** `work/`에 다시 넣어 드릴게요. "
+                          "코드를 붙여넣지 말고 잠시 기다려 주세요 — 끝나면 이 방에서 @멘션으로 알려 드려요.")
         return [Outgoing(inc.channel_id, reply, root, edit_id=getattr(self._tl, "placeholder", "") or "")]
+
+    def enqueue_fix(self, inc: Incoming, member: Member, msg: str, n_images: int) -> bool:
+        """Hand a MATLAB error/fix request to the write-capable fix lane (tmux mfixq). No secrets in the job."""
+        try:
+            self.cfg.fix_queue.mkdir(parents=True, exist_ok=True)
+            job = {"user": member.username, "room": inc.channel_name, "channel_id": inc.channel_id, "root_id": inc.root_id or inc.post_id,
+                   "post_id": inc.post_id, "message": msg[:6000], "images": n_images, "at": time.time()}
+            path = self.cfg.fix_queue / f"{int(time.time() * 1000)}_{member.username}.json"
+            path.write_text(json.dumps(job, ensure_ascii=False), encoding="utf-8")
+            return True
+        except Exception as exc:
+            log.warning("fix enqueue failed: %s", type(exc).__name__)
+            return False
 
     def _command(self, inc: Incoming, msg: str, is_hyle: bool, root: str) -> List[Outgoing]:
         parts = msg.split(maxsplit=3)
