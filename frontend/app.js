@@ -108,6 +108,7 @@
   function initMap() {
     if (map) { setTimeout(() => map.invalidateSize(), 50); return; }
     map = L.map("map", { zoomControl: true, worldCopyJump: false }).setView([41.6, -91.5], 6);
+    window.__artfarmMap = map;
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
       maxZoom: 19,
       attribution: "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community",
@@ -409,7 +410,7 @@
             <div class="pt-1 border-t border-slate-100">Scenario range deficit: ${dist(c.projection?.irrigation_deficit_mm, " mm")}</div>
           </div></div>`).join("")}</div>
       <h3 class="font-extrabold text-[#173a2b] mb-1">Rotation candidates (not ranked)</h3>
-      <p class="text-[11px] text-slate-500 mb-2">No crop repeats back-to-back. Order is arbitrary — compare trade-offs yourself.</p>
+      <p class="text-[11px] text-slate-500 mb-2">No crop repeats back-to-back. Order is arbitrary — compare trade-offs yourself. Sequences with the same crops in a different order share the same seasonal averages in this screening model (order effects such as N credit are not modelled).</p>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">${(q.rotation_candidates || []).map((r) => `
         <div class="rounded-2xl bg-white shadow p-4 text-xs">
           <div class="text-[11px] text-slate-500">Candidate ${r.candidate}</div>

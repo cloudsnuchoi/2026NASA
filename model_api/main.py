@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from . import cards, config, db, engine, explain as explain_mod, glossary as glossary_mod, services
+from . import cards, config, db, engine, explain as explain_mod, glossary as glossary_mod, quick as quick_mod, services
 from .repo import get_repo
 
 log = logging.getLogger("model_api")
@@ -324,3 +324,19 @@ def explain(req: ExplainRequest, request: Request):
     except Exception as exc:  # provider errors after retries
         log.warning("explain failed: %s", type(exc).__name__)
         raise APIError(502, "llm_error", f"LLM provider error ({type(exc).__name__})")
+
+
+class QuickRequest(BaseModel):
+    polygon: list[list[float]] = Field(..., min_length=3, description="[[lon, lat], ...] WGS84, 3+ vertices")
+    crops: list[str] = Field(..., min_length=2, max_length=3, description="2-3 of Corn/Soy/Wheat, no consecutive duplicate")
+
+
+@app.post("/quick")
+def quick(req: QuickRequest):
+    """Tier 1 Quick Screen (screening estimate, FAO-56 engine ported from team MATLAB prototype V8)."""
+    if any(len(p) != 2 for p in req.polygon):
+        raise APIError(422, "invalid_request", "polygon vertices must be [lon, lat]")
+    try:
+        return quick_mod.quick_screen(req.polygon, req.crops)
+    except ValueError as exc:
+        raise APIError(422, "invalid_request", str(exc))

@@ -95,10 +95,10 @@ async def quick(request: Request) -> Response:
         crops = req.crops if req else payload["crops"]
     except Exception as exc:
         return JSONResponse({"detail": f"invalid request: {exc}"}, status_code=422)
-    if hasattr(q, "quick_screen_async"):
-        out = await q.quick_screen_async(polygon, crops)
-    else:
+    try:
         out = await asyncio.to_thread(q.quick_screen, polygon, crops)
+    except ValueError as exc:
+        return JSONResponse({"detail": str(exc)}, status_code=422)
     return JSONResponse(out)
 
 
