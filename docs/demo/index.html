@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ART FARM — Field Shift: Adapting Farms with NASA Data</title>
+  <link rel="icon" href="assets/logo.svg" />
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --green-story: #82c341;
+      --green-story-deep: #5a9e2e;
+      --forest: #173a2b;
+      --forest-light: #24543e;
+      --cream: #f7f6f0;
+      --gold: #eab308;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, -apple-system, sans-serif;
+      background: var(--cream);
+      color: #16281f;
+      overflow-x: hidden;
+    }
+
+    /* Page management */
+    .app-page {
+      display: none;
+      min-height: 100vh;
+    }
+    .app-page.active {
+      display: block;
+      animation: pageFadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes pageFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero Ken Burns cinematic motion */
+    @keyframes kenBurns {
+      0% { transform: scale(1.0) translate(0, 0); }
+      50% { transform: scale(1.08) translate(-1.2%, -0.8%); }
+      100% { transform: scale(1.0) translate(0, 0); }
+    }
+    .hero-bg-img {
+      animation: kenBurns 24s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    /* Enhanced Rich Agricultural Pattern & Multi-Tone Green Story Background */
+    .story-patterned-bg {
+      position: relative;
+      background-color: #74b93d;
+      background-image:
+        radial-gradient(circle at 14% 16%, rgba(254, 240, 138, 0.34) 0%, rgba(254, 240, 138, 0) 42%),
+        radial-gradient(circle at 86% 32%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 45%),
+        radial-gradient(circle at 22% 68%, rgba(20, 83, 45, 0.28) 0%, rgba(20, 83, 45, 0) 50%),
+        radial-gradient(circle at 82% 84%, rgba(250, 204, 21, 0.22) 0%, rgba(250, 204, 21, 0) 44%),
+        repeating-linear-gradient(
+          -32deg,
+          rgba(255, 255, 255, 0.065) 0px,
+          rgba(255, 255, 255, 0.065) 2px,
+          transparent 2px,
+          transparent 18px
+        ),
+        repeating-linear-gradient(
+          58deg,
+          rgba(23, 58, 43, 0.055) 0px,
+          rgba(23, 58, 43, 0.055) 1.5px,
+          transparent 1.5px,
+          transparent 28px
+        ),
+        linear-gradient(
+          180deg,
+          #82c341 0%,
+          #78bc3e 18%,
+          #66ab38 42%,
+          #4f9334 68%,
+          #35742f 86%,
+          #1d492b 100%
+        );
+      overflow: hidden;
+    }
+    .story-topo-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.22;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1.2'%3E%3Cpath d='M-40 60 C 40 20, 120 100, 200 60 C 260 30, 310 70, 360 50' stroke-dasharray='6 6'/%3E%3Cpath d='M-40 140 C 60 90, 140 190, 240 130 C 290 100, 320 150, 360 130'/%3E%3Cpath d='M-40 220 C 50 180, 150 260, 250 210 C 300 185, 330 230, 360 210' stroke-dasharray='4 8'/%3E%3Cpath d='M-40 295 C 70 260, 170 330, 270 285 C 310 265, 335 300, 360 290'/%3E%3Ccircle cx='80' cy='80' r='26' stroke-opacity='0.45'/%3E%3Ccircle cx='80' cy='80' r='44' stroke-opacity='0.25' stroke-dasharray='3 5'/%3E%3Ccircle cx='248' cy='212' r='34' stroke-opacity='0.4'/%3E%3Ccircle cx='248' cy='212' r='56' stroke-opacity='0.22' stroke-dasharray='4 6'/%3E%3Cpath d='M156 22 L164 22 M160 18 L160 26' stroke-opacity='0.6'/%3E%3Cpath d='M36 252 L44 252 M40 248 L40 256' stroke-opacity='0.6'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 320px 320px;
+    }
+
+    /* Scroll reveal: image appears first, then text follows */
+    .reveal-img {
+      opacity: 0;
+      transform: translateY(34px) scale(0.97);
+      transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal-text {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.28s,
+                  transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.28s;
+    }
+    .story-block.in-view .reveal-img,
+    .story-block.in-view .reveal-text {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Map container with user uploaded satellite image background */
+    #map {
+      width: 100%;
+      height: 550px;
+      border-radius: 16px;
+      z-index: 1;
+      background-color: #102419;
+      background-image: none;
+      background-size: cover;
+      background-position: center;
+    }
+    @media (max-width: 768px) {
+      #map { height: 420px; }
+    }
+
+    /* Sunflower Loader (Symmetric radial pulse + smooth rotation) */
+    @keyframes sunflowerSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes petalPulse {
+      0%, 100% { opacity: 0.45; transform: scale(0.94); }
+      40% { opacity: 1; transform: scale(1.05); }
+    }
+    #sunflower-rotator {
+      transform-origin: 100px 100px;
+      animation: sunflowerSpin 14s linear infinite;
+    }
+    .sunflower-petal {
+      transform-box: fill-box;
+      transform-origin: 50% 100%;
+      animation: petalPulse 1.6s ease-in-out infinite;
+    }
+
+    /* Toast notification */
+    #toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-120%);
+      z-index: 9999;
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s;
+      opacity: 0;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .preset-btn { padding: .6rem .5rem; border-radius: .9rem; background: rgba(255,255,255,.12); border: 1px solid rgba(242,196,109,.45); font-weight: 800; font-size: .85rem; color: #fff; transition: background .2s; }
+    .preset-btn:hover { background: rgba(242,196,109,.3); }
+    .crop-card.selected { border-color: #82c341; box-shadow: 0 0 0 4px rgba(130,195,65,.25); }
+    .crop-card.selected .crop-check { background: #82c341; border-color: #82c341; }
+    .vtx-label { background: #173a2b; color: #fff; border: none; font-weight: 800; font-size: 10px; padding: 1px 5px; }
+    .leaflet-container { font-family: Inter, system-ui, sans-serif; }
+  </style>
+<style>
+  .ai-gen-wrap{position:relative}
+  .ai-badge{position:absolute;right:6px;bottom:6px;z-index:5;font:600 10px/1.2 system-ui,sans-serif;color:#fff;background:rgba(15,23,42,.72);padding:2px 6px;border-radius:4px;pointer-events:none;letter-spacing:.02em}
+</style>
+</head>
+<body>
+
+<!-- ===================================================================== -->
+<!-- PAGE 1: HERO + PATTERNED GREEN SCROLL STORY + OFFICIAL DATA SOURCES   -->
+<!-- ===================================================================== -->
+<section id="page-story" class="app-page active">
+  <!-- Hero Section -->
+  <div class="relative w-full h-[92vh] min-h-[580px] overflow-hidden bg-[#12261c]">
+    <img src="assets/img01.jpg"
+         alt="Aerial view of US Corn Belt farmland"
+         class="hero-bg-img absolute inset-0 w-full h-full object-cover object-center opacity-85" />
+    <div class="absolute inset-0 bg-gradient-to-b from-black/55 via-black/25 to-[#82c341]"></div>
+
+    <!-- Top Navigation with Cutout Logo -->
+    <header class="relative z-10 max-w-6xl mx-auto px-6 pt-6 flex items-center justify-between">
+      <div class="flex items-center gap-3.5">
+        <img src="assets/logo.svg"
+             alt="ART FARM logo"
+             class="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-[0_6px_18px_rgba(0,0,0,0.45)]" />
+        <div class="text-white">
+          <div class="text-xl md:text-3xl font-extrabold tracking-[0.12em]">ART FARM</div>
+          <div class="text-[11px] md:text-xs font-semibold text-amber-200">Field Shift: Adapting Farms with NASA Data</div>
+        </div>
+      </div>
+      <button id="btn-skip-to-map"
+              class="px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-sm font-semibold border border-white/25 transition">
+        Launch Tool →
+      </button>
+    </header>
+
+    <!-- Hero Headline -->
+    <div class="relative z-10 max-w-5xl mx-auto px-6 h-[calc(100%-110px)] flex flex-col justify-center pb-16">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/70 border border-emerald-400/30 text-emerald-200 text-xs font-semibold w-fit mb-5 backdrop-blur-sm">
+        <span>🛰️</span> NASA POWER · USGS 3DEP · NOAA/NWS · CMIP6 (Open-Meteo) · FAO-56
+      </div>
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-[1.1] tracking-tight max-w-3xl drop-shadow-md">
+        Standing Beside Farmers, <br />
+        <span class="text-amber-300">Guided by Orbital Data.</span>
+      </h1>
+      <p class="mt-5 text-base sm:text-lg text-white/90 max-w-2xl leading-relaxed font-medium drop-shadow">
+        Scroll down to see the challenges facing Corn Belt growers—and how open satellite and climate data can help compare crop-rotation options before planting. A decision aid — it does not replace your judgement.
+      </p>
+      <div class="mt-8 flex items-center gap-3 text-white/90 text-sm font-semibold">
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full border border-white/40 animate-bounce">↓</span>
+        <span>Scroll to explore the story</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Patterned Multi-Tone Green Scroll Story Sections -->
+  <div class="story-patterned-bg text-[#132a1c] pb-16">
+    <div class="story-topo-overlay"></div>
+
+    <!-- Decorative Floating Agricultural & Orbital Badges -->
+    <div class="relative z-10 max-w-6xl mx-auto px-6 pt-8">
+      <div class="flex flex-wrap items-center justify-center gap-2.5 mb-6">
+        <span class="px-3.5 py-1 rounded-full bg-white/25 backdrop-blur-sm border border-white/40 text-xs font-extrabold text-[#102a1b] shadow-sm">
+          🌿 Precision Crop Rotation Story
+        </span>
+        <span class="px-3.5 py-1 rounded-full bg-amber-300/30 backdrop-blur-sm border border-amber-200/50 text-xs font-bold text-[#102a1b] shadow-sm">
+          📐 WGS84 &amp; USGS 3DEP Topographic Contour
+        </span>
+        <span class="px-3.5 py-1 rounded-full bg-emerald-950/20 backdrop-blur-sm border border-white/30 text-xs font-bold text-white shadow-sm">
+          🛰️ NASA POWER 10-yr daily + CMIP6 ranges
+        </span>
+      </div>
+    </div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-6 space-y-24 pt-4">
+
+      <!-- Story Block 1 -->
+      <article class="story-block grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        <div class="lg:col-span-6 reveal-img">
+          <div class="rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50 bg-emerald-950 relative">
+            <img src="assets/img03.jpg"
+                 alt="Midwestern farmer inspecting cornfield"
+                 class="w-full h-72 sm:h-80 object-cover" />
+            <div class="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-black/65 text-amber-300 text-[11px] font-bold backdrop-blur-sm">
+              US Corn Belt Field Reality
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-span-6 reveal-text bg-white/92 backdrop-blur-md rounded-3xl p-7 sm:p-9 shadow-2xl border border-white/70">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold mb-4">
+            <span>🌾</span> THE REALITY ON THE GROUND
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-[#173a2b] mb-4">
+            A Farmer’s Day Is a Battle
+          </h2>
+          <p class="text-sm sm:text-base text-slate-700 leading-relaxed mb-5">
+            Every season, growers confront compounding environmental and economic pressures that no single intuition can outguess alone:
+          </p>
+          <ul class="space-y-3 text-sm text-slate-800">
+            <li class="flex items-start gap-2.5">
+              <span class="text-amber-600 font-bold mt-0.5">•</span>
+              <span><strong>Prolonged Drought:</strong> Weeks without rain crack the topsoil while roots struggle to reach receding moisture.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-amber-600 font-bold mt-0.5">•</span>
+              <span><strong>Extreme Heatwaves:</strong> Peak temperatures during pollination can scorch yields in a matter of days.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-amber-600 font-bold mt-0.5">•</span>
+              <span><strong>Pests, Storms &amp; Rising Costs:</strong> Sudden windstorms, pest outbreaks, and volatile fertilizer prices push farm ledgers into the red.</span>
+            </li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- Story Block 2 -->
+      <article class="story-block grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        <div class="lg:col-span-6 lg:order-2 reveal-img">
+          <div class="rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50 bg-amber-950 relative">
+            <img src="assets/img04.jpg"
+                 alt="Drought-stressed farmland with cracked soil"
+                 class="w-full h-72 sm:h-80 object-cover" />
+            <div class="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-red-950/80 text-red-200 text-[11px] font-bold backdrop-blur-sm">
+              Evapotranspiration &amp; Moisture Deficit Stress
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-span-6 lg:order-1 reveal-text bg-white/92 backdrop-blur-md rounded-3xl p-7 sm:p-9 shadow-2xl border border-white/70">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 text-red-900 text-xs font-bold mb-4">
+            <span>☀️</span> CLIMATE VOLATILITY BY THE 2030s
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-[#173a2b] mb-4">
+            When Yesterday’s Calendar No Longer Fits
+          </h2>
+          <p class="text-sm sm:text-base text-slate-700 leading-relaxed mb-4">
+            Across the US Corn Belt, rising evapotranspiration demands and shifting rainfall patterns are squeezing single-crop systems. Continuous monoculture depletes soil organic matter, drives up irrigation needs, and leaves fields vulnerable when heat spikes hit.
+          </p>
+          <div class="grid grid-cols-2 gap-3 pt-2">
+            <div class="rounded-2xl bg-emerald-50 border border-emerald-200 p-3.5">
+              <div class="text-xs font-semibold text-emerald-800">10-Year Baseline</div>
+              <div class="text-lg font-extrabold text-[#173a2b] mt-0.5">NASA POWER</div>
+              <div class="text-xs text-slate-600">2016–2025 daily weather</div>
+            </div>
+            <div class="rounded-2xl bg-amber-50 border border-amber-200 p-3.5">
+              <div class="text-xs font-semibold text-amber-800">2030s Horizon</div>
+              <div class="text-lg font-extrabold text-amber-950 mt-0.5">NOAA &amp; CMIP6</div>
+              <div class="text-xs text-slate-600">Forecast + trend regression</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Story Block 3 -->
+      <article class="story-block grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        <div class="lg:col-span-6 reveal-img">
+          <div class="rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50 bg-emerald-950 relative">
+            <img src="assets/img05.jpg"
+                 alt="Precision agriculture corn and soybean rows with satellite arc"
+                 class="w-full h-72 sm:h-80 object-cover" />
+            <div class="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-200 text-[11px] font-bold backdrop-blur-sm">
+              FAO-56 water balance &amp; Monte Carlo ranges
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-span-6 reveal-text bg-white/92 backdrop-blur-md rounded-3xl p-7 sm:p-9 shadow-2xl border border-white/70">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold mb-4">
+            <span>💛</span> SO, HOW CAN WE HELP?
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-[#173a2b] mb-4">
+            Sharing the Load with Precision Science
+          </h2>
+          <p class="text-sm sm:text-base text-slate-700 leading-relaxed mb-5">
+            We can’t control the weather—but we can put open data and transparent formulas side by side before planting begins:
+          </p>
+          <ul class="space-y-3 text-sm text-slate-800">
+            <li class="flex items-start gap-2.5">
+              <span>📡</span>
+              <span><strong>Water budget per crop:</strong> FAO-56 crop water demand against 10 years of NASA POWER weather.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span>🛰️</span>
+              <span><strong>Satellite &amp; Terrain Intelligence:</strong> Combine USGS 3DEP elevation, NASA POWER climate and (in pilot counties) Prithvi-EO crop maps.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span>🌱</span>
+              <span><strong>Rotation options, unranked:</strong> Compare water demand, P10–P90 ranges and trade-offs side by side — you choose.</span>
+            </li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- End of Light-Green Scroll: Full Page Transition Trigger -->
+      <div class="pt-4 pb-6 text-center">
+        <div class="max-w-3xl mx-auto bg-[#173a2b]/95 backdrop-blur-md text-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-emerald-300/30">
+          <div class="text-xs font-bold uppercase tracking-widest text-amber-300 mb-2">US Corn Belt · Quick Screen anywhere · Deep Analysis in 4 pilot counties</div>
+          <h3 class="text-2xl sm:text-3xl font-extrabold mb-3">Ready to Analyze Your Field?</h3>
+          <p class="text-sm sm:text-base text-emerald-100/85 mb-7 max-w-xl mx-auto">
+            Open the satellite map, click the 4 corners of a field anywhere in the Corn Belt (or pick a pilot-county preset) and compare rotation options.
+          </p>
+          <button id="btn-start-location"
+                  class="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-[#82c341] hover:bg-[#93d450] text-[#0f291e] font-extrabold text-base sm:text-lg shadow-lg transition transform hover:-translate-y-0.5">
+            <span>Start Location Setup</span>
+            <span>→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- FRONT PAGE BOTTOM: OFFICIAL DATA & MODEL SOURCES (FieldShift V8)  -->
+      <!-- ================================================================= -->
+      <footer id="front-data-sources" class="pt-2 pb-4">
+        <div class="bg-[#112a1e]/95 backdrop-blur-md text-emerald-50 rounded-3xl p-6 sm:p-8 shadow-2xl border border-emerald-400/25">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-emerald-400/20">
+            <div>
+              <div class="text-[11px] font-extrabold uppercase tracking-[0.2em] text-amber-300">
+                DATA &amp; MODEL SOURCES
+              </div>
+              <h4 class="text-lg sm:text-xl font-extrabold text-white mt-0.5">
+                ART FARM — open data used by the FAO-56 engine (ported from team MATLAB prototype V8)
+              </h4>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 text-xs font-bold">
+              Public APIs + published formulas
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs leading-relaxed">
+            <!-- Source 1 -->
+            <div class="rounded-2xl bg-[#183829] p-4 border border-emerald-400/15">
+              <div class="font-extrabold text-amber-300 mb-1">
+                [1] Satellite basemap
+              </div>
+              <p class="text-emerald-100/90">
+                <strong>Source:</strong> Esri World Imagery tiles (Esri, Maxar, Earthstar Geographics, and the GIS User Community) — basemap display only
+              </p>
+              <p class="text-emerald-200/70 mt-1 break-all font-mono text-[11px]">
+                Endpoint: https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer
+              </p>
+            </div>
+
+            <!-- Source 2 -->
+            <div class="rounded-2xl bg-[#183829] p-4 border border-emerald-400/15">
+              <div class="font-extrabold text-amber-300 mb-1">
+                [2] Terrain elevation
+              </div>
+              <p class="text-emerald-100/90">
+                <strong>Source:</strong> U.S. Geological Survey (USGS) 3D Elevation Program (3DEP) — Elevation Point Query Service
+              </p>
+              <p class="text-emerald-200/70 mt-1 break-all font-mono text-[11px]">
+                Endpoint: https://epqs.nationalmap.gov/v1/json (WGS84 a=6,378,137m, e²=0.00669438)
+              </p>
+            </div>
+
+            <!-- Source 3 -->
+            <div class="rounded-2xl bg-[#183829] p-4 border border-emerald-400/15">
+              <div class="font-extrabold text-amber-300 mb-1">
+                [3] 10 years of daily agro-climate
+              </div>
+              <p class="text-emerald-100/90">
+                <strong>Source:</strong> NASA Langley Research Center — POWER Project (community AG)
+              </p>
+              <p class="text-emerald-200/70 mt-1 break-all font-mono text-[11px]">
+                Endpoint: https://power.larc.nasa.gov/api/temporal/daily/point (T2M, PRECTOTCORR, ALLSKY_SFC_SW_DWN, GWETROOT)
+              </p>
+            </div>
+
+            <!-- Source 4 -->
+            <div class="rounded-2xl bg-[#183829] p-4 border border-emerald-400/15 md:col-span-1 lg:col-span-2">
+              <div class="font-extrabold text-amber-300 mb-1">
+                [4] Short-range forecast &amp; climate-model ranges
+              </div>
+              <p class="text-emerald-100/90">
+                <strong>Source A:</strong> NOAA National Weather Service (NWS) API (<span class="font-mono text-[11px]">https://api.weather.gov/points</span>)<br />
+                <strong>Source B:</strong> Open-Meteo Climate API (CMIP6 HighResMIP models, <span class="font-mono text-[11px]">https://climate-api.open-meteo.com/v1/climate</span>) — shown as a possible range (scenario), never a forecast. Pilot counties additionally use NASA NEX-GDDP-CMIP6 and GEOS-S2S.
+              </p>
+            </div>
+
+            <!-- Source 5 -->
+            <div class="rounded-2xl bg-[#183829] p-4 border border-emerald-400/15">
+              <div class="font-extrabold text-amber-300 mb-1">
+                [5] Agronomic formulas &amp; economics
+              </div>
+              <p class="text-emerald-100/90">
+                <strong>Formulas:</strong> UN FAO Irrigation &amp; Drainage Paper No. 56 (ET₀, crop coefficients K<sub>c</sub>, Table 12) &amp; Paper No. 33 (1 − Y<sub>a</sub>/Y<sub>m</sub> = K<sub>y</sub>(1 − ET<sub>a</sub>/ET<sub>m</sub>))<br />
+                <strong>Economics/soil:</strong> price/yield/cost figures are labelled assumptions with USDA ERS/NASS source and year; pilot-county soils from USDA NRCS gSSURGO.
+              </p>
+            </div>
+          </div>
+          <a href="#data-sources" id="ds-open" data-open-data-sources class="inline-block mt-4 underline font-semibold text-amber-300">Data &amp; Sources — full list with links and licences</a>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- PAGE 2: MAP — click 4 corners (Esri World Imagery via Leaflet)         -->
+<!-- ===================================================================== -->
+<section id="page-map" class="app-page bg-[#f7f6f0] py-6 px-4 sm:px-8">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <div class="flex items-center gap-3">
+        <img src="assets/logo.svg" alt="ART FARM logo" class="w-11 h-11" />
+        <div>
+          <h1 class="text-xl sm:text-2xl font-extrabold text-[#173a2b]">Step 1 · Draw your field</h1>
+          <p class="text-sm text-slate-600">Click the <strong>4 corners</strong> of a field anywhere in the US Corn Belt, or pick a pilot-county preset for Deep Analysis.</p>
+        </div>
+      </div>
+      <button data-goto="page-story" class="px-4 py-2 rounded-full bg-white border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50">← Story</button>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div class="lg:col-span-8">
+        <div class="relative">
+          <div id="map"></div>
+          <div class="absolute top-3 right-3 z-[500] flex gap-2">
+            <button id="btn-undo" class="px-3 py-1.5 rounded-lg bg-white/90 text-xs font-bold text-slate-700 shadow">Undo</button>
+            <button id="btn-clear" class="px-3 py-1.5 rounded-lg bg-white/90 text-xs font-bold text-slate-700 shadow">Clear</button>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-4 mt-2 text-[11px] text-slate-600">
+          <span class="inline-flex items-center gap-1.5"><span class="w-4 h-3 rounded-sm" style="background:rgba(125,211,168,.45);border:2px solid #f7f6f0"></span> Your field</span>
+          <span class="inline-flex items-center gap-1.5"><span class="w-4 h-3 rounded-sm" style="background:rgba(242,196,109,.25);border:2px dashed #f2c46d"></span> Pilot demo field (Deep Analysis)</span>
+          <span class="ml-auto">Basemap: Esri World Imagery (display only)</span>
+        </div>
+      </div>
+      <aside class="lg:col-span-4 space-y-4">
+        <div class="rounded-2xl bg-[#173a2b] text-white p-5 shadow-xl">
+          <div class="text-xs font-bold uppercase tracking-widest text-amber-300 mb-3">Pilot-county presets · Deep Analysis</div>
+          <div class="grid grid-cols-2 gap-2" id="preset-buttons">
+            <button data-preset="19169" class="preset-btn">Story, IA</button>
+            <button data-preset="17113" class="preset-btn">McLean, IL</button>
+            <button data-preset="31109" class="preset-btn">Lancaster, NE</button>
+            <button data-preset="39159" class="preset-btn">Union, OH</button>
+          </div>
+          <p class="text-[11px] text-emerald-100/75 mt-3">A preset draws one of our 20 demo fields (USDA Crop Sequence Boundaries — not ownership parcels).</p>
+        </div>
+        <div class="rounded-2xl bg-white p-5 shadow border border-slate-200 text-sm">
+          <div class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Field geometry (WGS84)</div>
+          <div class="flex justify-between py-1"><span class="text-slate-500">Vertices</span><strong id="m-vertices">0 / 4</strong></div>
+          <div class="flex justify-between py-1"><span class="text-slate-500">Area</span><strong id="m-area">—</strong></div>
+          <div class="flex justify-between py-1"><span class="text-slate-500">Perimeter</span><strong id="m-perim">—</strong></div>
+          <div class="flex justify-between py-1"><span class="text-slate-500">Analysis tier</span><strong id="m-tier">—</strong></div>
+          <p id="m-tier-note" class="text-[11px] text-slate-500 mt-2"></p>
+        </div>
+        <button id="btn-to-crops" disabled class="w-full px-6 py-3.5 rounded-2xl bg-[#82c341] enabled:hover:bg-[#93d450] disabled:opacity-40 text-[#0f291e] font-extrabold shadow-lg">Next: choose crops →</button>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- PAGE 3: CROPS                                                          -->
+<!-- ===================================================================== -->
+<section id="page-crops" class="app-page bg-[#f7f6f0] py-8 px-4 sm:px-8">
+  <div class="max-w-5xl mx-auto">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-[#173a2b]">Step 2 · Choose 2–3 crops for your rotation</h1>
+      <button data-goto="page-map" class="px-4 py-2 rounded-full bg-white border border-slate-300 text-sm font-semibold text-slate-700">← Map</button>
+    </div>
+    <p class="text-sm text-slate-600 mb-6">A rotation needs at least 2 different crops. ART FARM builds sequences with no crop repeated back-to-back and shows them <strong>unranked</strong> — the choice stays yours.</p>
+    <div id="crop-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-5"></div>
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Selected:</span>
+      <span id="crop-selected" class="text-sm font-semibold text-[#173a2b]">none</span>
+      <button id="btn-run" disabled class="ml-auto px-8 py-3.5 rounded-2xl bg-[#173a2b] enabled:hover:bg-[#24543e] disabled:opacity-40 text-white font-extrabold shadow-lg">Run screening →</button>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===================================================================== -->
+<!-- PAGE 4: SUNFLOWER DATA LOADING SCREEN                                 -->
+<!-- ===================================================================== -->
+<section id="page-loading" class="app-page bg-[#f7f6f0]">
+  <div class="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+    <!-- Animated Symmetrical Sunflower SVG with Crisp Botanical Stem & Leaves -->
+    <div class="relative w-48 h-52 flex items-center justify-center mb-6">
+      <svg viewBox="0 0 200 220" class="w-full h-full drop-shadow-md">
+        <!-- Balanced stem and symmetrical leaves -->
+        <path d="M 100,130 L 100,210" stroke="#2e6f40" stroke-width="6" stroke-linecap="round" fill="none" />
+        <path d="M 98,172 C 72,162 56,144 64,132 C 78,132 94,148 98,166 Z" fill="#4d9b58" stroke="#2e6f40" stroke-width="2" stroke-linejoin="round" />
+        <path d="M 102,172 C 128,162 144,144 136,132 C 122,132 106,148 102,166 Z" fill="#4d9b58" stroke="#2e6f40" stroke-width="2" stroke-linejoin="round" />
+        <g id="sunflower-rotator">
+          <g id="sunflower-petals" transform="translate(100,100)">
+            <!-- Symmetrical outer & inner petals generated by JS -->
+          </g>
+        </g>
+        <circle cx="100" cy="100" r="32" fill="#5c3d1e" stroke="#422a12" stroke-width="3" />
+        <circle cx="100" cy="100" r="24" fill="#422a12" opacity="0.75" />
+        <g id="sunflower-seeds" transform="translate(100,100)"></g>
+      </svg>
+    </div>
+    <div class="text-sm font-extrabold tracking-[0.35em] text-[#173a2b] uppercase mb-2">RUNNING FAO-56 ENGINE…</div>
+    <p id="loading-status" class="text-sm text-slate-600 max-w-md font-medium">
+      Fetching USGS 3DEP elevation · NASA POWER 10-year daily weather · NWS forecast · Open-Meteo climate ranges, then running the FAO-56 water balance…
+    </p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- PAGE 5: RESULTS                                                        -->
+<!-- ===================================================================== -->
+<section id="page-results" class="app-page bg-[#f3f5ee] py-6 px-4 sm:px-8">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <div class="flex items-center gap-3">
+        <img src="assets/logo.svg" alt="ART FARM logo" class="w-11 h-11" />
+        <div>
+          <h1 class="text-xl sm:text-2xl font-extrabold text-[#173a2b]">Results</h1>
+          <p class="text-xs text-slate-600">FAO-56 engine (ported from team MATLAB prototype V8) · <span class="font-bold text-amber-700">screening estimate</span> · does not replace your judgement</p>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button data-goto="page-crops" class="px-4 py-2 rounded-full bg-white border border-slate-300 text-sm font-semibold text-slate-700">← Crops</button>
+        <button data-goto="page-map" class="px-4 py-2 rounded-full bg-white border border-slate-300 text-sm font-semibold text-slate-700">New field</button>
+      </div>
+    </div>
+    <div id="tier2" class="mb-8"></div>
+    <div id="tier1"></div>
+    <footer class="mt-10 text-[11px] text-slate-500 leading-relaxed border-t border-slate-300 pt-4">
+      ART FARM supports, and does not replace, farmer and agronomist judgement. Strategy comparison percentages are relative indices versus strategy A (current practice) and are not guarantees. Future climate is shown only as a possible range (scenario).
+      Basemap © Esri, Maxar, Earthstar Geographics, and the GIS User Community. Data: NASA POWER, USGS 3DEP, NOAA NWS, Open-Meteo, USDA CDL/CSB/gSSURGO, Prithvi-EO (IBM/NASA). Parts of this site and its explanations were produced with AI assistance (SI); explanation numbers come only from model_api tool responses. <strong>All photos (img01–img12) and the ART FARM logo are AI-generated images (SI).</strong>
+    </footer>
+  </div>
+</section>
+
+<div id="toast" class="pointer-events-none px-5 py-3 rounded-xl shadow-2xl font-semibold text-sm flex items-center gap-2.5 bg-[#173a2b] text-white border border-emerald-400/40">
+  <span id="toast-msg"></span>
+</div>
+<script src="app.js"></script>
+<script src="data-sources.js"></script>
+<script>
+/* SI disclosure: every AI-generated photo gets a visible "AI-generated image" watermark (also for images added later). */
+(function () {
+  function mark(img) {
+    if (img.dataset.aiMarked || !/assets\/img\d+\./.test(img.getAttribute("src") || "")) return;
+    img.dataset.aiMarked = "1";
+    img.title = (img.title ? img.title + " · " : "") + "AI-generated image";
+    var host = img.parentElement; if (!host) return;
+    if (getComputedStyle(host).position === "static") host.classList.add("ai-gen-wrap");
+    var b = document.createElement("span"); b.className = "ai-badge"; b.textContent = "AI-generated image";
+    host.appendChild(b);
+  }
+  function scan(root) { (root.querySelectorAll ? root : document).querySelectorAll("img").forEach(mark); }
+  document.addEventListener("DOMContentLoaded", function () {
+    scan(document);
+    document.querySelectorAll('img[src$="logo.svg"]').forEach(function (l) { l.title = "ART FARM logo · AI-generated image"; });
+    new MutationObserver(function (ms) { ms.forEach(function (m) { m.addedNodes.forEach(function (n) { if (n.nodeType === 1) { if (n.tagName === "IMG") mark(n); else scan(n); } }); }); })
+      .observe(document.body, { childList: true, subtree: true });
+  });
+})();
+</script>
+</body>
+</html>

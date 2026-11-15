@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI 모델 · ART FARM · Field Shift</title>
-  <meta name="description" content="Prithvi, GEOS-S2S, NEX-GDDP, 몬테카를로·CVaR, LLM tool-call, RAG 임베딩. Chronos-Bolt는 선택.">
+  <meta name="description" content="구현 상태: Prithvi(추론), GEOS-S2S·NEX-GDDP 시나리오, 몬테카를로 물수지·CVaR, Tier 1 FAO-56 엔진, DeepSeek 설명(deepseek-flash). RAG는 대체 경로, Chronos-Bolt는 미사용(향후).">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/static/pretendard.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
   <link rel="stylesheet" href="./dashboard/styles.css">
@@ -14,27 +14,28 @@
   <nav id="site-nav" class="site-nav" aria-label="주요 메뉴"></nav>
   <header class="page-header">
     <div class="wrap">
-      <p class="kicker">Source of truth · ARCHITECTURE 6절 · PRD 9절 · SOT</p>
+      <p class="kicker">구현 상태 · 2026-11-15 KST · model_api 라이브 확인</p>
       <h1>AI 모델과 계산</h1>
-      <p class="lead">라이브 엔진은 <strong>규칙·지수 스코어링 + 몬테카를로 물수지 + CVaR</strong>입니다. 강화학습과 미세조정은 하지 않습니다. 표의 상태·키 여부는 동결 문서 기준이며, 구현 완료 여부는 이슈를 보세요.</p>
+      <p class="lead">라이브 엔진은 <strong>규칙·지수 스코어링 + 몬테카를로 물수지 + CVaR</strong>입니다. 강화학습과 미세조정은 하지 않습니다. 상태 칸은 세 가지뿐입니다: <span class="tag p0">구현·검증됨</span> 동작을 API·화면에서 확인함, <span class="tag">대체 경로</span> 원래 경로 대신 정해 둔 대체 동작이 돎, <span class="tag p1">미사용(향후)</span> 이번 제출에 없음.</p>
     </div>
   </header>
   <main class="wrap">
-    <p class="src-note">GEOS-S2S와 NEX-GDDP는 우리가 학습하는 모델이 아니라 NASA가 제공하는 <strong>물리 예보·시나리오 데이터</strong>입니다. Chronos-Bolt는 동결 문서(PRD·SOT·DECISIONS)에 없어 <strong>선택·P1</strong>로만 적었습니다. 수확량 예측을 본편 목적함수로 두지 않습니다. 중앙 LLM 제공자는 DeepSeek(OpenAI 호환)로 결정되었고, 모델 id <code>deepseek-v4.1-flash</code>는 <strong>미검증</strong>입니다.</p>
+    <p class="src-note">GEOS-S2S와 NEX-GDDP는 우리가 학습하는 모델이 아니라 NASA가 제공하는 <strong>물리 예보·시나리오 데이터</strong>이며, 분포로만 씁니다. LLM은 DeepSeek(OpenAI 호환) 모델 <code>deepseek-flash</code> 하나입니다. 수확량 예측은 목적함수가 아닙니다.</p>
+    <p class="src-note"><strong>Prithvi 한 문장 (<a href="https://github.com/cloudsnuchoi/2026NASA/blob/main/docs/PRITHVI-AGREEMENT.md">PRITHVI-AGREEMENT.md</a>):</strong> 2024년 기준 Prithvi 필지 최빈 클래스가 USDA CDL 작물과 같은 필지는 20개 중 19개이고, 필지별 CDL 픽셀 일치율은 0.193–0.997(중앙값 0.934, 평균 0.883)이다. 대부분 옥수수·콩 단작 필지라 일반 정확도가 아니다(모델 카드 aAcc 60.64 %).</p>
     <div class="table-wrap">
       <table class="data-table" id="models">
         <thead>
           <tr>
-            <th>이름</th><th>역할</th><th>입력</th><th>출력</th><th>실행 위치</th><th>키 필요?</th><th>우선</th><th>상태</th>
+            <th>이름</th><th>역할</th><th>입력</th><th>출력</th><th>실행 위치</th><th>키 필요?</th><th>상태</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
     </div>
 
-    <h2>본편 수식 (문서 최소 규격)</h2>
+    <h2>엔진 수식</h2>
     <div class="card algo-card">
-      <p>물수지 · FAO-56 · CVaR. 가중치 숫자는 문서에 고정되어 있지 않아 지어내지 않습니다. 슬라이더가 \(w_k\)만 바꿉니다.</p>
+      <p>물수지 · FAO-56 · CVaR. 우선순위 슬라이더(물·토양·안정성·소득)는 가중치 \(w_k\)만 바꾸고, 원점수와 분포는 그대로 둡니다.</p>
       <div class="formula">\[
         SM_t = SM_{t-1} + P_t - ET_{c,t} - R_t,\quad
         ET_c = ET_0 \times K_c,\quad
@@ -48,7 +49,13 @@
         \Delta=\overline{X}_{2031\text{–}2040}-\overline{X}_{1985\text{–}2014}
       \]</div>
     </div>
-    <p class="src-note">더 자세한 알고리즘 카드는 이전 페이지를 <a href="./algorithms.html">algorithms.html</a>에 남겨 두었습니다. 7축은 질소·침식·유기물·병해충·물·사료·시장(수량 옆축은 선택)입니다.</p>
+
+    <h2>MATLAB — 빌드 단계 검증(오프라인)</h2>
+    <div class="card">
+      <p>MATLAB은 요청 경로에 없습니다. 팀 MATLAB 프로토타입 V8의 FAO-56 수식은 Tier 1 엔진(Python)으로 옮겼고, MATLAB 담당은 빌드 단계에서 오프라인 비교·그림을 만들었습니다. 상태와 한계는 <a href="https://github.com/cloudsnuchoi/2026NASA/blob/main/docs/MATLAB-VALIDATION.md">MATLAB-VALIDATION.md</a>에 있습니다(V8 물 요구량과 엔진 계절 부족량은 정의가 달라 not validated, 2012 카운티 비교는 같은 POWER 자료의 교차 확인).</p>
+      <p>결과 그림·표: <a href="./matlab-results/">matlab-results/</a> — 2012 가뭄 카운티 비교(<code>drought_compare_2012.png</code>, <code>drought_compare_2012_summary.csv</code>), 2012 백테스트·P10–P90 슬라이드 그림(<code>fig_backtest2012.png</code>, <code>fig_p10p90.png</code>), 20필지 NDVI 맨땅 일수(<code>baresoil_days_20fields.csv</code>), V8 카드 20필지(<code>v8_cards_20fields.csv</code>).</p>
+    </div>
+    <p class="src-note">더 자세한 알고리즘 카드는 <a href="./algorithms.html">algorithms.html</a>에 있습니다. 7축 지수는 질소 순환·침식·유기물·병해충 단절·물 사용·사료·시장입니다(모두 기준 A 대비 상대 지수, 보장 아님).</p>
   </main>
   <footer id="site-footer" class="site-footer"></footer>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
@@ -57,23 +64,23 @@
   <script>
     FieldShiftSite.mount({ active: "models" });
     const ROWS = [
-      { name: "Prithvi-EO-1.0 작물 분류", role: "L1 비전. 추론만 (미세조정 없음)", input: "HLS 6밴드 × 3시점, 224×224", output: "13클래스 분할, 필지 다수결, agreement_with_cdl", runs: "VPS 배치. 요청 경로 GPU 금지", key: "없음 (HF 공개, Apache-2.0)", pri: "P0 보조", status: "실패 시 CDL 라벨. 구현은 이슈 따름", note: "EO-2.0 작물 공개 체크포인트 없음. 카드 mIoU 0.4269, 화면에서는 보조" },
-      { name: "NASA GEOS-S2S-3", role: "L2 물리 계절 예보 데이터 (우리가 학습하지 않음)", input: "월 초기화 앙상블, 0.5° 칸", output: "다음 시즌 강수·기온 아노말리 분포 → scenario_climate", runs: "오프라인 사전 계산, 김윤성", key: "없음 (NCCS datashare 공개 목록)", pri: "P0", status: "실패 시 과거 30년 분포로 대체. Earthdata 키 불필요", note: "3년 결정론적 예보 금지. 필지 정밀 값처럼 표시하지 않음" },
-      { name: "NASA NEX-GDDP-CMIP6", role: "L2 기후 시나리오 데이터 (다모델, 우리가 학습하지 않음)", input: "SSP2-4.5/5-8.5, pr/tas/tasmax/tasmin", output: "2030s delta 분포 → scenario_climate", runs: "오프라인 사전 계산, 김우찬", key: "없음 (S3/THREDDS, CC0)", pri: "P0", status: "Earthdata 키 불필요", note: "기준 1985–2014, 미래 2031–2040" },
-      { name: "몬테카를로 물수지 + CVaR + 7축 점수", role: "L3 시뮬레이션 (라이브 엔진)", input: "POWER/IMERG 등 피처, SSURGO AWC, Kc, 시나리오 이동, 슬라이더", output: "P10/P50/P90, CVaR, 전략 카드 점수. 단일 정답 없음", runs: "사전 계산 + FastAPI 재가중, Hylē, model_api/", key: "없음", pri: "P0", status: "설계 동결. 구현은 이슈 따름", note: "연 재표본 N=500–1000. 확정 kg/ha 금지. 수확량은 본편 목적함수가 아님" },
-      { name: "LLM tool-calling (DeepSeek)", role: "L4 설명. 오케스트레이터 중앙 LLM도 같은 제공자", input: "사용자 질문 + FastAPI JSON (profile, compare, evidence 등)", output: "설명 문장. 숫자는 도구 JSON 경로 각주만", runs: "제품: 런타임 /explain, Hylē. 오케스트레이터: VPS bridge.py", key: "예. DeepSeek API 키 1개 (OpenAI 호환). LLM_BASE_URL=https://api.deepseek.com, LLM_MODEL=deepseek-flash (설정으로 변경 가능)", pri: "P0", status: "제공자 DeepSeek 결정 (12:28). 모델 id deepseek-flash 확정 (DeepSeek-V4.1-Flash, 공식 문서 확인). 키는 .env에만", note: "숫자를 생성·수정하지 않음. 레거시 이름 deepseek-v4-flash는 쓰지 않음. 대화는 thinking 끔, 리뷰만 켬" },
-      { name: "임베딩 + pgvector RAG", role: "L4 근거 인용 전용", input: "evidence_chunk (가이드·NRCS·피복 문헌)", output: "짧은 인용 + DOI/URL. 없으면 insufficient_evidence", runs: "VPS Postgres 17, rag/", key: "임베딩 모델에 따라 다를 수 있음 (모델·차원 미정). 실패 시 pg_trgm 키워드", pri: "P0 (컷 가능)", status: "실패 시 키워드+DOI 테이블", note: "데이터 탐색용이 아님. 별도 Pinecone/Milvus 없음" },
-      { name: "Chronos-Bolt (시계열 기반 모델)", role: "선택: 수량·NDVI 시계열 예보 보조", input: "문서 미기재. 제안은 수량 또는 NDVI 시계열", output: "문서 미기재. 본편 목적함수로 쓰지 않음", runs: "제안: CPU 자체 호스팅 (키 없음). 동결 경로 아님", key: "없음 (제안)", pri: "선택·P1", status: "PRD·SOT·DECISIONS에 없음. 이번 주말 본편 전제 아님", note: "넣더라도 옆축·실험. 수확량 극대화로 승격하지 않음" }
+      { name: "Prithvi-EO-1.0 작물 분류 (NASA·IBM)", role: "L1 비전. 추론만 (미세조정 없음)", input: "HLS 6밴드 × 3시점, 224×224 칩", output: "필지 최빈 클래스(crop_pred), CDL 픽셀 일치율(agreement_with_cdl) → vision_result", runs: "VPS CPU 오프라인 배치. 요청 경로 밖", key: "없음 (HF 공개, Apache-2.0)", status: "구현·검증됨", note: "데모 필지 20개, 2024. CDL 대비 최빈 클래스 일치 19/20, 픽셀 일치율 중앙값 0.934·평균 0.883(일반 정확도 아님). 작물 라벨 기준은 CDL" },
+      { name: "NASA GEOS-S2S-3", role: "L2 다음 시즌 앙상블 (우리가 학습하지 않음)", input: "GMAO 공개 앙상블, 0.5°", output: "다음 시즌 범위(멤버 10개) → /simulate scenario_results", runs: "오프라인 적재 → API 조회", key: "없음 (NCCS datashare 공개)", status: "구현·검증됨", note: "분포로만 표시. 결정론적 다년 예보 없음. 필지 정밀 값 아님" },
+      { name: "NASA NEX-GDDP-CMIP6", role: "L2 2030년대 기후 시나리오 (우리가 학습하지 않음)", input: "ACCESS-CM2, MPI-ESM1-2-HR × SSP2-4.5, SSP5-8.5", output: "2030년대 범위 → /simulate scenario_results", runs: "오프라인 적재 → API 조회", key: "없음", status: "구현·검증됨", note: "“가능한 범위(시나리오)”로만 표시" },
+      { name: "몬테카를로 물수지 + CVaR + 7축 지수", role: "L3 시뮬레이션 (Tier 2 라이브 엔진)", input: "POWER 일 기상 1995–2025, SSURGO AWC, OpenET 보정 Kc, HLS 맨땅 기간, 시나리오", output: "전략 A–D별 P10/P50/P90, CVaR(하위 10 %), 2012 가뭄 백테스트", runs: "model_api (FastAPI, NumPy). 500회 재표본, 시드 고정", key: "없음", status: "구현·검증됨", note: "모든 전략이 같은 날씨 표본을 씀. 단일 정답·순위 없음. 확정 kg/ha 없음" },
+      { name: "Tier 1 FAO-56 엔진 (팀 MATLAB V8 이식)", role: "Quick Screen 선별 추정 (POST /quick)", input: "네 꼭짓점 다각형, 작물 2–3개, NASA POWER 10년, USGS 3DEP, NWS, Open-Meteo", output: "작물 카드·윤작 후보(순위 없음), 모든 결과에 screening estimate 라벨", runs: "model_api (Python). MATLAB 런타임 없음", key: "없음", status: "구현·검증됨", note: "검증 = 공개 데모 QA(4개 카운티 흐름 PASS, docs/QA-FINAL.md). V8과의 수치 일치 검증은 아님" },
+      { name: "LLM 설명 (DeepSeek, deepseek-flash)", role: "L4 설명 (POST /explain)", input: "사용자 질문 + model_api tool 응답 JSON", output: "설명 문장. 숫자는 tool JSON 값만, 대응 경로 없는 숫자는 unverified_numbers로 표시", runs: "model_api → DeepSeek API (OpenAI 호환)", key: "예. DeepSeek API 키 (서버 .env에만)", status: "구현·검증됨", note: "숫자를 계산·순위화하지 않음. 인용은 근거 검색 결과만" },
+      { name: "근거 검색 (pgvector RAG)", role: "L4 인용 전용 (GET /evidence/search)", input: "evidence_chunk", output: "인용 + DOI/URL. 없으면 insufficient_evidence: true", runs: "Postgres + pgvector 0.8.7 (확장 설치됨)", key: "없음", status: "대체 경로", note: "2026-11-15 확인: evidence_chunk 0행, /evidence/search?q=cover crop → hits 0, insufficient_evidence: true. 설명은 인용 없이 나가고 그 사실을 표시함" },
+      { name: "Chronos-Bolt (시계열 기반 모델)", role: "—", input: "—", output: "—", runs: "—", key: "—", status: "미사용(향후)", note: "이번 제출에 없음" }
     ];
+    const STATUS_CLS = { "구현·검증됨": "p0", "대체 경로": "", "미사용(향후)": "p1" };
     document.querySelector("#models tbody").innerHTML = ROWS.map(function (r) {
-      const opt = /선택|P1/.test(r.pri);
-      return "<tr" + (opt ? ' style="opacity:.95"' : "") + "><td><strong>" + FieldShiftSite.escapeHtml(r.name) +
-        "</strong>" + (opt ? ' <span class="tag p1">선택</span>' : "") +
-        "<br><span class='muted'>" + FieldShiftSite.escapeHtml(r.note) + "</span></td><td>" + FieldShiftSite.escapeHtml(r.role) +
+      const opt = r.status === "미사용(향후)";
+      return "<tr" + (opt ? ' style="opacity:.8"' : "") + "><td><strong>" + FieldShiftSite.escapeHtml(r.name) +
+        "</strong><br><span class='muted'>" + FieldShiftSite.escapeHtml(r.note) + "</span></td><td>" + FieldShiftSite.escapeHtml(r.role) +
         "</td><td>" + FieldShiftSite.escapeHtml(r.input) + "</td><td>" + FieldShiftSite.escapeHtml(r.output) +
         "</td><td>" + FieldShiftSite.escapeHtml(r.runs) + "</td><td>" + FieldShiftSite.escapeHtml(r.key) +
-        "</td><td><span class='tag " + (/P0/.test(r.pri) ? "p0" : "p1") + "'>" + FieldShiftSite.escapeHtml(r.pri) +
-        "</span></td><td>" + FieldShiftSite.escapeHtml(r.status) + "</td></tr>";
+        "</td><td><span class='tag " + STATUS_CLS[r.status] + "' style='white-space:nowrap'>" + FieldShiftSite.escapeHtml(r.status) + "</span></td></tr>";
     }).join("");
     function typeset() { FieldShiftSite.renderMath(document.querySelector("main")); }
     if (window.renderMathInElement) typeset();
