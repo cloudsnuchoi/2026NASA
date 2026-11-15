@@ -1,24 +1,24 @@
 {
- "generated_at": "2026-11-15T20:53:14+09:00",
+ "generated_at": "2026-11-15T21:03:31+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
    "name": "1차 제출",
    "at": "2026-11-15T21:00:00+09:00",
-   "remaining_min": 6
+   "remaining_min": 0
   },
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 126
+   "remaining_min": 116
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 156
+   "remaining_min": 146
   }
  ],
- "remaining_min": 156,
+ "remaining_min": 146,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -240,7 +240,7 @@
   {
    "id": "infra",
    "name": "인프라·봇",
-   "pct": 100,
+   "pct": 83,
    "items": [
     {
      "label": "Mattermost",
@@ -264,8 +264,8 @@
     },
     {
      "label": "main CI 최근 성공",
-     "status": "done",
-     "detail": "success"
+     "status": "progress",
+     "detail": null
     },
     {
      "label": "live 현황 (tmux live)",
@@ -313,6 +313,12 @@
    "last_activity": "20:40"
   },
   {
+   "name": "rbatch",
+   "model": "?",
+   "task": "?",
+   "last_activity": "21:00"
+  },
+  {
    "name": "runner",
    "model": "—",
    "task": "GitHub Actions 러너",
@@ -341,7 +347,7 @@
   {
    "name": "김우찬",
    "user": "woochan",
-   "mattermost_last": "20:32",
+   "mattermost_last": "21:03",
    "repo_last": null
   },
   {
@@ -353,7 +359,7 @@
   {
    "name": "고지은",
    "user": "jieun",
-   "mattermost_last": "20:53",
+   "mattermost_last": "21:02",
    "repo_last": null
   },
   {
@@ -372,53 +378,54 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "20:36"
+   "repo_last": "20:57"
   }
  ],
  "blockers": [],
  "next": [
-  "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv"
+  "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv",
+  "인프라·봇: main CI 최근 성공"
  ],
  "merged_prs": [
+  {
+   "number": 70,
+   "title": "feat(matlab): run_all_<name>.m 원클릭 실행과 JSON 실행 로그, mwatch 자동 수정",
+   "merged_at": "2026-11-15T11:57:47Z"
+  },
+  {
+   "number": 69,
+   "title": "docs(site): 모델 상태 정리, Data & Sources 패널, MATLAB 빌드 단계 결과",
+   "merged_at": "2026-11-15T11:53:44Z"
+  },
+  {
+   "number": 68,
+   "title": "docs: 강다은 데모 영상 역할 + MATLAB UX 진단표",
+   "merged_at": "2026-11-15T11:51:24Z"
+  },
+  {
+   "number": 65,
+   "title": "docs(submission): 제출 패키지 v1 (역할·Project 링크·MATLAB 검증 문단)",
+   "merged_at": "2026-11-15T11:48:46Z"
+  },
+  {
+   "number": 67,
+   "title": "feat(validation): USDA NASS 2012 군 단위 수확량 대조 (엔진 변경 없음)",
+   "merged_at": "2026-11-15T11:46:20Z"
+  },
+  {
+   "number": 66,
+   "title": "docs: DATA_SOURCES.md와 Prithvi 일치율 단일 정의",
+   "merged_at": "2026-11-15T11:46:07Z"
+  },
+  {
+   "number": 64,
+   "title": "feat(demo): 고정 정적 데모 (GitHub Pages /demo/, 스냅샷 대체)",
+   "merged_at": "2026-11-15T11:42:58Z"
+  },
   {
    "number": 63,
    "title": "feat(matlab): 윤성·지민 추가 세트 스크립트 6개 + 입력 + 가이드",
    "merged_at": "2026-11-15T11:36:30Z"
-  },
-  {
-   "number": 62,
-   "title": "fix(status): 일정 21:00 1차 · 23:00 동결 · 23:30 최종",
-   "merged_at": "2026-11-15T11:33:28Z"
-  },
-  {
-   "number": 61,
-   "title": "docs(matlab): 가이드 경로를 work/로 + 실행만 하는 원칙",
-   "merged_at": "2026-11-15T11:10:58Z"
-  },
-  {
-   "number": 59,
-   "title": "fix(matlab): V8 배치가 서버 API 캐시를 읽고 기존 결과를 보관 — 우찬님 USGS·Open-Meteo 오류 해결",
-   "merged_at": "2026-11-15T11:08:37Z"
-  },
-  {
-   "number": 60,
-   "title": "fix(web): 공개 URL QA 수정 (경계 좌표, 결측을 0%로 표시하던 문제, 문구) + QA-FINAL",
-   "merged_at": "2026-11-15T11:06:20Z"
-  },
-  {
-   "number": 58,
-   "title": "feat(web): AI 생성 이미지 표시(사진 워터마크 + 로고 푸터) · SI 내역 확정",
-   "merged_at": "2026-11-15T10:55:15Z"
-  },
-  {
-   "number": 57,
-   "title": "fix: 테스트가 실제 수정 큐에 쓰던 문제 + live.json MATLAB 사람별 3단계 + 시뮬 Stretch",
-   "merged_at": "2026-11-15T10:52:29Z"
-  },
-  {
-   "number": 56,
-   "title": "feat(orchestrator,matlab): MATLAB 오류 → 에이전트 자동 수정 큐 + 오늘 저녁 역할표",
-   "merged_at": "2026-11-15T10:48:37Z"
   }
  ],
  "ai_models": [

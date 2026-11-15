@@ -1,7 +1,7 @@
-# 아몰라 실시간 현황 · 20:53 KST
+# 아몰라 실시간 현황 · 21:03 KST
 
-일정: 1차 제출 21:00 (0시간 6분 남음) · 동결 23:00 (2시간 6분 남음) · 최종 제출 23:30 (2시간 36분 남음)
-최종 제출 23:30 KST까지 **2시간 36분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (1시간 56분 남음) · 최종 제출 23:30 (2시간 26분 남음)
+최종 제출 23:30 KST까지 **2시간 26분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -10,7 +10,7 @@
 | AI 모델 | 100% | 5/5 |
 | MATLAB | 86% | 6/7 |
 | UI | 100% | 7/7 |
-| 인프라·봇 | 100% | 6/6 |
+| 인프라·봇 | 83% | 5/6 |
 
 ## 데이터 100%
 - ✅ POWER 일별 12주 1995–2025
@@ -58,12 +58,12 @@
 - ✅ 화면 캡처 docs/screens
 - ✅ 공개 URL QA (docs/QA-FINAL.md)
 
-## 인프라·봇 100%
+## 인프라·봇 83%
 - ✅ Mattermost
 - ✅ 봇 (tmux bot)
 - ✅ 러너 (tmux runner)
 - ✅ SSH 공개키 자동 등록 (keywatch) — root 프로세스로 확인
-- ✅ main CI 최근 성공 — success
+- 🟡 main CI 최근 성공
 - ✅ live 현황 (tmux live)
 
 ## 막힌 점
@@ -71,6 +71,7 @@
 
 ## 다음 할 일
 1. MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv
+2. 인프라·봇: main CI 최근 성공
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
@@ -88,6 +89,7 @@
 | mfixq | ? | ? | 19:53 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | 12:11 |
 | mwatch | ? | ? | 20:40 |
+| rbatch | ? | ? | 21:00 |
 | runner | — | GitHub Actions 러너 | 13:09 |
 | sub2 | ? | ? | 20:17 |
 | web | — | 프론트+API 프록시 (:8095) | 20:09 |
@@ -96,19 +98,19 @@
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 20:32 | — |
+| 김우찬 | 21:03 | — |
 | 김윤성 | 20:45 | — |
-| 고지은 | 20:53 | — |
+| 고지은 | 21:02 | — |
 | 하지민 | 20:45 | — |
 | 강다은 | 17:18 | — |
-| Hylē | 16:01 | 20:36 |
+| Hylē | 16:01 | 20:57 |
 
 ## 최근 머지된 PR
+- #70 feat(matlab): run_all_<name>.m 원클릭 실행과 JSON 실행 로그, mwatch 자동 수정
+- #69 docs(site): 모델 상태 정리, Data & Sources 패널, MATLAB 빌드 단계 결과
+- #68 docs: 강다은 데모 영상 역할 + MATLAB UX 진단표
+- #65 docs(submission): 제출 패키지 v1 (역할·Project 링크·MATLAB 검증 문단)
+- #67 feat(validation): USDA NASS 2012 군 단위 수확량 대조 (엔진 변경 없음)
+- #66 docs: DATA_SOURCES.md와 Prithvi 일치율 단일 정의
+- #64 feat(demo): 고정 정적 데모 (GitHub Pages /demo/, 스냅샷 대체)
 - #63 feat(matlab): 윤성·지민 추가 세트 스크립트 6개 + 입력 + 가이드
-- #62 fix(status): 일정 21:00 1차 · 23:00 동결 · 23:30 최종
-- #61 docs(matlab): 가이드 경로를 work/로 + 실행만 하는 원칙
-- #59 fix(matlab): V8 배치가 서버 API 캐시를 읽고 기존 결과를 보관 — 우찬님 USGS·Open-Meteo 오류 해결
-- #60 fix(web): 공개 URL QA 수정 (경계 좌표, 결측을 0%로 표시하던 문제, 문구) + QA-FINAL
-- #58 feat(web): AI 생성 이미지 표시(사진 워터마크 + 로고 푸터) · SI 내역 확정
-- #57 fix: 테스트가 실제 수정 큐에 쓰던 문제 + live.json MATLAB 사람별 3단계 + 시뮬 Stretch
-- #56 feat(orchestrator,matlab): MATLAB 오류 → 에이전트 자동 수정 큐 + 오늘 저녁 역할표
