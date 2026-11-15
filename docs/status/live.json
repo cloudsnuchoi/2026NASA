@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T16:36:12+09:00",
+ "generated_at": "2026-11-15T16:41:19+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 323,
+ "remaining_min": 318,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "lanes": [
   {
@@ -301,7 +301,7 @@
   {
    "name": "김우찬",
    "user": "woochan",
-   "mattermost_last": "15:09",
+   "mattermost_last": "16:36",
    "repo_last": null
   },
   {
