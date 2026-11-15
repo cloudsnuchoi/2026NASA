@@ -75,6 +75,8 @@ class Config:
     history_turns: int = 20  # turns (user+assistant pairs) shared by every model in a room
     memory_dir: Path = HERE / "state" / "memory"
     memo_async: bool = True
+    design_channels: List[str] = field(default_factory=lambda: ["uiux-design"])  # answer questions, deep model by default
+    progress_every: float = 30.0  # seconds between "still thinking" edits for deep answers
     doc_budget: int = 60000
     max_tokens: int = 2500
     agent_silent_min: float = 10.0  # flag a laptop agent-loop silent longer than this
@@ -107,6 +109,7 @@ class Config:
         c.state_path = Path(e("STATE_PATH", str(c.state_path)))
         c.history_turns = int(e("HISTORY_TURNS", c.history_turns))
         c.memory_dir = Path(e("MEMORY_DIR", str(c.memory_dir)))
+        c.design_channels = [x.strip() for x in e("DESIGN_CHANNELS", ",".join(c.design_channels)).split(",") if x.strip()]
         c.codex_bin = e("CODEX_BIN", c.codex_bin)
         c.codex_models = [m.strip() for m in e("CODEX_MODELS", ",".join(c.codex_models)).split(",") if m.strip()]
         c.doc_budget = int(e("DOC_BUDGET_CHARS", c.doc_budget))
@@ -448,9 +451,11 @@ class DeepChain:
     def __init__(self, providers: List):
         self.providers = providers
 
-    def ask(self, prompt: str):
+    def ask(self, prompt: str, on_try: Optional[Callable[[str], None]] = None):
         for p in self.providers:
             try:
+                if on_try:
+                    on_try(getattr(p, "label", "심화 모델"))
                 return p.ask(prompt), getattr(p, "label", "심화 모델")
             except Exception as exc:
                 log.warning("deep provider %s failed: %s %s", getattr(p, "label", p), type(exc).__name__, str(exc)[:80])
@@ -491,6 +496,7 @@ SYSTEM_TEMPLATE = """너는 NASA Space Apps Challenge 2026 서울, 팀 '아몰�
 **완료 기준** — 체크리스트 3~5개, 확인 가능한 것.
 **보고할 것** — 1:1 채널에 올릴 것 (PR 링크 + 스크린샷, MATLAB은 파일 경로 + 그림).
 
+VPS MATLAB 접속 순서(김우찬·김윤성): ① SSH 키 만들기(infra/matlab/REMOTE.md 1절) ② 공개키(.pub 한 줄, `ssh-ed25519 …` 또는 `ssh-rsa …`)를 자기 1:1 방에 그대로 올리기 ③ 서버가 자동 등록 ④ 서버 주소·포트·토큰이 들어간 접속 명령이 그 방에 자동으로 올라옴 → 그 명령을 그대로 실행. 너는 서버 주소를 모른다. 주소를 묻는 사람에게는 공개키를 먼저 올리라고 안내하고, 주소를 지어내지 않는다. 개인키(.pub 없는 파일)는 절대 보내지 말라고 한다.
 규칙: 데이터·숫자·DOI·URL을 지어내지 않는다. 모르면 '미확인'. 비밀값(키·비밀번호·토큰)을 요구하거나 채팅에 붙이게 하지 않는다.
 PR 리뷰 요청이면: 이슈 범위 준수, SOT 계약 일치, 비밀값/대용량 파일 커밋 여부, 테스트·CI, 화면 문구 규칙을 보고 '머지 가능/수정 필요'와 고칠 프롬프트를 준다. 머지는 Hylē가 한다.
 
@@ -554,6 +560,7 @@ class Outgoing:
     channel: str  # channel id, or "name:<channel-name>" to resolve
     message: str
     root_id: str = ""
+    edit_id: str = ""  # replace this post (the "⏳ 답변 준비 중" placeholder) instead of posting a new one
 
 
 MEMO_SYSTEM = """너는 팀 채팅방 메모 관리자다. 아래 형식의 마크다운 메모만 출력한다(1500자 이내, 한국어, 사실만, 지어내지 않음).
@@ -584,6 +591,10 @@ class Orchestrator:
                  deep=None, memo_llm: Optional[LLM] = None):
         self.cfg, self.llm, self.gh, self.docs, self.members = cfg, llm, gh, docs, members
         self.deep, self.memo_llm = deep, memo_llm
+        import threading
+
+        self.notifier = None  # set by run_live: Mattermost (typing, placeholder post, edits)
+        self._tl = threading.local()
         self._memo_locks: Dict[str, object] = {}
         self.state: Dict[str, ChannelState] = {}
         self.agents: Dict[str, dict] = {}  # member username -> last agent-loop check-in (props + at)
@@ -660,16 +671,22 @@ class Orchestrator:
                 self.save_state()
                 return []  # Hylē speaks; the bot stays quiet but remembers it as priority
             member = one_on_one
-        elif inc.mentioned or inc.channel_type == "D":
+        elif inc.mentioned or inc.channel_type == "D" or (inc.channel_name in self.cfg.design_channels and "?" in msg):
             member = self.members.get(inc.username) or Member(inc.username, inc.username, "팀원", "")
         else:
             return []
+        if inc.channel_name in self.cfg.design_channels and "!deep" not in msg.lower():
+            msg = "!deep " + msg  # design channel = PRD decisions -> deep model (Codex sol) by default
 
         text = msg + (f"\n(첨부 파일 {inc.file_count}개 — 봇은 이미지 내용을 못 봄. 필요하면 글로 설명)" if inc.file_count else "")
         if is_hyle and one_on_one is not None:
             text = f"[Hylē 지시] {text}"
-        reply = self._ask(inc.channel_name, member, text)
-        return [Outgoing(inc.channel_id, reply, root)]
+        self._tl.ctx = (inc.channel_id, root)
+        try:
+            reply = self._ask(inc.channel_name, member, text)
+        finally:
+            self._tl.ctx = None
+        return [Outgoing(inc.channel_id, reply, root, edit_id=getattr(self._tl, "placeholder", "") or "")]
 
     def _command(self, inc: Incoming, msg: str, is_hyle: bool, root: str) -> List[Outgoing]:
         parts = msg.split(maxsplit=3)
@@ -702,7 +719,12 @@ class Orchestrator:
                 f"PR #{n} 리뷰해줘. 제목: {pr['title']}\n작성자: {pr['user']['login']}\nCI: {ci}\n"
                 f"본문:\n{(pr.get('body') or '')[:3000]}\n\nDIFF:\n{diff}"
             )
-            return out(self._ask(inc.channel_name, member, prompt, remember=False, think=True))
+            self._tl.ctx = (inc.channel_id, root)
+            try:
+                reply = self._ask(inc.channel_name, member, prompt, remember=False, think=True)
+            finally:
+                self._tl.ctx = None
+            return [Outgoing(inc.channel_id, reply, root, edit_id=getattr(self._tl, "placeholder", "") or "")]
         if cmd in ("!assign", "!note"):
             if not is_hyle:
                 return out(f"`{cmd}`는 Hylē만 쓸 수 있어요.")
@@ -882,9 +904,46 @@ class Orchestrator:
         convo = "\n\n".join(f"[{m['role']}]\n{m['content']}" for m in msgs)
         return f"{DEEP_PREAMBLE}\n{rules}\n## 대화 (마지막이 이번 질문)\n{convo}\n"
 
-    def _deep_ask(self, prompt: str):
+    def _deep_ask(self, prompt: str, on_try: Optional[Callable[[str], None]] = None):
         providers = getattr(self.deep, "providers", None) or [self.deep]
-        return DeepChain(providers).ask(prompt)
+        return DeepChain(providers).ask(prompt, on_try=on_try)
+
+    def _progress_start(self, label: str, deep: bool):
+        """Typing event + '⏳ 답변 준비 중… (model)' placeholder in the question's thread; deep answers refresh every 30 s."""
+        self._tl.placeholder = ""
+        ctx = getattr(self._tl, "ctx", None)
+        if not (self.notifier and ctx):
+            return None
+        import threading
+
+        ch, root = ctx
+        state = {"label": label, "t0": time.time(), "stop": threading.Event()}
+        try:
+            self.notifier.typing(ch, root)
+            self._tl.placeholder = state["pid"] = self.notifier.placeholder(ch, root, f"⏳ 답변 준비 중… ({label})")
+        except Exception as exc:
+            log.warning("placeholder failed: %s", type(exc).__name__)
+            return None
+
+        def tick():
+            while not state["stop"].wait(self.cfg.progress_every):
+                try:
+                    secs = int(time.time() - state["t0"])
+                    self.notifier.typing(ch, root)
+                    self.notifier.edit(state["pid"], f"⏳ 아직 생각 중… {secs}초 ({state['label']})")
+                except Exception:
+                    pass
+        if deep:
+            threading.Thread(target=tick, daemon=True).start()
+        return state
+
+    def _progress_label(self, state, label: str) -> None:
+        if state:
+            state["label"] = label
+            try:
+                self.notifier.edit(state["pid"], f"⏳ 답변 준비 중… ({label})")
+            except Exception:
+                pass
 
     def _ask(self, channel_name: str, member: Member, user_text: str, remember: bool = True, think: bool = False) -> str:
         st = self.st(channel_name)
@@ -897,13 +956,17 @@ class Orchestrator:
         msgs = history + [{"role": "user", "content": user_text + self.build_context(channel_name, member, short=short)}]
         route = "deep" if self.deep and not think and (forced or wants_deep(user_text)) else "flash"
         reply, label = "", ""
+        first = (getattr(getattr(self.deep, "providers", [None])[0], "label", "심화 모델") if route == "deep"
+                 else ("DeepSeek V4.1 Flash thinking" if think else MODEL_LABEL["flash"]))
+        prog = self._progress_start(first, deep=route == "deep" or think)
         try:
             if route == "deep":
                 try:
-                    reply, label = self._deep_ask(self._deep_prompt(msgs))
+                    reply, label = self._deep_ask(self._deep_prompt(msgs), on_try=lambda lb: self._progress_label(prog, lb))
                 except Exception as exc:  # every deep tier failed / timed out -> DeepSeek thinking
                     log.warning("deep chain fallback: %s", type(exc).__name__)
                     route, think = "fallback", True
+                    self._progress_label(prog, MODEL_LABEL["fallback"])
             if not reply:
                 reply = self.llm.complete(self.build_system(), msgs, think=think)
         except LLMBusy:
@@ -911,6 +974,9 @@ class Orchestrator:
         except Exception as exc:
             log.exception("LLM error")
             return f"⚠️ LLM 호출 실패: {type(exc).__name__}. Hylē에게 알려주세요."
+        finally:
+            if prog:
+                prog["stop"].set()
         if not reply:
             reply = "⚠️ 빈 응답이에요. 다시 질문해 주세요."
         if not label:
@@ -996,11 +1062,31 @@ class Mattermost:
             self._chan_by_name[name] = self.api("GET", f"/teams/{self.team['id']}/channels/name/{name}")["id"]
         return self._chan_by_name[name]
 
+    def typing(self, channel_id: str, root_id: str = "") -> None:
+        if self.do_post:
+            self.api("POST", f"/users/{self.me['id']}/typing", json={"channel_id": channel_id, "parent_id": root_id})
+
+    def placeholder(self, channel_id: str, root_id: str, text: str) -> str:
+        if not self.do_post:
+            print(f"--- [no-post placeholder] {text}")
+            return ""
+        return self.api("POST", "/posts", json={"channel_id": channel_id, "message": text, "root_id": root_id})["id"]
+
+    def edit(self, post_id: str, text: str) -> None:
+        if self.do_post and post_id:
+            self.api("PUT", f"/posts/{post_id}/patch", json={"message": text})
+
     def send(self, out: Outgoing) -> None:
-        for chunk in split_message(out.message):
+        for i, chunk in enumerate(split_message(out.message)):
             if not self.do_post:
                 print(f"\n--- [no-post] -> {out.channel} root={out.root_id}\n{chunk}\n")
                 continue
+            if i == 0 and out.edit_id:
+                try:
+                    self.edit(out.edit_id, chunk)  # turn the placeholder into the answer
+                    continue
+                except Exception:
+                    log.warning("placeholder edit failed; posting new")
             self.api("POST", "/posts", json={"channel_id": self.channel_id(out.channel), "message": chunk, "root_id": out.root_id})
 
     def channel_name(self, channel_id: str) -> str:
@@ -1077,6 +1163,7 @@ async def run_live(orch: Orchestrator, mm: Mattermost) -> None:
     locks: Dict[str, asyncio.Lock] = {}
     backoff = 1
     asyncio.create_task(_silence_watch(orch, mm))
+    orch.notifier = mm
     while True:
         try:
             async with websockets.connect(ws_url, ping_interval=20, ping_timeout=20, max_size=8 * 2**20) as ws:
