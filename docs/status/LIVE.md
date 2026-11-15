@@ -1,6 +1,6 @@
-# 아몰라 실시간 현황 · 16:05 KST
+# 아몰라 실시간 현황 · 16:10 KST
 
-제출 목표 22:00 KST까지 **5시간 54분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **5시간 49분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -87,7 +87,6 @@
 | --- | --- | --- | --- |
 | api | — | model_api 상시 실행 (:8090) | 15:50 |
 | bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | 16:01 |
-| fields2 | claude-opus-5-5 | 대비 데모 필지 추가 | 15:20 |
 | imerg | claude-sonnet-5-5 | IMERG·NLDAS-2 카운티 적재 | 13:59 |
 | live | — | 이 현황 생성기 (5분) | 15:54 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | 12:11 |
