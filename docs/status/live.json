@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T21:24:03+09:00",
+ "generated_at": "2026-11-15T21:29:13+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -10,15 +10,15 @@
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 95
+   "remaining_min": 90
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 125
+   "remaining_min": 120
   }
  ],
- "remaining_min": 125,
+ "remaining_min": 120,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -378,7 +378,7 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "21:10"
+   "repo_last": "21:16"
   }
  ],
  "blockers": [],
@@ -386,6 +386,11 @@
   "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv"
  ],
  "merged_prs": [
+  {
+   "number": 74,
+   "title": "docs(matlab): 가이드 Run 하나로 정리 + live.json 추가 세트 6개",
+   "merged_at": "2026-11-15T12:16:21Z"
+  },
   {
    "number": 73,
    "title": "fix(bot): MATLAB 방 캡처 요구 금지 규칙",
@@ -420,11 +425,6 @@
    "number": 65,
    "title": "docs(submission): 제출 패키지 v1 (역할·Project 링크·MATLAB 검증 문단)",
    "merged_at": "2026-11-15T11:48:46Z"
-  },
-  {
-   "number": 67,
-   "title": "feat(validation): USDA NASS 2012 군 단위 수확량 대조 (엔진 변경 없음)",
-   "merged_at": "2026-11-15T11:46:20Z"
   }
  ],
  "ai_models": [
