@@ -106,6 +106,13 @@
 - **결정 (임베딩).** RAG 임베딩은 `intfloat/multilingual-e5-small`(MIT, 384차원, 한국어·영어)이다. SOT 5절 DDL의 `vector(1536)`을 `vector(384)`로 바꾼다. 데이터 레인(`feat/26-data-spike`, `sql/001_sot_schema.sql`)이 이미 384로 적재했다. Hylē 승인.
   - 문서 청크는 `passage: `, 질의는 `query: ` 접두사를 붙인다. 중국에서 개발된 모델은 쓰지 않는다(주최 측 비권장).
 
+<<<<<<< HEAD
+## 2026-11-15 19:15 · ART FARM 웹 2단 구조 (L1)
+
+- **결정 (웹).** 공개 데모는 `infra/web`(Starlette, 127.0.0.1:8095) + Cloudflare quick tunnel. `frontend/`는 빌드 없는 HTML/JS(Tailwind CDN, Leaflet + Esri World Imagery, Chart.js). Tier 1 `POST /quick`(V8 FAO-56 포팅, 외부 응답 디스크 캐시, 실패 시 null + info_gaps, 대체 상수 없음), Tier 2는 폴리곤이 20개 데모 필지와 겹칠 때 `/simulate`·`/validation/backtest`·`/explain`.
+- **결정 (윤작 후보).** 연속 동일 작물 금지를 순환(마지막→처음)까지 적용해 V8의 Corn-Soy-Corn 후보를 뺀다. 경제 가정(목업 CROP_DB)은 USDA ERS/NASS 표·연도를 확인하지 못해 제외하고 info_gap으로 남긴다.
+- **원인 기록 (MATLAB).** 서버에서 MATLAB이 "안 돈" 원인은 스크립트 파일명이 내부 함수명(`select_cornbelt_4vertices`)과 같았기 때문이다. 서버 문제가 아니다.
+=======
 ## 2026-11-15 18:57 · PRD 최종 동결 (ART FARM, 두 단계, 정직성) · MATLAB 원인
 
 - **동결 (이름).** 제품 이름 **ART FARM**, 부제 **"Field Shift: Adapting Farms with NASA Data"**. 사이트·프론트·제출·슬라이드 공통. 디자인팀 요청(로고 "ART FARM", 전부 영어) 반영. Hylē 최종 지시.
@@ -113,3 +120,4 @@
 - **동결 (정직성).** 보장 문구·"Recommended"·순위 금지. 출처 없는 숫자 삭제. 경제 가정(목업 `CROP_DB`)은 "assumption" + USDA ERS/NASS 출처·연도, 확인 못 하면 정보 공백. Kc는 FAO-56 Table 12(옥수수 mid 1.20, 대두 1.15, 밀 1.15)로 바꾸거나 목업 값과의 차이를 툴팁에 보인다. "Water saving %"·"soil organic matter index"는 relative-index 툴팁. 결과 화면의 "MATLAB engine" 표기는 "FAO-56 engine (ported from team MATLAB prototype V8)"으로 바꾼다. 상세는 PRD 4절.
 - **확인 (구현 상태).** `/strategies/compare` 응답에 `rank` 필드가 남아 있다. UI는 표시·정렬에 쓰지 않는다. 필드 제거는 별도 이슈(계약 테스트 동반).
 - **원인 (MATLAB이 서버에서 안 돌던 문제).** 스크립트 **파일 이름이 파일 안의 로컬 함수 이름과 같았다**(`select_cornbelt_4vertices`). MATLAB에서 스크립트 파일 이름과 같은 이름의 로컬 함수를 두면 스크립트로 실행되지 않는다. **서버(VPS MATLAB) 문제가 아니다.** 해결: 파일 이름이나 함수 이름 중 하나를 바꾼다(V8 `FieldShift_LiveAPI_Engineeee.m`의 함수는 `select_cornbelt_4vertices_noaddon`). MATLAB은 계속 오프라인 전용이고, V8 수식은 Tier 1 엔진으로 이식한다.
+>>>>>>> origin/main
