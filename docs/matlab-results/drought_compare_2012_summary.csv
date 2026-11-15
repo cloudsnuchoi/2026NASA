@@ -1,0 +1,5 @@
+county_fips,county_label,n_fields,engine_A_deficit_2012_mm,precip_anomaly_pct_2012_MJJAS,rzsm_z_2012_MJJAS,tmax_anomaly_c_2012_MJJAS,pearson_r_precip_vs_deficit,n_for_r
+17113,McLean,3,414.766666666667,-32.21267,NaN,3.19897,-0.865331917755845,4
+19169,Story,12,469.925,-49.01958,NaN,3.477106,-0.865331917755845,4
+31109,Lancaster,3,643.3,-49.84573,NaN,3.509062,-0.865331917755845,4
+39159,Union,2,306.5,-10.0622,NaN,1.422763,-0.865331917755845,4
