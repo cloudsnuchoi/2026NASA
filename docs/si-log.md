@@ -20,3 +20,4 @@
 | 2026-11-15 20:30–21:00 KST | SITE2 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | `docs/DATA_SOURCES.md`(URL curl 확인·제출 양식 텍스트), `docs/PRITHVI-AGREEMENT.md`(vision_result 20필지 분포), 사이트 탭 구현 상태 갱신·`docs/matlab-results/`, `frontend/data-sources.js` 패널 (`feat/site-truth`) | 이 로그 |
 | 2026-11-15 20:17–22:55 KST | SUB 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | 제출 문서: `submission-form.md`(폼 순서 복붙본), 팀 역할, MATLAB 교차 확인 문단(실제 출력 CSV만 인용), 슬라이드 갱신 (`feat/submission-v1`) | 이 로그, `docs/submission/` |
 | 2026-11-15 20:25 KST | STATIC 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | GitHub Pages 정적 데모(`docs/demo/`), API 대체 계층, `tools/make_demo_snapshot.py`, `tools/test_static_demo.py` | 이 로그, `docs/demo/` |
+| 2026-11-15 20:17–20:55 KST | UX 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | UX 감사(`docs/UX-AUDIT.md`, WCAG 대비 계산, 360/390/768 모바일 캡처), `infra/web/ux/` 점검 스크립트, `frontend/`·`docs/demo/` UX 수정(대비, 44 px 터치, 히어로, 결과 이동 바, 오류 안내·재시도, sticky) (`feat/ux-mobile`) | 이 로그, `docs/UX-AUDIT.md` |

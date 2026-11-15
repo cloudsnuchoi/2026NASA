@@ -29,6 +29,7 @@
       background: var(--cream);
       color: #16281f;
       overflow-x: hidden;
+      overflow-x: clip; /* clip, not hidden: hidden makes body a scroll container and breaks position: sticky */
     }
 
     /* Page management */
@@ -173,6 +174,20 @@
     .crop-card.selected .crop-check { background: #82c341; border-color: #82c341; }
     .vtx-label { background: #173a2b; color: #fff; border: none; font-weight: 800; font-size: 10px; padding: 1px 5px; }
     .leaflet-container { font-family: Inter, system-ui, sans-serif; }
+    /* UX audit F4/F9: touch targets, focus, reduced motion */
+    .app-page button, #page-story button { min-height: 44px; }
+    @media (pointer: coarse) {
+      .leaflet-touch .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; font-size: 22px; }
+    }
+    :focus-visible { outline: 3px solid #f2c46d; outline-offset: 2px; }
+    .s7 input[type=checkbox] { width: 20px; height: 20px; flex: none; accent-color: #173a2b; }
+    .s7 label { min-height: 44px; align-items: center; padding: 4px 0; cursor: pointer; }
+    details.ev > summary { cursor: pointer; min-height: 32px; list-style: revert; }
+    .rng { white-space: nowrap; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .reveal-img, .reveal-text { opacity: 1 !important; transform: none !important; }
+    }
   </style>
 <style>
   .ai-gen-wrap{position:relative}
@@ -218,12 +233,16 @@
         Standing Beside Farmers, <br />
         <span class="text-amber-300">Guided by Orbital Data.</span>
       </h1>
-      <p class="mt-5 text-base sm:text-lg text-white/90 max-w-2xl leading-relaxed font-medium drop-shadow">
-        Scroll down to see the challenges facing Corn Belt growers—and how open satellite and climate data can help compare crop-rotation options before planting. A decision aid — it does not replace your judgement.
+      <p id="hero-value" class="mt-5 text-lg sm:text-xl text-white max-w-2xl leading-snug font-bold drop-shadow">
+        Compare crop-rotation options for a Corn Belt field before planting: crop water demand, P10–P90 ranges and drought risk from NASA POWER and other open data.
       </p>
-      <div class="mt-8 flex items-center gap-3 text-white/90 text-sm font-semibold">
-        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full border border-white/40 animate-bounce">↓</span>
-        <span>Scroll to explore the story</span>
+      <p class="mt-2 text-sm sm:text-base text-white/90 max-w-2xl font-medium drop-shadow">A decision-support tool — it does not replace your judgement. Free, no login.</p>
+      <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+        <button id="btn-hero-start" class="inline-flex items-center gap-2 min-h-[48px] px-6 py-3 rounded-2xl bg-[#82c341] hover:bg-[#93d450] text-[#0f291e] font-extrabold text-base shadow-lg">Draw your field <span aria-hidden="true">→</span></button>
+        <span class="inline-flex items-center gap-2 text-white/90 text-sm font-semibold">
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-full border border-white/40 motion-safe:animate-bounce" aria-hidden="true">↓</span>
+          <span>or scroll for the story</span>
+        </span>
       </div>
     </div>
   </div>
@@ -241,7 +260,7 @@
         <span class="px-3.5 py-1 rounded-full bg-amber-300/30 backdrop-blur-sm border border-amber-200/50 text-xs font-bold text-[#102a1b] shadow-sm">
           📐 WGS84 &amp; USGS 3DEP Topographic Contour
         </span>
-        <span class="px-3.5 py-1 rounded-full bg-emerald-950/20 backdrop-blur-sm border border-white/30 text-xs font-bold text-white shadow-sm">
+        <span class="px-3.5 py-1 rounded-full bg-white/25 backdrop-blur-sm border border-white/40 text-xs font-bold text-[#102a1b] shadow-sm">
           🛰️ NASA POWER 10-yr daily + CMIP6 ranges
         </span>
       </div>
@@ -479,7 +498,7 @@
         <img src="assets/logo.svg" alt="ART FARM logo" class="w-11 h-11" />
         <div>
           <h1 class="text-xl sm:text-2xl font-extrabold text-[#173a2b]">Step 1 · Draw your field</h1>
-          <p class="text-sm text-slate-600">Click the <strong>4 corners</strong> of a field anywhere in the US Corn Belt, or pick a pilot-county preset for Deep Analysis.</p>
+          <p class="text-sm text-slate-600"><span class="pointer-word">Click</span> the <strong>4 corners</strong> of a field anywhere in the US Corn Belt, or pick a pilot-county preset for Deep Analysis.</p>
         </div>
       </div>
       <button data-goto="page-story" class="px-4 py-2 rounded-full bg-white border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50">← Story</button>
@@ -487,10 +506,11 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
       <div class="lg:col-span-8">
         <div class="relative">
-          <div id="map"></div>
+          <div id="map" role="application" aria-label="Satellite map: place the 4 corners of your field"></div>
+          <div id="map-hint" aria-live="polite" class="absolute left-1/2 -translate-x-1/2 bottom-14 z-[500] whitespace-nowrap px-3 py-1.5 rounded-full bg-[#173a2b]/90 text-white text-xs font-bold shadow pointer-events-none">Place corner 1 of 4</div>
           <div class="absolute top-3 right-3 z-[500] flex gap-2">
-            <button id="btn-undo" class="px-3 py-1.5 rounded-lg bg-white/90 text-xs font-bold text-slate-700 shadow">Undo</button>
-            <button id="btn-clear" class="px-3 py-1.5 rounded-lg bg-white/90 text-xs font-bold text-slate-700 shadow">Clear</button>
+            <button id="btn-undo" class="min-h-[44px] px-4 py-2 rounded-lg bg-white/90 text-xs font-bold text-slate-700 shadow">Undo</button>
+            <button id="btn-clear" class="min-h-[44px] px-4 py-2 rounded-lg bg-white/90 text-xs font-bold text-slate-700 shadow">Clear</button>
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-4 mt-2 text-[11px] text-slate-600">
@@ -535,8 +555,8 @@
     </div>
     <p class="text-sm text-slate-600 mb-6">A rotation needs at least 2 different crops. ART FARM builds sequences with no crop repeated back-to-back and shows them <strong>unranked</strong> — the choice stays yours.</p>
     <div id="crop-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-5"></div>
-    <div class="mt-6 flex flex-wrap items-center gap-3">
-      <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Selected:</span>
+    <div class="mt-6 flex flex-wrap items-center gap-3 sticky bottom-0 z-20 -mx-4 px-4 py-3 bg-[#f7f6f0]/95 backdrop-blur border-t border-slate-200 sm:static sm:mx-0 sm:px-0 sm:py-0 sm:bg-transparent sm:border-0">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Selected:</span>
       <span id="crop-selected" class="text-sm font-semibold text-[#173a2b]">none</span>
       <button id="btn-run" disabled class="ml-auto px-8 py-3.5 rounded-2xl bg-[#173a2b] enabled:hover:bg-[#24543e] disabled:opacity-40 text-white font-extrabold shadow-lg">Run screening →</button>
     </div>
@@ -591,9 +611,10 @@
         <button data-goto="page-map" class="px-4 py-2 rounded-full bg-white border border-slate-300 text-sm font-semibold text-slate-700">New field</button>
       </div>
     </div>
-    <div id="tier2" class="mb-8"></div>
-    <div id="tier1"></div>
-    <footer class="mt-10 text-[11px] text-slate-500 leading-relaxed border-t border-slate-300 pt-4">
+    <nav id="results-nav" aria-label="Jump to section" class="sticky top-0 z-30 -mx-4 sm:mx-0 px-4 py-2 mb-4 bg-[#f3f5ee]/95 backdrop-blur border-b border-slate-200 flex gap-2 overflow-x-auto text-sm font-bold"></nav>
+    <div id="tier2" class="mb-8 scroll-mt-16"></div>
+    <div id="tier1" class="scroll-mt-16"></div>
+    <footer class="mt-10 text-xs text-slate-600 leading-relaxed border-t border-slate-300 pt-4">
       ART FARM supports, and does not replace, farmer and agronomist judgement. Strategy comparison percentages are relative indices versus strategy A (current practice) and are not guarantees. Future climate is shown only as a possible range (scenario).
       Basemap © Esri, Maxar, Earthstar Geographics, and the GIS User Community. Data: NASA POWER, USGS 3DEP, NOAA NWS, Open-Meteo, USDA CDL/CSB/gSSURGO, Prithvi-EO (IBM/NASA). Parts of this site and its explanations were produced with AI assistance (SI); explanation numbers come only from model_api tool responses. <strong>All photos (img01–img12) and the ART FARM logo are AI-generated images (SI).</strong>
     </footer>
