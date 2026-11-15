@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T22:51:34+09:00",
+ "generated_at": "2026-11-15T22:56:48+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -10,15 +10,15 @@
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 8
+   "remaining_min": 3
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 38
+   "remaining_min": 33
   }
  ],
- "remaining_min": 38,
+ "remaining_min": 33,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -149,7 +149,7 @@
     {
      "label": "/explain (DeepSeek)",
      "status": "done",
-     "detail": "6.7 s, deepseek-flash"
+     "detail": "6.5 s, deepseek-flash"
     }
    ]
   },
@@ -481,7 +481,7 @@
   {
    "name": "/explain (DeepSeek)",
    "status": "done",
-   "detail": "6.7 s, deepseek-flash"
+   "detail": "6.5 s, deepseek-flash"
   }
  ],
  "stretch": [

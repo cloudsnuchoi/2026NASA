@@ -1,7 +1,7 @@
-# 아몰라 실시간 현황 · 22:51 KST
+# 아몰라 실시간 현황 · 22:56 KST
 
-일정: 1차 제출 21:00 (지남) · 동결 23:00 (0시간 8분 남음) · 최종 제출 23:30 (0시간 38분 남음)
-최종 제출 23:30 KST까지 **0시간 38분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (0시간 3분 남음) · 최종 제출 23:30 (0시간 33분 남음)
+최종 제출 23:30 KST까지 **0시간 33분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -38,7 +38,7 @@
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
-- ✅ /explain (DeepSeek) — 6.7 s, deepseek-flash
+- ✅ /explain (DeepSeek) — 6.5 s, deepseek-flash
 
 ## MATLAB 100%
 - ✅ 윤성 1차 CSV: drought_2012_county.csv
@@ -82,7 +82,7 @@
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
-- ✅ /explain (DeepSeek) — 6.7 s, deepseek-flash
+- ✅ /explain (DeepSeek) — 6.5 s, deepseek-flash
 
 ## 에이전트 레인 (tmux)
 | 세션 | 모델 | 하는 일 | 상태 | 기다리는 것 | 마지막 활동 |
