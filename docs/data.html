@@ -13,26 +13,28 @@
   <nav id="site-nav" class="site-nav" aria-label="주요 메뉴"></nav>
   <header class="page-header">
     <div class="wrap">
-      <p class="kicker">Source of truth · SOT.md</p>
+      <p class="kicker">구현 상태 · 2026-11-15 KST · 계약은 SOT.md</p>
       <h1>데이터셋과 계약</h1>
-      <p class="lead">받을 제품은 이미 SOT에 정해져 있습니다. 포털을 처음부터 조사하지 않고, 표의 이름과 층(1층 카운티 / 2층 Story)으로 받습니다. 상태 열은 실시간 다운로드가 아니라 문서 기준이며, 실제 적재는 이슈 #26과 현황판을 보세요.</p>
+      <p class="lead">ART FARM이 실제로 쓰는 데이터입니다. 상태 열은 2026-11-15 라이브 DB(테이블에 행이 있는지)와 model_api 확인 결과입니다. 링크·라이선스·확인 HTTP 상태의 전체 목록은 <a href="https://github.com/cloudsnuchoi/2026NASA/blob/main/docs/DATA_SOURCES.md">DATA_SOURCES.md</a>입니다.</p>
     </div>
   </header>
   <main class="wrap">
-    <p class="src-note">동결·갱신: 2026-11-15 11:10 Asia/Seoul (KST). Story County <code>19169</code>. QuickStats는 선택, 대체는 NASS 일괄 파일. DB 엔진은 최근 결정대로 <strong>Postgres 17</strong> + PostGIS + pgvector + pg_trgm (SOT 초안의 “16”보다 DECISIONS·ARCHITECTURE가 우선).</p>
+    <p class="src-note">DB: Postgres 17 + PostGIS + pgvector(설치됨, 근거 색인 0행) + pg_trgm. 저장 EPSG:4326, <code>field_id</code> = CSB ID. Tier 2 데모 필지 20개: Story IA(<code>19169</code>) 12, McLean IL(<code>17113</code>) 3, Lancaster NE(<code>31109</code>) 3, Union OH(<code>39159</code>) 2.</p>
 
-    <h2>공간 두 층 (SOT 1.6) · 데이터셋 표</h2>
+    <h2>쓰는 곳 · 데이터셋 표</h2>
     <div class="tier-strip">
-      <div><span class="k">1층</span><strong>콘벨트 12주 · 카운티</strong> POWER, IMERG, SMAP 맥락, CDL 작물 비율, NEX-GDDP 카운티 평균. 어디든 1차 힌트.</div>
-      <div><span class="k">2층</span><strong>Story County 19169 · 30 m</strong> CDL 래스터, CSB, SSURGO, HLS NDVI, GEOS-S2S. 몬테카를로와 백테스트 본편.</div>
+      <div><span class="k">Q</span><strong>Tier 1 Quick Screen · 실시간</strong> NASA POWER 10년, USGS 3DEP, NOAA NWS, Open-Meteo → FAO-56 엔진. 콘벨트 어디서나.</div>
+      <div><span class="k">1층</span><strong>콘벨트 카운티 · 맥락</strong> POWER, IMERG, NLDAS-2, SMAP, CDL 작물 비율, GEOS-S2S·NEX-GDDP 카운티 시나리오, NASS 수량.</div>
+      <div><span class="k">2층</span><strong>데모 필지 20개 · 30 m</strong> CSB, CDL 이력, SSURGO, HLS NDVI, OpenET, Prithvi. 몬테카를로·2012 백테스트.</div>
     </div>
 
     <form class="filter-bar" id="filters">
       <label>층
         <select id="f-tier">
           <option value="">전체</option>
-          <option value="1">1층</option>
-          <option value="2">2층</option>
+          <option value="Q">Tier 1 실시간</option>
+          <option value="1">1층 카운티</option>
+          <option value="2">2층 필지</option>
           <option value="—">층 없음</option>
         </select>
       </label>
@@ -57,7 +59,7 @@
           <option value="P0">P0</option>
           <option value="P1">P1</option>
           <option value="선택">선택</option>
-          <option value="후순위">후순위·컷</option>
+          <option value="후순위">미사용</option>
         </select>
       </label>
       <label>검색
@@ -69,7 +71,7 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>이름</th><th>제공</th><th>층</th><th>변수</th><th>해상도·기간</th><th>접근</th><th>어디서 쓰나</th><th>MATLAB</th><th>담당</th><th>우선</th><th>상태</th>
+            <th>이름</th><th>제공</th><th>층</th><th>변수</th><th>해상도·기간</th><th>접근</th><th>어디서 쓰나</th><th>MATLAB</th><th>코드 위치</th><th>우선</th><th>상태</th>
           </tr>
         </thead>
         <tbody id="dataset-body"></tbody>
@@ -83,24 +85,23 @@
     <h2>시간 집계 · 디렉터리 · 저장소 레이아웃</h2>
     <article id="sot-dirs" class="prose wide"><div class="empty">불러오는 중…</div></article>
 
-    <h2>DB 테이블</h2>
-    <p>서비스 DB는 협업 도구(Mattermost)와 분리합니다. API가 읽는 값만 아래 테이블(또는 동등한 뷰)에 있어야 합니다. 분석 중간은 Parquet + DuckDB도 허용합니다.</p>
+    <h2>DB 테이블 (2026-11-15 확인)</h2>
+    <p>서비스 DB는 협업 도구와 분리합니다. 아래는 라이브 DB에서 행이 있는지 확인한 결과입니다.</p>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>테이블</th><th>역할</th></tr></thead>
+        <thead><tr><th>테이블</th><th>역할</th><th>상태</th></tr></thead>
         <tbody>
-          <tr><td><code>data_source</code></td><td>출처 메타(NASA 여부, 라이선스, 인용)</td></tr>
-          <tr><td><code>fields</code></td><td>CSB <code>field_id</code>, 카운티, 기하(EPSG:4326), 면적</td></tr>
-          <tr><td><code>field_season</code></td><td>계절 피처(NDVI, 맨땅, 강수, 기온, ET0, SMAP 아노말리)</td></tr>
-          <tr><td><code>field_dekad</code></td><td>10일 순 NDVI 평활, 맨땅 플래그</td></tr>
-          <tr><td><code>climate_daily</code></td><td>일 기후 입력</td></tr>
-          <tr><td><code>climate_annual</code></td><td>연 기후·작물 요약</td></tr>
-          <tr><td><code>scenario_climate</code></td><td>GEOS-S2S·NEX-GDDP 시나리오 분포</td></tr>
-          <tr><td><code>strategy_score</code></td><td>7축 점수, CVaR, 분위</td></tr>
-          <tr><td><code>backtest_result</code></td><td>CDL/CSB 백테스트 (수량 열은 선택)</td></tr>
-          <tr><td><code>vision_result</code></td><td>Prithvi 배치 추론 (실패 시 CDL)</td></tr>
-          <tr><td><code>evidence_chunk</code></td><td>RAG 인용·DOI (pgvector HNSW, 보조 pg_trgm)</td></tr>
-          <tr><td><code>calibration_param</code></td><td>MATLAB 보정 계수</td></tr>
+          <tr><td><code>fields</code></td><td>CSB 필지, 기하(EPSG:4326)</td><td>적재됨</td></tr>
+          <tr><td><code>field_crop_history</code></td><td>CDL 필지 작물 이력</td><td>적재됨</td></tr>
+          <tr><td><code>field_soil</code></td><td>SSURGO 토양</td><td>적재됨</td></tr>
+          <tr><td><code>field_ndvi_hls</code></td><td>HLS NDVI</td><td>적재됨</td></tr>
+          <tr><td><code>field_et_openet</code></td><td>OpenET 월 ET</td><td>적재됨</td></tr>
+          <tr><td><code>vision_result</code></td><td>Prithvi 추론 (20필지, 2024)</td><td>적재됨</td></tr>
+          <tr><td><code>county, county_crop_share, county_yield</code></td><td>카운티 경계·작물 비율·NASS 수량</td><td>적재됨</td></tr>
+          <tr><td><code>county_weather_daily, county_imerg_daily, county_nldas_monthly, county_smap</code></td><td>POWER·IMERG·NLDAS-2·SMAP 카운티 시계열</td><td>적재됨</td></tr>
+          <tr><td><code>county_scenario_year</code></td><td>GEOS-S2S·NEX-GDDP 시나리오</td><td>적재됨</td></tr>
+          <tr><td><code>evidence_chunk</code></td><td>근거 인용·DOI (pgvector)</td><td>0행 → 대체 경로 (insufficient_evidence)</td></tr>
+          <tr><td><code>field_season, field_dekad, climate_daily, climate_annual, scenario_climate, strategy_score, backtest_result, calibration_param, data_source</code></td><td>SOT 초안 테이블</td><td>0행 · 미사용(향후). MC·백테스트는 요청 시 계산</td></tr>
         </tbody>
       </table>
     </div>
@@ -128,6 +129,7 @@
       const pri = document.getElementById("f-priority").value;
       const q = (document.getElementById("f-q").value || "").trim().toLowerCase();
       const rows = (window.FIELDSHIFT_DATASETS || []).filter(function (d) {
+        if (tier === "Q" && d.tier.indexOf("Q") < 0) return false;
         if (tier === "1" && d.tier.indexOf("1") < 0) return false;
         if (tier === "2" && d.tier.indexOf("2") < 0) return false;
         if (tier === "—" && d.tier !== "—") return false;
@@ -138,7 +140,7 @@
         if (pri === "P0" && d.priority.indexOf("P0") < 0) return false;
         if (pri === "P1" && d.priority.indexOf("P1") < 0) return false;
         if (pri === "선택" && d.priority.indexOf("선택") < 0) return false;
-        if (pri === "후순위" && !/후순위|컷|사용 안 함/.test(d.priority)) return false;
+        if (pri === "후순위" && !/미사용|후순위|컷/.test(d.priority)) return false;
         if (q) {
           const blob = (d.name + " " + d.id + " " + (d.use||"") + " " + (d.used_in||"") + " " + (d.variables||"") + " " + (d.notes||"") + " " + (d.resolution||"") + " " + (d.owner||"")).toLowerCase();
           if (blob.indexOf(q) < 0) return false;

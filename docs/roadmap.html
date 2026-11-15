@@ -22,11 +22,22 @@
     <section id="live-status" aria-label="라이브 현황"></section>
     <section class="timeline" id="timeline">
       <div class="timeline-meta">
-        <div><strong>오늘 시간표</strong><div class="muted">CHECKLIST 1–5절 + 23:30 업로드 창. 노란 칸이 지금 구간, 빨간 선이 현재 시각입니다.</div></div>
+        <div><strong>오늘 시간표</strong><div class="muted">1차 제출 21:00, 수정 마감 23:00, 최종 제출 23:30 KST. 노란 칸이 지금 구간, 빨간 선이 현재 시각입니다.</div></div>
         <div class="now" id="tl-now">--:--:-- KST</div>
       </div>
       <div class="track-wrap" id="tracks"></div>
       <div class="hours" id="hours"></div>
+    </section>
+    <section class="card" style="margin:1rem 0;">
+      <h2>제출 이후 (미사용(향후))</h2>
+      <ul>
+        <li>근거 문헌 색인 채우기 → 설명에 DOI 인용 (지금은 <code>evidence_chunk</code> 0행, <code>insufficient_evidence: true</code>)</li>
+        <li>three.js 복셀 3D 필지 시뮬, <code>/sim/{field_id}/scene</code></li>
+        <li>경제(수익) 비교: 출처·연도 붙은 가격·비용 가정</li>
+        <li>데모 카운티 확대(지금 4개 카운티 20필지), 지도 레이어 엔드포인트</li>
+        <li>MATLAB 산출 테이블(<code>field_dekad</code>, <code>field_season</code>) DB 적재, V8과 엔진의 정의 맞춘 비교</li>
+        <li>Chronos-Bolt 등 시계열 모델 — 이번 제출에서 쓰지 않음</li>
+      </ul>
     </section>
     <p class="src-note">분업표(사람 담당·에이전트 레인): <a href="https://github.com/cloudsnuchoi/2026NASA/blob/main/docs/LANES.md">docs/LANES.md</a></p>
     <p class="src-note" id="sum"></p>
@@ -43,19 +54,21 @@
     const DAY1 = new Date("2026-11-15T23:59:00+09:00");
     const SPAN = DAY1 - DAY0;
     const BLOCKS = [
-      { label: "동결", start: "2026-11-15T08:00:00+09:00", end: "2026-11-15T10:00:00+09:00", row: 0 },
+      { label: "PRD 확정", start: "2026-11-15T08:00:00+09:00", end: "2026-11-15T10:00:00+09:00", row: 0 },
       { label: "데이터·EDA", start: "2026-11-15T08:00:00+09:00", end: "2026-11-15T11:00:00+09:00", row: 1 },
       { label: "병렬 구축", start: "2026-11-15T11:00:00+09:00", end: "2026-11-15T18:00:00+09:00", row: 0 },
-      { label: "기능 동결·E2E", start: "2026-11-15T18:00:00+09:00", end: "2026-11-15T20:00:00+09:00", row: 0 },
-      { label: "제출물", start: "2026-11-15T20:00:00+09:00", end: "2026-11-15T23:30:00+09:00", row: 0 },
-      { label: "업로드", start: "2026-11-15T23:30:00+09:00", end: "2026-11-15T23:55:00+09:00", row: 0 },
-      { label: "마감", start: "2026-11-15T23:55:00+09:00", end: "2026-11-15T23:59:00+09:00", row: 0 }
+      { label: "기능 완료·E2E", start: "2026-11-15T18:00:00+09:00", end: "2026-11-15T20:00:00+09:00", row: 0 },
+      { label: "제출물", start: "2026-11-15T20:00:00+09:00", end: "2026-11-15T21:00:00+09:00", row: 0 },
+      { label: "1차 제출 21:00", start: "2026-11-15T21:00:00+09:00", end: "2026-11-15T21:10:00+09:00", row: 1 },
+      { label: "다듬기", start: "2026-11-15T21:00:00+09:00", end: "2026-11-15T23:00:00+09:00", row: 0 },
+      { label: "수정 마감 23:00", start: "2026-11-15T23:00:00+09:00", end: "2026-11-15T23:30:00+09:00", row: 0 },
+      { label: "최종 제출 23:30", start: "2026-11-15T23:30:00+09:00", end: "2026-11-15T23:59:00+09:00", row: 0 }
     ];
     const CATS = [
       { id: "data", label: "데이터", area: ["area: data"], hint: "다운로드, EDA, 적재, CDL/CSB/SSURGO, NASA 소스" },
-      { id: "model", label: "모델·AI", area: ["area: model", "area: rag"], hint: "FastAPI, MC·CVaR, 7축, LLM/RAG, 백테스트" },
-      { id: "matlab", label: "MATLAB", area: ["area: matlab"], hint: "오프라인 평활·아노말리. 라이브 경로 없음" },
-      { id: "sim", label: "시뮬(three.js)", area: ["area: sim"], hint: "복셀·데모 영상. 체크리스트 본문에 항목이 거의 없으면 이슈만 표시" },
+      { id: "model", label: "모델·AI", area: ["area: model", "area: rag"], hint: "FastAPI, Tier 1 /quick, MC·CVaR, 7축, /explain(deepseek-flash), 백테스트. RAG 색인은 대체 경로(0행)" },
+      { id: "matlab", label: "MATLAB", area: ["area: matlab"], hint: "빌드 단계 검증(오프라인): 2012 가뭄 비교, NDVI 맨땅, V8 20필지, 슬라이드 그림. 라이브 경로 없음" },
+      { id: "sim", label: "시뮬(three.js)", area: ["area: sim"], hint: "데모 영상(강다은). 복셀 3D 시뮬은 미사용(향후)" },
       { id: "frontend", label: "프론트엔드/UIUX", area: ["area: frontend"], hint: "지도, 카드, 슬라이더, 로그인 없는 웹" },
       { id: "infra", label: "인프라·채팅·에이전트", area: ["area: infra"], hint: "VPS, DB, Mattermost, agent-loop, 비밀값, 배포" },
       { id: "pitch", label: "피치·제출", area: ["area: pitch", "area: docs"], hint: "영상·슬라이드, 제출 페이지, SI, NASA Data" }

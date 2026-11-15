@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MATLAB 결과 · 빌드 단계 검증(오프라인) · ART FARM</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0b1c2c; color: #e8eef4; margin: 2rem auto; max-width: 960px; line-height: 1.55; padding: 0 1rem; }
+    a { color: #7eb6ff; } img { max-width: 100%; background: #fff; border-radius: 6px; }
+    figure { margin: 1.5rem 0; } figcaption { color: #b9c6d3; font-size: .92rem; }
+    code { background: rgba(255,255,255,.08); padding: 0 .25rem; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <p><a href="../models.html">← AI 모델</a> · <a href="../architecture.html">아키텍처</a></p>
+  <h1>MATLAB — 빌드 단계 검증(오프라인)</h1>
+  <p>MATLAB은 라이브 요청 경로에 없습니다. 아래 파일은 팀 MATLAB 담당이 서버에서 만든 오프라인 산출물(<code>/data/processed/v1/matlab/outputs/</code>, 2026-11-15)의 사본입니다. 해석과 한계는 <a href="https://github.com/cloudsnuchoi/2026NASA/blob/main/docs/MATLAB-VALIDATION.md">MATLAB-VALIDATION.md</a>를 따릅니다: V8 물 요구량(ETm)과 엔진 계절 물 부족량은 정의가 달라 <strong>not validated</strong>이고, 2012 카운티 비교는 같은 NASA POWER 자료의 교차 확인이지 독립 관측 검증이 아닙니다.</p>
+
+  <figure>
+    <img src="drought_compare_2012.png" alt="2012 drought county comparison figure">
+    <figcaption>2012 가뭄 카운티 비교 (스크립트 <code>matlab/drought_compare_2012.m</code>). 요약 표: <a href="drought_compare_2012_summary.csv">drought_compare_2012_summary.csv</a> (4개 카운티; 상관계수는 n=4라 참고용).</figcaption>
+  </figure>
+  <figure>
+    <img src="fig_backtest2012.png" alt="2012 backtest slide figure">
+    <figcaption>2012 가뭄 백테스트 슬라이드 그림 (스크립트 <code>matlab/slide_figures.m</code>, 엔진 API 응답을 그림으로 옮김).</figcaption>
+  </figure>
+  <figure>
+    <img src="fig_p10p90.png" alt="P10-P90 slide figure">
+    <figcaption>P10–P90 범위 슬라이드 그림 (스크립트 <code>matlab/slide_figures.m</code>). 기준 A 대비 상대 지수, 보장 아님.</figcaption>
+  </figure>
+
+  <h2>표 (CSV)</h2>
+  <ul>
+    <li><a href="baresoil_days_20fields.csv">baresoil_days_20fields.csv</a> — 데모 필지 20개 HLS NDVI 맨땅 일수 (스크립트 <code>matlab/ndvi_baresoil.m</code>). 관측 범위(coverage) 열을 함께 볼 것.</li>
+    <li><a href="v8_cards_20fields.csv">v8_cards_20fields.csv</a> — 팀 V8 프로토타입을 20필지에 일괄 실행한 카드 (스크립트 <code>matlab/FieldShift_V8_batch.m</code>). 라벨 “screening estimate”, 계수는 원본 V8 값(not validated).</li>
+    <li><a href="drought_compare_2012_summary.csv">drought_compare_2012_summary.csv</a> — 위 그림의 요약.</li>
+  </ul>
+</body>
+</html>
