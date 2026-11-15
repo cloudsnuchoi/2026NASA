@@ -41,6 +41,8 @@ DOC_FILES = [
     "docs/SOT.md",
     "docs/PRD.md",
     "docs/TEAM_SPEC.md",
+    "matlab/TASKS.md",
+    "infra/matlab/REMOTE.md",
 ]
 
 
@@ -476,6 +478,8 @@ class MockLLM(LLM):
     def complete(self, system: str, messages: List[dict], think: bool = False) -> str:
         self.calls.append({"system": system, "messages": messages, "think": think})
         last = messages[-1]["content"] if messages else ""
+        if isinstance(last, list):
+            last = " ".join(p.get("text", "") for p in last if p.get("type") == "text")
         return (
             "**다음 할 일**\n(mock) " + last[:80] + "\n\n**복사-붙여넣기 프롬프트**\n```\n(mock prompt)\n```\n\n"
             "**완료 기준**\n- (mock)\n\n**보고할 것**\n- PR 링크 + 스크린샷"
@@ -497,6 +501,12 @@ SYSTEM_TEMPLATE = """너는 NASA Space Apps Challenge 2026 서울, 팀 '아몰�
 **보고할 것** — 1:1 채널에 올릴 것 (PR 링크 + 스크린샷, MATLAB은 파일 경로 + 그림).
 
 VPS MATLAB 접속 순서(김우찬·김윤성): ① SSH 키 만들기(infra/matlab/REMOTE.md 1절) ② 공개키(.pub 한 줄, `ssh-ed25519 …` 또는 `ssh-rsa …`)를 자기 1:1 방에 그대로 올리기 ③ 서버가 자동 등록 ④ 서버 주소·포트·토큰이 들어간 접속 명령이 그 방에 자동으로 올라옴 → 그 명령을 그대로 실행. 너는 서버 주소를 모른다. 주소를 묻는 사람에게는 공개키를 먼저 올리라고 안내하고, 주소를 지어내지 않는다. 개인키(.pub 없는 파일)는 절대 보내지 말라고 한다.
+MATLAB 컨테이너 안 경로(브라우저 MATLAB에서 보이는 경로): 입력 CSV `/data/processed/v1/inputs/`, 결과 저장 `/data/processed/v1/matlab/`, 원본 `/data/raw/`(읽기 전용), 스크립트 `~/Documents/MATLAB/projects/2026NASA/matlab/`. `/srv/hackathon/...`는 서버 바깥 경로라 MATLAB 안에서 보이지 않으니 MATLAB 사용자에게 절대 쓰지 않는다. 홈 폴더(~/Documents/MATLAB)는 컨테이너를 다시 만들면 사라지니 결과는 `/data/processed/v1/matlab/`에 저장하라고 한다. MATLAB 결과 형식은 TASKS.md대로 CSV다.
+MATLAB 담당 작업 정의는 matlab/TASKS.md가 기준이다(이슈 제목보다 우선). #24 = HLS NDVI SG 평활·맨땅 + coefficients.csv(우찬), #29 = 2012 가뭄 vs 평년 카운티 비교(윤성).
+툴박스·애드온: 브라우저 MATLAB에서는 Add-On 탐색기가 열리지 않는 게 정상이다. 툴박스 이름을 적으면 Hylē/서버가 mpm으로 설치한다고 답하고 "설치 요청 접수"라고만 안내한다. 경로 확인 코드를 요구하지 않는다.
+MATLAB 방에서 "토큰"은 대개 브라우저 MATLAB 접속 토큰이다. 그 값은 그 방의 "공개키를 등록했어요" 안내 글에 있다고 안내한다. API 키를 묻는 것으로 오해하지 않는다.
+지시·안내를 보낼 때는 이 형식을 쓴다(질문에 짧게 답할 때는 제외):
+인사 한 줄 → 역할 한 줄 → ✅ 할 일(번호 목록) → 📘 방법(경로·명령) → 📋 명세(링크) → 🎯 이슈(번호와 한 줄) → 📮 완료 보고법(이 방에 무엇을 적을지).
 규칙: 데이터·숫자·DOI·URL을 지어내지 않는다. 모르면 '미확인'. 비밀값(키·비밀번호·토큰)을 요구하거나 채팅에 붙이게 하지 않는다.
 PR 리뷰 요청이면: 이슈 범위 준수, SOT 계약 일치, 비밀값/대용량 파일 커밋 여부, 테스트·CI, 화면 문구 규칙을 보고 '머지 가능/수정 필요'와 고칠 프롬프트를 준다. 머지는 Hylē가 한다.
 
@@ -549,6 +559,7 @@ class Incoming:
     root_id: str = ""
     mentioned: bool = False
     file_count: int = 0
+    file_ids: List[str] = field(default_factory=list)
     agent_kind: str = ""  # set when the post comes from a laptop agent-loop (props.amolla_agent)
     agent_state: str = ""
     agent_props: dict = field(default_factory=dict)
@@ -594,6 +605,7 @@ class Orchestrator:
         import threading
 
         self.notifier = None  # set by run_live: Mattermost (typing, placeholder post, edits)
+        self.active: Dict[str, dict] = {}  # channel_id -> progress state of the answer being generated
         self._tl = threading.local()
         self._memo_locks: Dict[str, object] = {}
         self.state: Dict[str, ChannelState] = {}
@@ -678,12 +690,23 @@ class Orchestrator:
         if inc.channel_name in self.cfg.design_channels and "!deep" not in msg.lower():
             msg = "!deep " + msg  # design channel = PRD decisions -> deep model (Codex sol) by default
 
-        text = msg + (f"\n(첨부 파일 {inc.file_count}개 — 봇은 이미지 내용을 못 봄. 필요하면 글로 설명)" if inc.file_count else "")
+        images = []
+        if inc.file_ids and self.notifier is not None:
+            try:
+                images = self.notifier.fetch_images(inc.file_ids)
+            except Exception as exc:
+                log.warning("image fetch failed: %s", type(exc).__name__)
+        other = inc.file_count - len(images)
+        text = msg or "(이미지만 보냄)"
+        if images:
+            text += f"\n(첨부 이미지 {len(images)}장 — 화면 캡처를 읽고 답할 것)"
+        if other > 0:
+            text += f"\n(이미지가 아닌 첨부 {other}개 — 봇은 내용을 못 봄. 필요하면 글로 설명)"
         if is_hyle and one_on_one is not None:
             text = f"[Hylē 지시] {text}"
         self._tl.ctx = (inc.channel_id, root)
         try:
-            reply = self._ask(inc.channel_name, member, text)
+            reply = self._ask(inc.channel_name, member, text, images=images)
         finally:
             self._tl.ctx = None
         return [Outgoing(inc.channel_id, reply, root, edit_id=getattr(self._tl, "placeholder", "") or "")]
@@ -919,7 +942,8 @@ class Orchestrator:
         import threading
 
         ch, root = ctx
-        state = {"label": label, "t0": time.time(), "stop": threading.Event()}
+        state = {"label": label, "t0": time.time(), "stop": threading.Event(), "extra": 0}
+        self.active[ch] = state
         try:
             self.notifier.typing(ch, root)
             self._tl.placeholder = state["pid"] = self.notifier.placeholder(ch, root, f"⏳ 답변 준비 중… ({label})")
@@ -932,7 +956,7 @@ class Orchestrator:
                 try:
                     secs = int(time.time() - state["t0"])
                     self.notifier.typing(ch, root)
-                    self.notifier.edit(state["pid"], f"⏳ 아직 생각 중… {secs}초 ({state['label']})")
+                    self.notifier.edit(state["pid"], f"⏳ 아직 생각 중… {secs}초 ({state['label']})" + self._extra_note(state))
                 except Exception:
                     pass
         if deep:
@@ -943,11 +967,27 @@ class Orchestrator:
         if state:
             state["label"] = label
             try:
-                self.notifier.edit(state["pid"], f"⏳ 답변 준비 중… ({label})")
+                self.notifier.edit(state["pid"], f"⏳ 답변 준비 중… ({label})" + self._extra_note(state))
             except Exception:
                 pass
 
-    def _ask(self, channel_name: str, member: Member, user_text: str, remember: bool = True, think: bool = False) -> str:
+    @staticmethod
+    def _extra_note(state) -> str:
+        n = state.get("extra", 0)
+        return f"\n📨 추가 메시지 {n}개 받음, 이어서 답할게요" if n else ""
+
+    def note_extra(self, channel_id: str, n: int) -> None:
+        """Called by the batcher when the same person sends more while an answer is being generated."""
+        state = self.active.get(channel_id)
+        if state and state.get("pid") and not state["stop"].is_set():
+            state["extra"] = n
+            try:
+                self.notifier.edit(state["pid"], f"⏳ 답변 준비 중… ({state['label']})" + self._extra_note(state))
+            except Exception:
+                pass
+
+    def _ask(self, channel_name: str, member: Member, user_text: str, remember: bool = True, think: bool = False,
+             images: Optional[List[str]] = None) -> str:
         st = self.st(channel_name)
         keep = self.cfg.history_turns * 2
         history = st.history[-keep:]
@@ -955,8 +995,13 @@ class Orchestrator:
         if forced:
             user_text = re.sub(r"(?i)!deep", "", user_text).strip()
         short = not forced and len(user_text) <= 30 and not wants_deep(user_text) and not think
-        msgs = history + [{"role": "user", "content": user_text + self.build_context(channel_name, member, short=short)}]
-        route = "deep" if self.deep and not think and (forced or wants_deep(user_text)) else "flash"
+        body = user_text + self.build_context(channel_name, member, short=short)
+        if images:  # screenshots -> DeepSeek Flash vision (CLI deep models cannot see images)
+            content = [{"type": "text", "text": body}] + [{"type": "image_url", "image_url": {"url": u}} for u in images]
+        else:
+            content = body
+        msgs = history + [{"role": "user", "content": content}]
+        route = "deep" if self.deep and not think and not images and (forced or wants_deep(user_text)) else "flash"
         reply, label = "", ""
         first = (getattr(getattr(self.deep, "providers", [None])[0], "label", "심화 모델") if route == "deep"
                  else ("DeepSeek V4.1 Flash thinking" if think else MODEL_LABEL["flash"]))
@@ -1064,6 +1109,21 @@ class Mattermost:
             self._chan_by_name[name] = self.api("GET", f"/teams/{self.team['id']}/channels/name/{name}")["id"]
         return self._chan_by_name[name]
 
+    def fetch_images(self, file_ids: List[str], max_bytes: int = 4 * 2**20, limit: int = 3) -> List[str]:
+        """Download image attachments (<= 4 MB, max 3) as data URLs for the vision model."""
+        import base64
+
+        out = []
+        for fid in file_ids[:limit]:
+            info = self.api("GET", f"/files/{fid}/info")
+            mime = info.get("mime_type", "")
+            if not mime.startswith("image/") or info.get("size", 0) > max_bytes:
+                continue
+            r = self.s.get(f"{self.cfg.mm_url}/api/v4/files/{fid}", timeout=30)
+            r.raise_for_status()
+            out.append(f"data:{mime};base64," + base64.b64encode(r.content).decode())
+        return out
+
     def typing(self, channel_id: str, root_id: str = "") -> None:
         if self.do_post:
             self.api("POST", f"/users/{self.me['id']}/typing", json={"channel_id": channel_id, "parent_id": root_id})
@@ -1155,6 +1215,7 @@ class Mattermost:
             root_id=post.get("root_id", ""),
             mentioned=mentioned,
             file_count=len(post.get("file_ids") or []),
+            file_ids=list(post.get("file_ids") or []),
         )
 
 
@@ -1165,6 +1226,7 @@ async def run_live(orch: Orchestrator, mm: Mattermost) -> None:
     locks: Dict[str, asyncio.Lock] = {}
     backoff = 1
     asyncio.create_task(_silence_watch(orch, mm))
+    batcher = Batcher(orch, mm, locks, delay=float(os.environ.get("BATCH_DELAY", "4")))
     orch.notifier = mm
     while True:
         try:
@@ -1190,12 +1252,69 @@ async def run_live(orch: Orchestrator, mm: Mattermost) -> None:
                         continue
                     if inc is None:
                         continue
-                    lock = locks.setdefault(inc.channel_id, asyncio.Lock())
-                    asyncio.create_task(_process(orch, mm, inc, lock))
+                    batcher.add(inc)
         except Exception as exc:
             log.warning("websocket error: %s; reconnect in %ss", exc, backoff)
             await asyncio.sleep(backoff)
             backoff = min(backoff * 2, 60)
+
+
+def merge_incoming(batch: List[Incoming], follow_up: bool = False) -> Incoming:
+    """Several short posts from one person -> one question (answered in the first post's thread)."""
+    first = batch[0]
+    text = "\n".join(m.message for m in batch if m.message.strip())
+    if follow_up:
+        text = "(앞 답변을 만드는 동안 보낸 추가 메시지)\n" + text
+    return Incoming(channel_id=first.channel_id, channel_name=first.channel_name, channel_type=first.channel_type,
+                    user_id=first.user_id, username=first.username, message=text, post_id=first.post_id,
+                    root_id=first.root_id, mentioned=any(m.mentioned for m in batch),
+                    file_count=sum(m.file_count for m in batch), file_ids=[f for m in batch for f in m.file_ids],
+                    create_at=max(m.create_at for m in batch))
+
+
+class Batcher:
+    """Debounce a person's rapid posts (wait `delay` s, then answer them together). Posts that arrive while
+    an answer is being generated are queued (the answer is not interrupted) and answered right after, together,
+    with the previous answer in context. Commands and agent-loop posts bypass the queue."""
+
+    def __init__(self, orch: Orchestrator, mm, locks: Dict[str, asyncio.Lock], delay: float = 4.0, process=None):
+        self.orch, self.mm, self.locks, self.delay = orch, mm, locks, delay
+        self.process = process or _process
+        self.pending: Dict[tuple, List[Incoming]] = {}
+        self.running: set = set()
+        self.scheduled: set = set()
+
+    def add(self, inc: Incoming) -> None:
+        lock = self.locks.setdefault(inc.channel_id, asyncio.Lock())
+        if inc.agent_kind or inc.message.strip().startswith("!"):
+            asyncio.create_task(self.process(self.orch, self.mm, inc, lock))
+            return
+        key = (inc.channel_id, inc.user_id)
+        self.pending.setdefault(key, []).append(inc)
+        if key in self.running:
+            self.orch.note_extra(inc.channel_id, len(self.pending[key]))
+        if key not in self.scheduled:
+            self.scheduled.add(key)
+            asyncio.create_task(self._run(key, lock))
+
+    async def _run(self, key, lock) -> None:
+        follow_up = False
+        try:
+            while True:
+                await asyncio.sleep(self.delay)
+                batch = self.pending.pop(key, [])
+                if not batch:
+                    break
+                self.running.add(key)
+                try:
+                    await self.process(self.orch, self.mm, merge_incoming(batch, follow_up), lock)
+                finally:
+                    self.running.discard(key)
+                follow_up = True
+                if not self.pending.get(key):
+                    break
+        finally:
+            self.scheduled.discard(key)
 
 
 async def _silence_watch(orch: Orchestrator, mm: Mattermost, every: float = 60.0) -> None:
