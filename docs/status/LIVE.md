@@ -1,14 +1,14 @@
-# 아몰라 실시간 현황 · 22:20 KST
+# 아몰라 실시간 현황 · 22:25 KST
 
-일정: 1차 제출 21:00 (지남) · 동결 23:00 (0시간 39분 남음) · 최종 제출 23:30 (1시간 9분 남음)
-최종 제출 23:30 KST까지 **1시간 9분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (0시간 34분 남음) · 최종 제출 23:30 (1시간 4분 남음)
+최종 제출 23:30 KST까지 **1시간 4분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
 | 데이터 | 100% | 11/11 |
 | 엔진·API | 100% | 6/6 |
 | AI 모델 | 100% | 5/5 |
-| MATLAB | 69% | 9/13 |
+| MATLAB | 92% | 12/13 |
 | UI | 100% | 7/7 |
 | 인프라·봇 | 100% | 6/6 |
 
@@ -40,7 +40,7 @@
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
 - ✅ /explain (DeepSeek) — 6.7 s, deepseek-flash
 
-## MATLAB 69%
+## MATLAB 92%
 - ✅ 윤성 1차 CSV: drought_2012_county.csv
 - ✅ 윤성 1차 CSV: climate_annual.csv
 - ✅ 윤성 1차 CSV: calibration_params.csv
@@ -51,9 +51,9 @@
 - ✅ yoonsung 추가: yoonsung_nldas_2012 — nldas_vs_engine_2012.png
 - ✅ yoonsung 추가: yoonsung_season_anomaly — season_anomaly_1995_2025.png
 - ✅ yoonsung 추가: yoonsung_s2s_box — s2s_vs_history_box.png
-- 🟡 jimin 추가: jimin_growing_season — growing_season_20fields.csv
-- 🟡 jimin 추가: jimin_ndvi_anomaly — ndvi_anomaly.png
-- 🟡 jimin 추가: jimin_bare_vs_rye — bare_vs_strategyB.csv
+- ✅ jimin 추가: jimin_growing_season — growing_season_20fields.csv
+- ✅ jimin 추가: jimin_ndvi_anomaly — ndvi_anomaly.png
+- ✅ jimin 추가: jimin_bare_vs_rye — bare_vs_strategyB.csv
 
 ## UI 100%
 - ✅ frontend/ 코드 (main)
@@ -77,8 +77,6 @@
 
 ## 다음 할 일
 1. MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv
-2. MATLAB: jimin 추가: jimin_growing_season
-3. MATLAB: jimin 추가: jimin_ndvi_anomaly
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
@@ -99,6 +97,7 @@
 | mm-tunnel | — | Mattermost Cloudflare 터널 | — | — | 12:11 |
 | mwatch | ? | ? | running | — | 20:40 |
 | rbatch | ? | ? | running | — | 21:00 |
+| results | ? | ? | running | — | 22:25 |
 | runner | — | GitHub Actions 러너 | — | — | 13:09 |
 | sub2 | ? | ? | running | — | 20:17 |
 | web | — | 프론트+API 프록시 (:8095) | — | — | 21:56 |
@@ -126,7 +125,7 @@
 | 김우찬 | 22:15 | — |
 | 김윤성 | 21:55 | — |
 | 고지은 | 21:04 | — |
-| 하지민 | 22:18 | — |
+| 하지민 | 22:25 | — |
 | 강다은 | 17:18 | — |
 | Hylē | 16:01 | 22:01 |
 

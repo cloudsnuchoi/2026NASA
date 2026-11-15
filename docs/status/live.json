@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T22:20:43+09:00",
+ "generated_at": "2026-11-15T22:25:51+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -10,15 +10,15 @@
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 39
+   "remaining_min": 34
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 69
+   "remaining_min": 64
   }
  ],
- "remaining_min": 69,
+ "remaining_min": 64,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -156,7 +156,7 @@
   {
    "id": "matlab",
    "name": "MATLAB",
-   "pct": 69,
+   "pct": 92,
    "items": [
     {
      "label": "윤성 1차 CSV: drought_2012_county.csv",
@@ -210,17 +210,17 @@
     },
     {
      "label": "jimin 추가: jimin_growing_season",
-     "status": "progress",
+     "status": "done",
      "detail": "growing_season_20fields.csv"
     },
     {
      "label": "jimin 추가: jimin_ndvi_anomaly",
-     "status": "progress",
+     "status": "done",
      "detail": "ndvi_anomaly.png"
     },
     {
      "label": "jimin 추가: jimin_bare_vs_rye",
-     "status": "progress",
+     "status": "done",
      "detail": "bare_vs_strategyB.csv"
     }
    ]
@@ -373,6 +373,14 @@
    "waits_on": ""
   },
   {
+   "name": "results",
+   "model": "?",
+   "task": "?",
+   "last_activity": "22:25",
+   "state": "running",
+   "waits_on": ""
+  },
+  {
    "name": "runner",
    "model": "—",
    "task": "GitHub Actions 러너",
@@ -421,7 +429,7 @@
   {
    "name": "하지민",
    "user": "jimin",
-   "mattermost_last": "22:18",
+   "mattermost_last": "22:25",
    "repo_last": null
   },
   {
@@ -439,9 +447,7 @@
  ],
  "blockers": [],
  "next": [
-  "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv",
-  "MATLAB: jimin 추가: jimin_growing_season",
-  "MATLAB: jimin 추가: jimin_ndvi_anomaly"
+  "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv"
  ],
  "merged_prs": [
   {
@@ -592,6 +598,10 @@
    "waits_on": "main에 없는 커밋 3개 (감독 머지)"
   },
   "rbatch": {
+   "state": "running",
+   "waits_on": ""
+  },
+  "results": {
    "state": "running",
    "waits_on": ""
   },
