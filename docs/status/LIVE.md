@@ -1,7 +1,7 @@
-# 아몰라 실시간 현황 · 21:29 KST
+# 아몰라 실시간 현황 · 21:34 KST
 
-일정: 1차 제출 21:00 (지남) · 동결 23:00 (1시간 30분 남음) · 최종 제출 23:30 (2시간 0분 남음)
-최종 제출 23:30 KST까지 **2시간 0분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (1시간 25분 남음) · 최종 제출 23:30 (1시간 55분 남음)
+최종 제출 23:30 KST까지 **1시간 55분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
