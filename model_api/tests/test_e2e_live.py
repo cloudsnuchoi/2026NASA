@@ -154,9 +154,11 @@ def test_health():
 
 def test_fields_demo_list():
     st, d = get("/fields")
-    assert st == 200 and d["demo_only"] is True and d["total"] == len(d["fields"]) == 12
-    for f in d["fields"]:
-        assert f["county_fips"].strip() == STORY and f["state_alpha"] == "IA"
+    assert st == 200 and d["demo_only"] is True and d["total"] == len(d["fields"]) >= 12
+    story = [f for f in d["fields"] if f["county_fips"].strip() == STORY]
+    assert len(story) == 12 and d["fields"][:12] == story  # Story first; contrast fields follow (docs/CONTRAST-FIELDS.md)
+    for f in story:
+        assert f["state_alpha"] == "IA"
         lon, lat = f["centroid"]["coordinates"]
         assert -94.0 < lon < -93.0 and 41.8 < lat < 42.3
         assert f["area_ha"] > 0
