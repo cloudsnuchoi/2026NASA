@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T23:12:14+09:00",
+ "generated_at": "2026-11-15T23:17:23+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -15,10 +15,10 @@
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 17
+   "remaining_min": 12
   }
  ],
- "remaining_min": 17,
+ "remaining_min": 12,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -270,7 +270,7 @@
   {
    "id": "infra",
    "name": "인프라·봇",
-   "pct": 83,
+   "pct": 100,
    "items": [
     {
      "label": "Mattermost",
@@ -294,8 +294,8 @@
     },
     {
      "label": "main CI 최근 성공",
-     "status": "progress",
-     "detail": null
+     "status": "done",
+     "detail": "success"
     },
     {
      "label": "live 현황 (tmux live)",
@@ -325,6 +325,14 @@
    "model": "—",
    "task": "이 현황 생성기 (5분)",
    "last_activity": "15:54"
+  },
+  {
+   "name": "llm",
+   "model": "?",
+   "task": "?",
+   "last_activity": "23:14",
+   "state": "running",
+   "waits_on": ""
   },
   {
    "name": "mfixq",
@@ -410,14 +418,22 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "23:01"
+   "repo_last": "23:09"
   }
  ],
  "blockers": [],
- "next": [
-  "인프라·봇: main CI 최근 성공"
- ],
+ "next": [],
  "merged_prs": [
+  {
+   "number": 82,
+   "title": "docs(matlab): 우찬 Kc ±10% 민감도 결과와 제출 문장 스니펫",
+   "merged_at": "2026-11-15T14:08:25Z"
+  },
+  {
+   "number": 81,
+   "title": "docs(validation): 윤성 NASS 2008–2023 다년 비교, 지민 NDVI·부족량 (22:50 전 run_log OK)",
+   "merged_at": "2026-11-15T14:07:58Z"
+  },
   {
    "number": 80,
    "title": "docs(submission): 제출 양식 v3, 데이터 사용 확인, /demo/ Live 링크, 재부팅 점검",
@@ -447,16 +463,6 @@
    "number": 74,
    "title": "docs(matlab): 가이드 Run 하나로 정리 + live.json 추가 세트 6개",
    "merged_at": "2026-11-15T12:16:21Z"
-  },
-  {
-   "number": 73,
-   "title": "fix(bot): MATLAB 방 캡처 요구 금지 규칙",
-   "merged_at": "2026-11-15T12:10:02Z"
-  },
-  {
-   "number": 71,
-   "title": "feat(matlab): 서버 봇 직접 안내(notify.log), 레인 상태, MATLAB 결과 30분 배치",
-   "merged_at": "2026-11-15T12:06:25Z"
   }
  ],
  "ai_models": [
@@ -531,6 +537,10 @@
   },
   "l5": {
    "state": "done",
+   "waits_on": ""
+  },
+  "llm": {
+   "state": "running",
    "waits_on": ""
   },
   "mfixq": {

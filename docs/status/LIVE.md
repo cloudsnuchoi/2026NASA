@@ -1,7 +1,7 @@
-# 아몰라 실시간 현황 · 23:12 KST
+# 아몰라 실시간 현황 · 23:17 KST
 
-일정: 1차 제출 21:00 (지남) · 동결 23:00 (지남) · 최종 제출 23:30 (0시간 17분 남음)
-최종 제출 23:30 KST까지 **0시간 17분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (지남) · 최종 제출 23:30 (0시간 12분 남음)
+최종 제출 23:30 KST까지 **0시간 12분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -10,7 +10,7 @@
 | AI 모델 | 100% | 5/5 |
 | MATLAB | 100% | 13/13 |
 | UI | 100% | 7/7 |
-| 인프라·봇 | 83% | 5/6 |
+| 인프라·봇 | 100% | 6/6 |
 
 ## 데이터 100%
 - ✅ POWER 일별 12주 1995–2025
@@ -64,19 +64,18 @@
 - ✅ 화면 캡처 docs/screens
 - ✅ 공개 URL QA (docs/QA-FINAL.md)
 
-## 인프라·봇 83%
+## 인프라·봇 100%
 - ✅ Mattermost
 - ✅ 봇 (tmux bot)
 - ✅ 러너 (tmux runner)
 - ✅ SSH 공개키 자동 등록 (keywatch) — root 프로세스로 확인
-- 🟡 main CI 최근 성공
+- ✅ main CI 최근 성공 — success
 - ✅ live 현황 (tmux live)
 
 ## 막힌 점
 - 없음
 
 ## 다음 할 일
-1. 인프라·봇: main CI 최근 성공
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
@@ -91,6 +90,7 @@
 | api | — | model_api 상시 실행 (:8090) | — | — | 19:27 |
 | bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | running | — | 21:20 |
 | live | — | 이 현황 생성기 (5분) | — | — | 15:54 |
+| llm | ? | ? | running | — | 23:14 |
 | mfixq | ? | ? | running | — | 19:53 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | — | — | 12:11 |
 | mwatch | ? | ? | running | — | 20:40 |
@@ -123,14 +123,14 @@
 | 고지은 | 21:04 | — |
 | 하지민 | 22:38 | — |
 | 강다은 | 17:18 | — |
-| Hylē | 16:01 | 23:01 |
+| Hylē | 16:01 | 23:09 |
 
 ## 최근 머지된 PR
+- #82 docs(matlab): 우찬 Kc ±10% 민감도 결과와 제출 문장 스니펫
+- #81 docs(validation): 윤성 NASS 2008–2023 다년 비교, 지민 NDVI·부족량 (22:50 전 run_log OK)
 - #80 docs(submission): 제출 양식 v3, 데이터 사용 확인, /demo/ Live 링크, 재부팅 점검
 - #78 feat(matlab): 윤성 NASS 2012 비교 결과 반영(슬라이드, S5), 새 스크립트 2개
 - #77 fix(ui): 결과 화면에 'A decision aid — it does not replace your judgement' 문구
 - #76 fix(ui): 분석 화면을 목업 v8 기준으로 복원, 스냅샷 배지, Pages CORS 제거, 프록시 제한 조정
 - #75 docs(submission): v2 슬라이드(MATLAB 그림, 모바일 화면)와 V8 실행 로그 출처
 - #74 docs(matlab): 가이드 Run 하나로 정리 + live.json 추가 세트 6개
-- #73 fix(bot): MATLAB 방 캡처 요구 금지 규칙
-- #71 feat(matlab): 서버 봇 직접 안내(notify.log), 레인 상태, MATLAB 결과 30분 배치
