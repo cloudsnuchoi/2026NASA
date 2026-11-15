@@ -1,7 +1,7 @@
-# 아몰라 실시간 현황 · 23:17 KST
+# 아몰라 실시간 현황 · 23:22 KST
 
-일정: 1차 제출 21:00 (지남) · 동결 23:00 (지남) · 최종 제출 23:30 (0시간 12분 남음)
-최종 제출 23:30 KST까지 **0시간 12분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (지남) · 최종 제출 23:30 (0시간 7분 남음)
+최종 제출 23:30 KST까지 **0시간 7분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -90,7 +90,6 @@
 | api | — | model_api 상시 실행 (:8090) | — | — | 19:27 |
 | bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | running | — | 21:20 |
 | live | — | 이 현황 생성기 (5분) | — | — | 15:54 |
-| llm | ? | ? | running | — | 23:14 |
 | mfixq | ? | ? | running | — | 19:53 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | — | — | 12:11 |
 | mwatch | ? | ? | running | — | 20:40 |

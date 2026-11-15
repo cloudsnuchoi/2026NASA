@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T23:17:23+09:00",
+ "generated_at": "2026-11-15T23:22:31+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -15,10 +15,10 @@
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 12
+   "remaining_min": 7
   }
  ],
- "remaining_min": 12,
+ "remaining_min": 7,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -327,14 +327,6 @@
    "last_activity": "15:54"
   },
   {
-   "name": "llm",
-   "model": "?",
-   "task": "?",
-   "last_activity": "23:14",
-   "state": "running",
-   "waits_on": ""
-  },
-  {
    "name": "mfixq",
    "model": "?",
    "task": "?",
@@ -537,10 +529,6 @@
   },
   "l5": {
    "state": "done",
-   "waits_on": ""
-  },
-  "llm": {
-   "state": "running",
    "waits_on": ""
   },
   "mfixq": {
