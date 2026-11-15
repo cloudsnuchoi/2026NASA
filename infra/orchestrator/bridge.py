@@ -671,7 +671,7 @@ class Orchestrator:
                 self.save_state()
                 return []  # Hylē speaks; the bot stays quiet but remembers it as priority
             member = one_on_one
-        elif inc.mentioned or inc.channel_type == "D" or (inc.channel_name in self.cfg.design_channels and "?" in msg):
+        elif inc.mentioned or inc.channel_type == "D" or inc.channel_name in self.cfg.design_channels:  # discussion room: every human post
             member = self.members.get(inc.username) or Member(inc.username, inc.username, "팀원", "")
         else:
             return []
@@ -860,7 +860,9 @@ class Orchestrator:
         lock = self._memo_locks.setdefault(channel_name, threading.Lock())
         with lock:
             fmt = lambda ms: "\n".join(f"[{m['role']}] {m['content'][:1500]}" for m in ms)  # noqa: E731
-            body = (f"## 기존 메모\n{self.memo(channel_name) or '(없음)'}\n\n## 이번 대화\n{fmt(exchange)}\n\n"
+            focus = ("\n(이 방은 PRD 논의방이다. '결정된 것'에 합의된 결론을, '막힌 점'에 미결 쟁점과 누가 답해야 하는지를 누적한다.)\n"
+                     if channel_name in self.cfg.design_channels else "")
+            body = (f"{focus}## 기존 메모\n{self.memo(channel_name) or '(없음)'}\n\n## 이번 대화\n{fmt(exchange)}\n\n"
                     f"## 기록에서 밀려난 오래된 대화 (요약에 합칠 것)\n{fmt(dropped) or '(없음)'}")
             try:
                 new = self.memo_llm.complete(MEMO_SYSTEM, [{"role": "user", "content": body}], think=False).strip()
