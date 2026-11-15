@@ -174,6 +174,10 @@
     .vtx-label { background: #173a2b; color: #fff; border: none; font-weight: 800; font-size: 10px; padding: 1px 5px; }
     .leaflet-container { font-family: Inter, system-ui, sans-serif; }
   </style>
+<style>
+  .ai-gen-wrap{position:relative}
+  .ai-badge{position:absolute;right:6px;bottom:6px;z-index:5;font:600 10px/1.2 system-ui,sans-serif;color:#fff;background:rgba(15,23,42,.72);padding:2px 6px;border-radius:4px;pointer-events:none;letter-spacing:.02em}
+</style>
 </head>
 <body>
 
@@ -590,7 +594,7 @@
     <div id="tier1"></div>
     <footer class="mt-10 text-[11px] text-slate-500 leading-relaxed border-t border-slate-300 pt-4">
       ART FARM supports, and does not replace, farmer and agronomist judgement. All percentages are relative indices versus strategy A (current practice) and are not guarantees. Future climate is shown only as a possible range (scenario).
-      Basemap © Esri, Maxar, Earthstar Geographics, and the GIS User Community. Data: NASA POWER, USGS 3DEP, NOAA NWS, Open-Meteo, USDA CDL/CSB/gSSURGO, Prithvi-EO (IBM/NASA). Parts of this site and its explanations were produced with AI assistance (SI); explanation numbers come only from model_api tool responses.
+      Basemap © Esri, Maxar, Earthstar Geographics, and the GIS User Community. Data: NASA POWER, USGS 3DEP, NOAA NWS, Open-Meteo, USDA CDL/CSB/gSSURGO, Prithvi-EO (IBM/NASA). Parts of this site and its explanations were produced with AI assistance (SI); explanation numbers come only from model_api tool responses. <strong>All photos (img01–img12) and the ART FARM logo are AI-generated images (SI).</strong>
     </footer>
   </div>
 </section>
@@ -599,5 +603,26 @@
   <span id="toast-msg"></span>
 </div>
 <script src="app.js"></script>
+<script>
+/* SI disclosure: every AI-generated photo gets a visible "AI-generated image" watermark (also for images added later). */
+(function () {
+  function mark(img) {
+    if (img.dataset.aiMarked || !/assets\/img\d+\./.test(img.getAttribute("src") || "")) return;
+    img.dataset.aiMarked = "1";
+    img.title = (img.title ? img.title + " · " : "") + "AI-generated image";
+    var host = img.parentElement; if (!host) return;
+    if (getComputedStyle(host).position === "static") host.classList.add("ai-gen-wrap");
+    var b = document.createElement("span"); b.className = "ai-badge"; b.textContent = "AI-generated image";
+    host.appendChild(b);
+  }
+  function scan(root) { (root.querySelectorAll ? root : document).querySelectorAll("img").forEach(mark); }
+  document.addEventListener("DOMContentLoaded", function () {
+    scan(document);
+    document.querySelectorAll('img[src$="logo.svg"]').forEach(function (l) { l.title = "ART FARM logo · AI-generated image"; });
+    new MutationObserver(function (ms) { ms.forEach(function (m) { m.addedNodes.forEach(function (n) { if (n.nodeType === 1) { if (n.tagName === "IMG") mark(n); else scan(n); } }); }); })
+      .observe(document.body, { childList: true, subtree: true });
+  });
+})();
+</script>
 </body>
 </html>
