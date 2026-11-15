@@ -399,7 +399,7 @@
       }
       const ago = st
         ? '<div class="ago">마지막 보고 ' + escapeHtml(relativeKo(st.time, now)) +
-          " · " + escapeHtml(fmtKST(new Date(st.time))) + "</div>"
+          " (" + escapeHtml(fmtKSTShort(new Date(st.time))) + " KST)</div>"
         : '<div class="ago">보고 시각 없음</div>';
       const minePr = pulls.filter(function (p) { return p.user && p.user.login === mem.login; });
       const prHtml = minePr.length
@@ -601,16 +601,14 @@
   }
 
   function rateMessage(rate, fetchedAt, usedCache, err) {
-    const when = fetchedAt ? fmtKST(new Date(fetchedAt)) : "";
+    const when = fetchedAt ? fmtKSTShort(new Date(fetchedAt)) + " KST" : "";
     const bits = [];
-    if (usedCache) bits.push("로컬 캐시 표시" + (when ? " (수집 " + when + ")" : ""));
-    else if (when) bits.push("GitHub API 갱신 " + when);
+    if (usedCache) bits.push("캐시" + (when ? " " + when : ""));
+    else if (when) bits.push("갱신 " + when);
     if (rate && rate.remaining != null) {
-      bits.push("잔여 요청 " + rate.remaining + "/" + (rate.limit || "?") +
-        (hasToken() ? " (토큰)" : " (비인증 한도 60/시간)"));
-      if (rate.reset) bits.push("한도 리셋 " + fmtKST(new Date(Number(rate.reset) * 1000)));
+      bits.push("잔여 " + rate.remaining + "/" + (rate.limit || "?") + (hasToken() ? " (토큰)" : ""));
     }
-    bits.push(hasToken() ? "2분마다 전체 갱신" : "댓글 2분마다 · 이슈/PR 약 10분마다");
+    bits.push(hasToken() ? "2분마다 갱신" : "댓글 2분 · 이슈/PR 10분");
     let kind = "";
     if (err === "rate_limited") {
       bits.unshift("API 한도에 걸렸습니다. 캐시로 표시합니다.");
