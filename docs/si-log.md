@@ -11,4 +11,4 @@
 | 2026-11-15 14:40 | QA 레인 에이전트 | 코딩 어시스턴트 (Claude Code), DeepSeek API(`/explain` 1회 실호출) | 라이브 E2E 테스트, DB 점검 SQL, `docs/QA-REPORT.md` | 이 로그, `docs/QA-REPORT.md` |
 | 2026-11-15 15:40–16:25 | Prithvi 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | Prithvi-EO-1.0-100M 작물 분류 CPU 추론(순수 PyTorch forward, 미세조정 없음), HLS 3시점 칩 수집, vision_result 20필지 적재 (#28) | 이 로그, `docs/PRITHVI.md` |
 | 2026-11-15 15:00–17:00 | contrast fields 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | 대비 데모 필지 8개(McLean IL·Lancaster NE·Union OH) 적재 스크립트, `/fields` 카운티 라벨·Story 우선, 대비 테스트, `docs/CONTRAST-FIELDS.md` (`feat/contrast-fields`) | 이 로그, `docs/CONTRAST-FIELDS.md` |
-| 2026-11-15 18:57–19:30 | PRD 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | PRD 최종 동결 문서화: ART FARM 이름, Tier 1/Tier 2, 정직성 규칙, `POST /quick` 계약(SOT 6.0), 구현 상태 표, 사이트 브랜드, DECISIONS 18:57, `docs/PRD-FREEZE-SUMMARY.md` (`feat/prd-final`) | 이 로그, `docs/DECISIONS.md` |
+| 2026-11-15 19:00 KST | L2 MATLAB pipeline / Codex | 코딩 어시스턴트 | 20필지 입력 내보내기, V8 비대화형 배치, MATLAB 분석 스켈레톤, 검증기·반복 스크립트 | `docs/MATLAB-VALIDATION.md`, `feat/matlab-pipeline` |
