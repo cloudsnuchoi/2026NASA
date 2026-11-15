@@ -322,14 +322,16 @@ def normalize_crops(crops: list[str]) -> list[str]:
 
 def rotation_candidates(crops: list[str]) -> list[list[str]]:
     """V8 generation rule: 2 crops -> both 2-year orders; 3 crops -> V8 3-year list filtered to the selection.
-    No consecutive duplicates. Output order is generation order, NOT a ranking."""
+    No consecutive duplicates, including across the cycle wrap. Output order is generation order, NOT a ranking."""
     u = list(dict.fromkeys(crops))
     if len(u) == 2:
         seqs = [[u[0], u[1]], [u[1], u[0]]]
     else:
         seqs = [["Corn", "Soy", "Wheat"], ["Soy", "Wheat", "Corn"], ["Wheat", "Corn", "Soy"], ["Corn", "Soy", "Corn"]]
         seqs = [s for s in seqs if set(s) <= set(u)]
-    return [s for s in seqs if all(a != b for a, b in zip(s, s[1:]))]
+    # cyclic check: the rotation repeats, so last->first must also differ (drops V8's Corn-Soy-Corn,
+    # which becomes corn-after-corn when the cycle restarts)
+    return [s for s in seqs if all(a != b for a, b in zip(s, s[1:] + s[:1]))]
 
 
 # --------------------------------------------------------------------------------------------- main

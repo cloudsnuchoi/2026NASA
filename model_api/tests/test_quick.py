@@ -130,6 +130,8 @@ def test_success_shape(client, fake_http):
 
 def test_two_crop_rotations():
     assert quick.rotation_candidates(["Corn", "Soy"]) == [["Corn", "Soy"], ["Soy", "Corn"]]
+    for seq in quick.rotation_candidates(["Corn", "Soy", "Wheat"]):
+        assert all(a != b for a, b in zip(seq, seq[1:] + seq[:1]))
 
 
 def test_failure_gives_null_and_info_gap(fake_http):

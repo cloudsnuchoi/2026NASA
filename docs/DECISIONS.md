@@ -105,3 +105,9 @@
 
 - **결정 (임베딩).** RAG 임베딩은 `intfloat/multilingual-e5-small`(MIT, 384차원, 한국어·영어)이다. SOT 5절 DDL의 `vector(1536)`을 `vector(384)`로 바꾼다. 데이터 레인(`feat/26-data-spike`, `sql/001_sot_schema.sql`)이 이미 384로 적재했다. Hylē 승인.
   - 문서 청크는 `passage: `, 질의는 `query: ` 접두사를 붙인다. 중국에서 개발된 모델은 쓰지 않는다(주최 측 비권장).
+
+## 2026-11-15 19:15 · ART FARM 웹 2단 구조 (L1)
+
+- **결정 (웹).** 공개 데모는 `infra/web`(Starlette, 127.0.0.1:8095) + Cloudflare quick tunnel. `frontend/`는 빌드 없는 HTML/JS(Tailwind CDN, Leaflet + Esri World Imagery, Chart.js). Tier 1 `POST /quick`(V8 FAO-56 포팅, 외부 응답 디스크 캐시, 실패 시 null + info_gaps, 대체 상수 없음), Tier 2는 폴리곤이 20개 데모 필지와 겹칠 때 `/simulate`·`/validation/backtest`·`/explain`.
+- **결정 (윤작 후보).** 연속 동일 작물 금지를 순환(마지막→처음)까지 적용해 V8의 Corn-Soy-Corn 후보를 뺀다. 경제 가정(목업 CROP_DB)은 USDA ERS/NASS 표·연도를 확인하지 못해 제외하고 info_gap으로 남긴다.
+- **원인 기록 (MATLAB).** 서버에서 MATLAB이 "안 돈" 원인은 스크립트 파일명이 내부 함수명(`select_cornbelt_4vertices`)과 같았기 때문이다. 서버 문제가 아니다.
