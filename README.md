@@ -1,3 +1,7 @@
+[![▶ Try the live engine](https://img.shields.io/badge/%E2%96%B6%20Try%20the%20live%20engine-ART%20FARM-2e7d32?style=for-the-badge)](https://watts-astrology-asus-blessed.trycloudflare.com)
+
+**Demo video:** https://drive.google.com/file/d/1mrTBy1BNMSToOB3PpFKjQZMX_heUaC02/view?usp=drive_link · **Paper (PDF):** https://cloudsnuchoi.github.io/2026NASA/paper/artfarm_paper.pdf · **Static backup:** https://cloudsnuchoi.github.io/2026NASA/demo/
+
 # 2026NASA · Field Shift
 
 ## Demo video & paper

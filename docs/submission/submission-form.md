@@ -32,17 +32,17 @@ https://drive.google.com/file/d/1mrTBy1BNMSToOB3PpFKjQZMX_heUaC02/view?usp=drive
 ## 4. Project link
 
 ```
-https://cloudsnuchoi.github.io/2026NASA/demo/
+https://github.com/cloudsnuchoi/2026NASA
 ```
 
-If the form takes one URL, paste the block above (the static snapshot never goes offline). If it takes a list or free text, use:
+If the form takes a list or free text, use:
 
 ```
-- Live (dynamic engine on our server): https://watts-astrology-asus-blessed.trycloudflare.com
-- Backup (static snapshot): https://cloudsnuchoi.github.io/2026NASA/demo/
 - Code: https://github.com/cloudsnuchoi/2026NASA
-- Slides: https://cloudsnuchoi.github.io/2026NASA/submission/slides/
+- Live engine: https://watts-astrology-asus-blessed.trycloudflare.com
 - Paper: https://cloudsnuchoi.github.io/2026NASA/paper/artfarm_paper.pdf
+- Backup (static snapshot): https://cloudsnuchoi.github.io/2026NASA/demo/
+- Slides: https://cloudsnuchoi.github.io/2026NASA/submission/slides/
 ```
 
 The live URL is a Cloudflare quick tunnel and changes when the server restarts. Before pressing Submit, compare it with `/srv/hackathon/state/status/demo_url.txt` (also published as `docs/demo/live_url.json`).
@@ -200,5 +200,6 @@ No space agency partner data used. Other data and services:
 | Open-Meteo Climate API | https://open-meteo.com/en/docs/climate-api |
 | Esri World Imagery (basemap) | https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9 |
 | US Census cartographic boundary files | https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html |
+| USDA ERS commodity costs and returns (prototype net-return estimate, team V8) | https://www.ers.usda.gov/data-products/commodity-costs-and-returns |
 | FAO-56 Crop Evapotranspiration (Allen et al. 1998) | https://www.fao.org/3/x0490e/x0490e00.htm |
 | OpenAI gpt-4o-miniAPI (explainer LLM) | https://api-docs.OpenAI.com/ |
