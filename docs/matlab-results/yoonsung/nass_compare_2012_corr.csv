@@ -1,0 +1,5 @@
+pair,n,pearson_r,spearman_rho,note
+corn_change_pct vs engine_A_deficit_mm,4,-0.488381487431937,0,"weak (r = -0.49) but unreliable: only n = 4 counties, not statistically meaningful; directional sanity check only, yield is not the engine objective"
+soy_change_pct vs engine_A_deficit_mm,4,-0.845554865346262,-0.4,"moderate-to-strong in sign (r = -0.85) but unreliable: only n = 4 counties, not statistically meaningful; directional sanity check only, yield is not the engine objective"
+corn_change_pct vs precip_anomaly_pct_2012_MJJAS,4,0.228959451057035,0,"weak (r = 0.23) but unreliable: only n = 4 counties, not statistically meaningful; directional sanity check only, yield is not the engine objective"
+soy_change_pct vs precip_anomaly_pct_2012_MJJAS,4,0.464710763562515,0.4,"weak (r = 0.46) but unreliable: only n = 4 counties, not statistically meaningful; directional sanity check only, yield is not the engine objective"
