@@ -62,7 +62,7 @@
       return '<a class="' + cls.trim() + '"' + aria + ' href="' + href + '">' + p.label + "</a>";
     }).join("") +
       '<a class="drive-link" href="' + DRIVE_URL + '" target="_blank" rel="noopener">팀 드라이브 (아몰라)</a>' +
-      chatLink("drive-link");
+      chatLink("drive-link") + demoLink("drive-link");
 
     nav.innerHTML =
       '<div class="nav-inner">' +
@@ -308,6 +308,16 @@
     return '<a class="chat-link ' + cls + '" href="' + escapeHtml(chatUrl) + '" target="_blank" rel="noopener">팀 채팅</a>';
   }
 
+  /* ---------- live demo link (hidden until live.json has demo_url) ---------- */
+  function demoLink(cls) {
+    return '<a class="demo-link ' + cls + '" href="#" target="_blank" rel="noopener" style="display:none">라이브 데모</a>';
+  }
+
+  function setDemoUrl(url) {
+    if (!/^https?:\/\//i.test(String(url || ""))) return;
+    document.querySelectorAll("a.demo-link").forEach(function (a) { a.setAttribute("href", url); a.style.display = ""; });
+  }
+
   function setChatUrl(url) {
     if (!/^https?:\/\//i.test(String(url || ""))) return;
     chatUrl = url;
@@ -331,6 +341,7 @@
     } catch (e) { data = null; err = String(e.message || e); }
     liveState = { data: data, err: err };
     if (data && data.chat_url) setChatUrl(data.chat_url);
+    if (data && data.demo_url) setDemoUrl(data.demo_url);
     liveSubs.forEach(function (cb) { try { cb(data, err); } catch (e) { console.error(e); } });
     return liveState;
   }
