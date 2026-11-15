@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T23:32:49+09:00",
+ "generated_at": "2026-11-15T23:43:19+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -147,7 +147,7 @@
      "detail": "전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}"
     },
     {
-     "label": "/explain (DeepSeek)",
+     "label": "/explain (OpenAI)",
      "status": "done",
      "detail": "6.5 s, deepseek-flash"
     }
@@ -156,7 +156,7 @@
   {
    "id": "matlab",
    "name": "MATLAB",
-   "pct": 100,
+   "pct": 93,
    "items": [
     {
      "label": "윤성 1차 CSV: drought_2012_county.csv",
@@ -222,6 +222,16 @@
      "label": "jimin 추가: jimin_bare_vs_rye",
      "status": "done",
      "detail": "bare_vs_strategyB.csv"
+    },
+    {
+     "label": "yoonsung 추가: yoonsung_nass_compare",
+     "status": "done",
+     "detail": "nass_compare_2012.png"
+    },
+    {
+     "label": "jieun 추가: jieun_slide_fig3",
+     "status": "progress",
+     "detail": "fig3_yoonsung_extra.png"
     }
    ]
   },
@@ -310,7 +320,7 @@
    "name": "api",
    "model": "—",
    "task": "model_api 상시 실행 (:8090)",
-   "last_activity": "19:27"
+   "last_activity": "23:39"
   },
   {
    "name": "bot",
@@ -414,7 +424,9 @@
   }
  ],
  "blockers": [],
- "next": [],
+ "next": [
+  "MATLAB: jieun 추가: jieun_slide_fig3"
+ ],
  "merged_prs": [
   {
    "number": 85,
@@ -479,7 +491,7 @@
    "detail": "전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}"
   },
   {
-   "name": "/explain (DeepSeek)",
+   "name": "/explain (OpenAI)",
    "status": "done",
    "detail": "6.5 s, deepseek-flash"
   }

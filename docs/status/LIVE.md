@@ -1,4 +1,4 @@
-# 아몰라 실시간 현황 · 23:32 KST
+# 아몰라 실시간 현황 · 23:43 KST
 
 일정: 1차 제출 21:00 (지남) · 동결 23:00 (지남) · 최종 제출 23:30 (지남)
 최종 제출 23:30 KST까지 **0시간 0분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
@@ -8,7 +8,7 @@
 | 데이터 | 100% | 11/11 |
 | 엔진·API | 100% | 6/6 |
 | AI 모델 | 100% | 5/5 |
-| MATLAB | 100% | 13/13 |
+| MATLAB | 93% | 14/15 |
 | UI | 100% | 7/7 |
 | 인프라·봇 | 100% | 6/6 |
 
@@ -38,9 +38,9 @@
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
-- ✅ /explain (DeepSeek) — 6.5 s, deepseek-flash
+- ✅ /explain (OpenAI) — 6.5 s, deepseek-flash
 
-## MATLAB 100%
+## MATLAB 93%
 - ✅ 윤성 1차 CSV: drought_2012_county.csv
 - ✅ 윤성 1차 CSV: climate_annual.csv
 - ✅ 윤성 1차 CSV: calibration_params.csv
@@ -54,6 +54,8 @@
 - ✅ jimin 추가: jimin_growing_season — growing_season_20fields.csv
 - ✅ jimin 추가: jimin_ndvi_anomaly — ndvi_anomaly.png
 - ✅ jimin 추가: jimin_bare_vs_rye — bare_vs_strategyB.csv
+- ✅ yoonsung 추가: yoonsung_nass_compare — nass_compare_2012.png
+- 🟡 jieun 추가: jieun_slide_fig3 — fig3_yoonsung_extra.png
 
 ## UI 100%
 - ✅ frontend/ 코드 (main)
@@ -76,18 +78,19 @@
 - 없음
 
 ## 다음 할 일
+1. MATLAB: jieun 추가: jieun_slide_fig3
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
-- ✅ /explain (DeepSeek) — 6.5 s, deepseek-flash
+- ✅ /explain (OpenAI) — 6.5 s, deepseek-flash
 
 ## 에이전트 레인 (tmux)
 | 세션 | 모델 | 하는 일 | 상태 | 기다리는 것 | 마지막 활동 |
 | --- | --- | --- | --- | --- | --- |
-| api | — | model_api 상시 실행 (:8090) | — | — | 19:27 |
+| api | — | model_api 상시 실행 (:8090) | — | — | 23:39 |
 | bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | running | — | 21:20 |
 | live | — | 이 현황 생성기 (5분) | — | — | 15:54 |
 | mfixq | ? | ? | running | — | 19:53 |
