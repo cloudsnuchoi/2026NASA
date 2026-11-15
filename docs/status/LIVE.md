@@ -1,6 +1,6 @@
-# 아몰라 실시간 현황 · 17:48 KST
+# 아몰라 실시간 현황 · 18:03 KST
 
-제출 목표 22:00 KST까지 **4시간 11분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **3시간 56분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
