@@ -48,6 +48,7 @@ These documents are frozen in Korean. Identifiers in code stay English.
 | [AGENTS.md](AGENTS.md) | Rules for Codex CLI / Gemini CLI (agy) agents, per role |
 | [GEMINI.md](GEMINI.md) | Gemini CLI entry point (imports AGENTS.md) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Issue → branch → PR → one review → squash merge; hourly 10-minute sync |
+| [infra/agent-loop/](infra/agent-loop/README.md) | 팀원 노트북 상시 에이전트: 1:1 채널의 `!task #N` → Codex/agy 실행 → PR·STATUS (한 줄 설치) |
 
 ---
 

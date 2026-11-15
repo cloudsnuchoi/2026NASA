@@ -106,7 +106,7 @@ def test_assign_pushes_to_member_channel(orch):
     outs = orch.handle(inc("hyle", "backend", "!assign 지은 #12 지도부터"))
     assert outs[0].channel == "name:1on1-jieun"
     assert outs[0].message.startswith("@jieun")
-    assert outs[1].channel == "cid-backend"
+    assert outs[-1].channel == "cid-backend"
     assert orch.gh.issue_calls == [12]
     assert any("#12" in o for o in orch.st("1on1-jieun").overrides)
 
@@ -182,3 +182,50 @@ def test_dry_run_repl(orch, capsys):
     bridge.run_dry(orch, io.StringIO("jieun: 안녕\nhyle@1on1-jieun: 우선 S1\nhyle@backend: !assign 지은 #12\n"))
     out = capsys.readouterr().out
     assert "1on1-jieun" in out and "저장만" in out and "name:1on1-jieun" in out
+
+
+# ---- laptop agent-loop integration (infra/agent-loop)
+def test_assign_dispatches_task_to_laptop_agent(orch):
+    outs = orch.handle(inc("hyle", "backend", "!assign 지은 #12 지도부터"))
+    tasks = [o for o in outs if o.message.startswith("!task")]
+    assert len(tasks) == 1 and tasks[0].channel == "name:1on1-jieun"
+    assert tasks[0].message.startswith("!task #12 ") and "(mock prompt)" in tasks[0].message
+    assert "heartbeat 없음" in outs[-1].message
+
+
+def test_assign_no_task_for_matlab_or_when_disabled(orch):
+    outs = orch.handle(inc("hyle", "backend", "!assign 우찬 #2"))
+    assert not any(o.message.startswith("!task") for o in outs)
+    orch.cfg.auto_dispatch = False
+    outs = orch.handle(inc("hyle", "backend", "!assign 지은 #12"))
+    assert not any(o.message.startswith("!task") for o in outs)
+
+
+def test_agent_posts_are_silent_and_feed_status(orch):
+    hb = inc("jieun", "1on1-jieun", "🟢 online · agent-loop", ctype="P")
+    hb.agent_kind, hb.agent_state = "heartbeat", "idle"
+    assert orch.handle(hb) == []
+    reply = inc("jieun", "1on1-jieun", "✅ 완료 PR ...")
+    reply.agent_kind = "reply"
+    assert orch.handle(reply) == []
+    assert orch.handle(inc("hyle", "1on1-jieun", "!task #12 지도")) == []
+    assert orch.handle(inc("jieun", "1on1-jieun", "!agent")) == []
+    st = orch.handle(inc("jieun", "1on1-jieun", "!status"))[0].message
+    assert "~1on1-jieun: 🟢 idle" in st
+    st_all = orch.handle(inc("hyle", "backend", "!status"))[0].message
+    assert "~1on1-jimin: 기록 없음" in st_all
+
+
+def test_parse_event_agent_loop_posts():
+    mm = bridge.Mattermost.__new__(bridge.Mattermost)
+    mm.cfg = Config()
+    mm.me = {"id": "bot", "username": "orchestrator"}
+    mm._users = {"u1": "jieun"}
+    mm._chan_by_name = {"1on1-jieun": "c1"}
+    post = {"id": "p", "user_id": "u1", "channel_id": "c1", "message": "🟢 online",
+            "props": {"amolla_agent": "heartbeat", "state": "busy"}}
+    for evname in ("posted", "post_edited"):
+        i = mm.parse_event({"event": evname, "data": {"post": json.dumps(post)}})
+        assert i.agent_kind == "heartbeat" and i.agent_state == "busy" and i.channel_name == "1on1-jieun"
+    human = dict(post, props={})
+    assert mm.parse_event({"event": "post_edited", "data": {"post": json.dumps(human)}}) is None

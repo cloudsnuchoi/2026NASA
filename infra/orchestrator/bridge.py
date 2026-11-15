@@ -74,6 +74,7 @@ class Config:
     history_turns: int = 16
     doc_budget: int = 60000
     max_tokens: int = 2500
+    auto_dispatch: bool = True  # !assign also posts "!task #N <prompt>" for the member's laptop agent-loop
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -94,6 +95,7 @@ class Config:
         c.history_turns = int(e("HISTORY_TURNS", c.history_turns))
         c.doc_budget = int(e("DOC_BUDGET_CHARS", c.doc_budget))
         c.max_tokens = int(e("ORCH_MAX_TOKENS", c.max_tokens))
+        c.auto_dispatch = e("AUTO_DISPATCH", "1").strip().lower() not in ("0", "false", "no", "")
         return c
 
 
@@ -332,6 +334,9 @@ HELP = """**orchestrator 명령** (메시지 맨 앞에 입력)
 - `!reset` 이 채널 대화 기억 지우기
 - (Hylē) `!assign <이름|username> #<이슈> [추가 지시]` 해당 1on1 채널에 작업 지시 보내기
 - (Hylē) `!note <이름|username> <지시>` 그 사람 채널에 우선 지시만 저장(답 안 함)
+- (Hylē·봇) `!task #<이슈> <지시>` 1on1 채널에 쓰면 그 팀원 노트북의 agent-loop가 실행 (봇은 대답 안 함)
+- `!agent` 노트북 agent-loop 상태 묻기 (agent-loop가 답함)
+`!assign`은 git 쓰는 팀원에게 `!task`도 자동으로 보내요 (AUTO_DISPATCH=0이면 끔).
 1on1 채널에서는 그냥 질문하면 돼요. 팀 채널에서는 @orchestrator 를 붙여 주세요."""
 
 
@@ -347,6 +352,8 @@ class Incoming:
     root_id: str = ""
     mentioned: bool = False
     file_count: int = 0
+    agent_kind: str = ""  # set when the post comes from a laptop agent-loop (props.amolla_agent)
+    agent_state: str = ""
 
 
 @dataclass
@@ -366,6 +373,7 @@ class Orchestrator:
     def __init__(self, cfg: Config, llm: LLM, gh: GitHubContext, docs: DocsContext, members: Dict[str, Member]):
         self.cfg, self.llm, self.gh, self.docs, self.members = cfg, llm, gh, docs, members
         self.state: Dict[str, ChannelState] = {}
+        self.agents: Dict[str, dict] = {}  # channel_name -> last agent-loop heartbeat/status
         self._load_state()
 
     # ---- persistence
@@ -399,6 +407,12 @@ class Orchestrator:
 
     def handle(self, inc: Incoming) -> List[Outgoing]:
         msg = inc.message.strip()
+        if inc.agent_kind:  # laptop agent-loop output: remember heartbeats, never reply
+            if inc.agent_kind in ("heartbeat", "status"):
+                self.agents[inc.channel_name] = {"state": inc.agent_state or "?", "at": time.time(), "text": msg[:200]}
+            return []
+        if msg.lower().startswith(("!task", "!agent")):
+            return []  # addressed to the member's laptop agent-loop
         if not msg and not inc.file_count:
             return []
         is_hyle = inc.username == self.cfg.hyle
@@ -438,7 +452,7 @@ class Orchestrator:
             return out("이 채널 대화 기억을 지웠어요. (Hylē 우선 지시도 함께 지워짐)")
         if cmd == "!status":
             member = self.member_for_channel(inc.channel_name)
-            return out(self.gh.summary(member))
+            return out(self.gh.summary(member) + "\n" + self.agent_summary(inc.channel_name if member else None))
         if cmd == "!review":
             m = re.search(r"\d+", msg[len("!review"):])
             if not m:
@@ -483,11 +497,30 @@ class Orchestrator:
             self.st(ch).overrides.append(f"[{_now()}] !assign {rest}")
             prompt = f"[Hylē 지시] {target.name}님에게 다음 작업을 배정한다: {rest}{issue_txt}\n위 형식으로 작업 지시를 써라."
             reply = self._ask(ch, target, prompt)
-            return [
-                Outgoing(f"name:{ch}", f"@{target.username} Hylē가 작업을 배정했어요.\n\n{reply}"),
-                Outgoing(inc.channel_id, f"{target.name}님 1on1 채널(~{ch})로 보냈어요.", root),
-            ]
+            outs = [Outgoing(f"name:{ch}", f"@{target.username} Hylē가 작업을 배정했어요.\n\n{reply}")]
+            note = ""
+            if self.cfg.auto_dispatch and target.uses_git:
+                task_prompt = extract_prompt(reply) or rest
+                outs.append(Outgoing(f"name:{ch}", f"!task {('#' + m.group(1) + ' ') if m else ''}{task_prompt}"[:MAX_POST]))
+                ag = self.agents.get(ch)
+                note = " 노트북 agent-loop에도 `!task`로 보냈어요" + ("." if ag and time.time() - ag["at"] < 1800 else " (최근 30분 heartbeat 없음 — 노트북이 꺼져 있을 수 있어요).")
+            outs.append(Outgoing(inc.channel_id, f"{target.name}님 1on1 채널(~{ch})로 보냈어요.{note}", root))
+            return outs
         return out(f"모르는 명령이에요: {cmd}\n\n{HELP}")
+
+    def agent_summary(self, channel_name: Optional[str] = None) -> str:
+        """Laptop agent-loop liveness from heartbeats seen since the bridge started."""
+        chans = [channel_name] if channel_name else [f"1on1-{u}" for u, m in self.members.items() if u != self.cfg.hyle]
+        lines = ["노트북 agent-loop:"]
+        for ch in chans:
+            a = self.agents.get(ch)
+            if not a:
+                lines.append(f"- ~{ch}: 기록 없음 (bridge 재시작 뒤 heartbeat 아직 없음 / 미설치)")
+                continue
+            mins = int((time.time() - a["at"]) // 60)
+            alive = "🟢" if mins <= 25 else "⚫ 끊김?"
+            lines.append(f"- ~{ch}: {alive} {a['state']} · {mins}분 전")
+        return "\n".join(lines)
 
     def build_system(self, channel_name: str, member: Member) -> str:
         ov = self.st(channel_name).overrides
@@ -524,6 +557,12 @@ class Orchestrator:
             ]
             self.save_state()
         return reply
+
+
+def extract_prompt(reply: str) -> str:
+    """First fenced code block of an LLM reply (the copy-paste prompt)."""
+    m = re.search(r"```[a-zA-Z]*\n(.*?)```", reply, re.S)
+    return m.group(1).strip() if m else ""
 
 
 def _now() -> str:
@@ -591,12 +630,35 @@ class Mattermost:
                 continue
             self.api("POST", "/posts", json={"channel_id": self.channel_id(out.channel), "message": chunk, "root_id": out.root_id})
 
+    def channel_name(self, channel_id: str) -> str:
+        for name, cid in self._chan_by_name.items():
+            if cid == channel_id:
+                return name
+        name = self.api("GET", f"/channels/{channel_id}").get("name", "")
+        self._chan_by_name[name] = channel_id
+        return name
+
     def parse_event(self, ev: dict) -> Optional[Incoming]:
-        if ev.get("event") != "posted":
+        if ev.get("event") not in ("posted", "post_edited"):
             return None
         data = ev.get("data", {})
         post = json.loads(data.get("post", "{}"))
-        if post.get("user_id") == self.me["id"] or post.get("type") or (post.get("props") or {}).get("from_bot") == "true":
+        props = post.get("props") or {}
+        if post.get("user_id") == self.me["id"] or post.get("type"):
+            return None
+        if props.get("amolla_agent"):  # laptop agent-loop (posts as the member) -> heartbeat bookkeeping only
+            return Incoming(
+                channel_id=post.get("channel_id", ""),
+                channel_name=data.get("channel_name") or self.channel_name(post.get("channel_id", "")),
+                channel_type=data.get("channel_type", "P"),
+                user_id=post.get("user_id", ""),
+                username=self.username(post.get("user_id", "")),
+                message=post.get("message", ""),
+                post_id=post.get("id", ""),
+                agent_kind=str(props.get("amolla_agent")),
+                agent_state=str(props.get("state", "")),
+            )
+        if ev.get("event") != "posted" or props.get("from_bot") == "true":
             return None
         mentions = json.loads(data.get("mentions", "[]") or "[]")
         msg = post.get("message", "")
