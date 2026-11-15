@@ -11,5 +11,6 @@
 | 2026-11-15 14:40 | QA 레인 에이전트 | 코딩 어시스턴트 (Claude Code), DeepSeek API(`/explain` 1회 실호출) | 라이브 E2E 테스트, DB 점검 SQL, `docs/QA-REPORT.md` | 이 로그, `docs/QA-REPORT.md` |
 | 2026-11-15 15:40–16:25 | Prithvi 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | Prithvi-EO-1.0-100M 작물 분류 CPU 추론(순수 PyTorch forward, 미세조정 없음), HLS 3시점 칩 수집, vision_result 20필지 적재 (#28) | 이 로그, `docs/PRITHVI.md` |
 | 2026-11-15 15:00–17:00 | contrast fields 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | 대비 데모 필지 8개(McLean IL·Lancaster NE·Union OH) 적재 스크립트, `/fields` 카운티 라벨·Story 우선, 대비 테스트, `docs/CONTRAST-FIELDS.md` (`feat/contrast-fields`) | 이 로그, `docs/CONTRAST-FIELDS.md` |
+| 2026-11-15 19:00–20:00 | L4 제출 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | 제출 초안 `docs/submission/`(submission.md, data-links.md, si-use.md, slides, video-script). 숫자는 라이브 model_api·docs에서 가져옴 | 이 로그, `docs/submission/si-use.md` |
 | 2026-11-15 19:00–19:40 | L1 web 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | ART FARM 프론트엔드(목업 V8 영어화·Leaflet/Esri 지도·Tier 1/2 결과), `POST /quick` (V8 FAO-56 포팅, 디스크 캐시, 모의 HTTP 테스트), `infra/web` 읽기 전용 프록시·레이트 리밋·터널 (`feat/artfarm-web`) | 이 로그, `infra/web/README.md` |
 | 2026-11-15 19:00 KST | L2 MATLAB pipeline / Codex | 코딩 어시스턴트 | 20필지 입력 내보내기, V8 비대화형 배치, MATLAB 분석 스켈레톤, 검증기·반복 스크립트 | `docs/MATLAB-VALIDATION.md`, `feat/matlab-pipeline` |
