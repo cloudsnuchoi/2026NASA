@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T19:25:33+09:00",
+ "generated_at": "2026-11-15T19:30:40+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 154,
+ "remaining_min": 149,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -265,13 +265,19 @@
    "name": "api",
    "model": "—",
    "task": "model_api 상시 실행 (:8090)",
-   "last_activity": "15:50"
+   "last_activity": "19:27"
   },
   {
    "name": "bot",
    "model": "DeepSeek Flash + Codex sol/terra + Claude",
    "task": "Mattermost 오케스트레이터 봇",
    "last_activity": "16:01"
+  },
+  {
+   "name": "l5",
+   "model": "codex gpt-6.1-terra",
+   "task": "L5 공개 URL QA",
+   "last_activity": "19:27"
   },
   {
    "name": "live",
@@ -308,7 +314,7 @@
   {
    "name": "김우찬",
    "user": "woochan",
-   "mattermost_last": "19:23",
+   "mattermost_last": "19:29",
    "repo_last": null
   },
   {
@@ -320,7 +326,7 @@
   {
    "name": "고지은",
    "user": "jieun",
-   "mattermost_last": "15:50",
+   "mattermost_last": "19:30",
    "repo_last": null
   },
   {
