@@ -1,7 +1,7 @@
-# 아몰라 실시간 현황 · 22:10 KST
+# 아몰라 실시간 현황 · 22:15 KST
 
-일정: 1차 제출 21:00 (지남) · 동결 23:00 (0시간 49분 남음) · 최종 제출 23:30 (1시간 19분 남음)
-최종 제출 23:30 KST까지 **1시간 19분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (0시간 44분 남음) · 최종 제출 23:30 (1시간 14분 남음)
+최종 제출 23:30 KST까지 **1시간 14분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -48,8 +48,8 @@
 - ✅ yoonsung: drought_compare_2012.png + drought_compare_2012_summary.csv — ✅ 결과 파일 있음
 - ✅ jimin: baresoil_days_20fields.csv — ✅ 결과 파일 있음
 - ✅ jieun: fig_p10p90.png + fig_backtest2012.png — ✅ 결과 파일 있음
-- 🟡 yoonsung 추가: yoonsung_nldas_2012 — nldas_vs_engine_2012.png
-- ✅ yoonsung 추가: yoonsung_season_anomaly — season_anomaly_1995_2025.png
+- ✅ yoonsung 추가: yoonsung_nldas_2012 — nldas_vs_engine_2012.png
+- 🟡 yoonsung 추가: yoonsung_season_anomaly — season_anomaly_1995_2025.png
 - ✅ yoonsung 추가: yoonsung_s2s_box — s2s_vs_history_box.png
 - 🟡 jimin 추가: jimin_growing_season — growing_season_20fields.csv
 - 🟡 jimin 추가: jimin_ndvi_anomaly — ndvi_anomaly.png
@@ -77,7 +77,7 @@
 
 ## 다음 할 일
 1. MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv
-2. MATLAB: yoonsung 추가: yoonsung_nldas_2012
+2. MATLAB: yoonsung 추가: yoonsung_season_anomaly
 3. MATLAB: jimin 추가: jimin_growing_season
 
 ## AI 모델
@@ -123,14 +123,15 @@
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 21:51 | — |
+| 김우찬 | 22:13 | — |
 | 김윤성 | 21:55 | — |
 | 고지은 | 21:04 | — |
-| 하지민 | 21:55 | — |
+| 하지민 | 22:14 | — |
 | 강다은 | 17:18 | — |
-| Hylē | 16:01 | 21:55 |
+| Hylē | 16:01 | 22:01 |
 
 ## 최근 머지된 PR
+- #77 fix(ui): 결과 화면에 'A decision aid — it does not replace your judgement' 문구
 - #76 fix(ui): 분석 화면을 목업 v8 기준으로 복원, 스냅샷 배지, Pages CORS 제거, 프록시 제한 조정
 - #75 docs(submission): v2 슬라이드(MATLAB 그림, 모바일 화면)와 V8 실행 로그 출처
 - #74 docs(matlab): 가이드 Run 하나로 정리 + live.json 추가 세트 6개
@@ -138,4 +139,3 @@
 - #71 feat(matlab): 서버 봇 직접 안내(notify.log), 레인 상태, MATLAB 결과 30분 배치
 - #72 fix(ui): 모바일 360/390/768 점검과 UX-AUDIT 수정
 - #70 feat(matlab): run_all_<name>.m 원클릭 실행과 JSON 실행 로그, mwatch 자동 수정
-- #69 docs(site): 모델 상태 정리, Data & Sources 패널, MATLAB 빌드 단계 결과

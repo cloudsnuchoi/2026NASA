@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T22:10:26+09:00",
+ "generated_at": "2026-11-15T22:15:35+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -10,15 +10,15 @@
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 49
+   "remaining_min": 44
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 79
+   "remaining_min": 74
   }
  ],
- "remaining_min": 79,
+ "remaining_min": 74,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -195,12 +195,12 @@
     },
     {
      "label": "yoonsung 추가: yoonsung_nldas_2012",
-     "status": "progress",
+     "status": "done",
      "detail": "nldas_vs_engine_2012.png"
     },
     {
      "label": "yoonsung 추가: yoonsung_season_anomaly",
-     "status": "done",
+     "status": "progress",
      "detail": "season_anomaly_1995_2025.png"
     },
     {
@@ -403,7 +403,7 @@
   {
    "name": "김우찬",
    "user": "woochan",
-   "mattermost_last": "21:51",
+   "mattermost_last": "22:13",
    "repo_last": null
   },
   {
@@ -421,7 +421,7 @@
   {
    "name": "하지민",
    "user": "jimin",
-   "mattermost_last": "21:55",
+   "mattermost_last": "22:14",
    "repo_last": null
   },
   {
@@ -434,16 +434,21 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "21:55"
+   "repo_last": "22:01"
   }
  ],
  "blockers": [],
  "next": [
   "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv",
-  "MATLAB: yoonsung 추가: yoonsung_nldas_2012",
+  "MATLAB: yoonsung 추가: yoonsung_season_anomaly",
   "MATLAB: jimin 추가: jimin_growing_season"
  ],
  "merged_prs": [
+  {
+   "number": 77,
+   "title": "fix(ui): 결과 화면에 'A decision aid — it does not replace your judgement' 문구",
+   "merged_at": "2026-11-15T13:01:36Z"
+  },
   {
    "number": 76,
    "title": "fix(ui): 분석 화면을 목업 v8 기준으로 복원, 스냅샷 배지, Pages CORS 제거, 프록시 제한 조정",
@@ -478,11 +483,6 @@
    "number": 70,
    "title": "feat(matlab): run_all_<name>.m 원클릭 실행과 JSON 실행 로그, mwatch 자동 수정",
    "merged_at": "2026-11-15T11:57:47Z"
-  },
-  {
-   "number": 69,
-   "title": "docs(site): 모델 상태 정리, Data & Sources 패널, MATLAB 빌드 단계 결과",
-   "merged_at": "2026-11-15T11:53:44Z"
   }
  ],
  "ai_models": [
