@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T19:41:07+09:00",
+ "generated_at": "2026-11-15T19:46:15+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 138,
+ "remaining_min": 133,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -290,6 +290,12 @@
    "last_activity": "15:54"
   },
   {
+   "name": "mfix",
+   "model": "?",
+   "task": "?",
+   "last_activity": "19:43"
+  },
+  {
    "name": "mm-tunnel",
    "model": "—",
    "task": "Mattermost Cloudflare 터널",
@@ -324,19 +330,19 @@
   {
    "name": "김윤성",
    "user": "yoonsung",
-   "mattermost_last": "16:35",
+   "mattermost_last": "19:44",
    "repo_last": null
   },
   {
    "name": "고지은",
    "user": "jieun",
-   "mattermost_last": "19:40",
+   "mattermost_last": "19:43",
    "repo_last": null
   },
   {
    "name": "하지민",
    "user": "jimin",
-   "mattermost_last": "19:38",
+   "mattermost_last": "19:45",
    "repo_last": null
   },
   {
