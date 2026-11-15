@@ -160,7 +160,9 @@ All fixes keep the honesty labels (screening estimate, relative-index tooltip, P
 ## 5. Reproduce
 
 ```bash
-/srv/hackathon/venv/bin/python frontend/tests/ux_mobile.py "$(cat /srv/hackathon/state/status/demo_url.txt)" docs/screens/mobile 360,390,768
+/srv/hackathon/venv/bin/python infra/web/ux/mobile_check.py "$(cat /srv/hackathon/state/status/demo_url.txt)" docs/screens/mobile 360,390,768
+/srv/hackathon/venv/bin/python infra/web/ux/error_check.py <base-url> docs/screens/mobile   # mocked 429 → message + Retry
+python3 infra/web/ux/contrast.py                                                              # table in §3.6
 ```
 
-(The script is added to the repo in phase 2; the phase 1 run used the identical script from a scratch directory. It hits the public tunnel's rate-limited API once per width.)
+The mobile check hits the rate-limited API once per width (`/quick`, `/simulate`, `/field/{id}/profile`, `/validation/backtest`).
