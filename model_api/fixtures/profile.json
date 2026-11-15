@@ -272,7 +272,9 @@
   "gSSURGO",
   "POWER",
   "HLS",
-  "OpenET"
+  "OpenET",
+  "IMERG",
+  "NLDAS"
  ],
  "region_label": "Story County, IA (Corn Belt)",
  "precip_mm_yr": 838.1,
@@ -373,9 +375,20 @@
   "start": "1995-01-01",
   "end": "2024-12-31"
  },
+ "nldas": {
+  "source_id": "nldas",
+  "variable": "rootmoist",
+  "unit": "kg/m2 (= mm water), NLDAS-2 Noah root zone",
+  "latest_month": "2025-12",
+  "latest_rootmoist_kg_m2": 232.2,
+  "anomaly_last_12_months_kg_m2": 9.8,
+  "baseline": "1995-2024 same-month mean",
+  "native_resolution": "nominal 0.125 deg",
+  "notes": "County context cell, not field-precise."
+ },
  "info_gaps": [
   "ndvi_class thresholds are team defaults (good >= 0.75, fair >= 0.5)",
   "Prithvi vision result not loaded yet (CDL is the reference label)",
-  "Precipitation normal from POWER (IMERG not loaded); ET from OpenET Ensemble 2016-2025 (point)"
+  "Precipitation normal from POWER (GPM IMERG loaded 2016-2025 as a cross-check, not the water-balance input); ET from OpenET Ensemble 2016-2025 (point)"
  ]
 }

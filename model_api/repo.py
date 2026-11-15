@@ -231,6 +231,44 @@ class PgRepo:
     def imerg_count(self, fips: str) -> int:
         return int(db.query("SELECT count(*) AS n FROM county_imerg_daily WHERE county_fips = %s", (fips,))[0]["n"])
 
+    def imerg_annual(self, fips: str) -> list[dict]:
+        """GPM IMERG daily county precipitation summed per calendar year: [{year, precip_mm, days}]."""
+        def load():
+            rows = db.query(
+                "SELECT extract(year FROM date)::int AS year, sum(precip_mm) AS precip_mm, count(precip_mm) AS days "
+                "FROM county_imerg_daily WHERE county_fips = %s GROUP BY 1 ORDER BY 1",
+                (fips,),
+            )
+            return [{"year": int(r["year"]), "precip_mm": _f(r["precip_mm"]), "days": int(r["days"])} for r in rows]
+
+        return self._cached(("imerg_annual", fips), load)
+
+    def imerg_daily(self, fips: str) -> dict[str, np.ndarray] | None:
+        def load():
+            rows = db.query("SELECT date, precip_mm FROM county_imerg_daily WHERE county_fips = %s ORDER BY date", (fips,))
+            if not rows:
+                return None
+            return {"date": np.array([r["date"] for r in rows]),
+                    "precip_mm": np.array([np.nan if r["precip_mm"] is None else float(r["precip_mm"]) for r in rows])}
+
+        return self._cached(("imerg_daily", fips), load)
+
+    def nldas_monthly(self, fips: str) -> list[dict]:
+        """NLDAS-2 Noah monthly county means (kg/m2 = mm of water for moisture, rainf and evap)."""
+        def load():
+            rows = db.query(
+                "SELECT month, rootmoist_kg_m2, soilm_0_10_kg_m2, soilm_10_40_kg_m2, soilm_40_100_kg_m2, evap_kg_m2, rainf_kg_m2 "
+                "FROM county_nldas_monthly WHERE county_fips = %s ORDER BY month",
+                (fips,),
+            )
+            for r in rows:
+                for k in list(r):
+                    if k != "month":
+                        r[k] = _f(r[k])
+            return rows
+
+        return self._cached(("nldas", fips), load)
+
     # ---- evidence / params ---------------------------------------------------------------------
     def evidence_search(self, q: str, strategy_code: str | None, limit: int = 5) -> list[dict]:
         sql = (

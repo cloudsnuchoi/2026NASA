@@ -12,8 +12,14 @@ FIPS = "19169"
 
 
 class FakeRepo:
-    def __init__(self, with_scenarios: bool = True, evidence: list[dict] | None = None):
+    def __init__(self, with_scenarios: bool = True, evidence: list[dict] | None = None, with_imerg: bool = False,
+                 with_nldas: bool = False, crop_names: list[str] | None = None, awc: float = 0.18, openet_scale: float = 1.0):
         self.with_scenarios = with_scenarios
+        self.with_imerg = with_imerg
+        self.with_nldas = with_nldas
+        self.crop_names = crop_names
+        self.awc = awc
+        self.openet_scale = openet_scale
         self._evidence = evidence or []
         self._wx = self._make_weather()
 
@@ -51,13 +57,16 @@ class FakeRepo:
         return 1
 
     def soil(self, field_id):
-        return [{"mukey": "1", "comppct_r": 100.0, "om_pct": 3.0, "kffact": 0.28, "drainagecl": "Well drained", "awc_cm_cm": 0.18,
+        return [{"mukey": "1", "comppct_r": 100.0, "om_pct": 3.0, "kffact": 0.28, "drainagecl": "Well drained", "awc_cm_cm": self.awc,
                  "source": "test"}]
 
     def soil_medians(self):
         return {"awc_cm_cm": 0.18, "kffact": 0.28, "om_pct": 3.0, "n": 1}
 
     def crop_history(self, field_id):
+        if self.crop_names:
+            n = len(self.crop_names)
+            return [{"year": y, "cdl_class": None, "crop_name": self.crop_names[(y - 2008) % n], "share": 0.9} for y in range(2008, 2026)]
         return [{"year": y, "cdl_class": 1 if y % 2 == 0 else 5, "crop_name": "Corn" if y % 2 == 0 else "Soybeans", "share": 0.9}
                 for y in range(2008, 2026)]
 
@@ -72,8 +81,9 @@ class FakeRepo:
         return out
 
     def openet(self, field_id):
-        return [{"date": dt.date(y, m, 1), "variable": "et_ensemble_mm", "value": 50.0, "unit": "mm"}
-                for y in (2024, 2025) for m in range(1, 13)]
+        return [{"date": dt.date(y, m, 1), "variable": "et_ensemble_mm",
+                 "value": self.openet_scale * (100.0 if 6 <= m <= 8 else 60.0 if m in (5, 9) else 15.0), "unit": "mm"}
+                for y in range(2016, 2026) for m in range(1, 13)]
 
     def vision(self, field_id):
         return []
@@ -128,7 +138,30 @@ class FakeRepo:
         return rows
 
     def imerg_count(self, fips):
-        return 0
+        return 365 * 3 if self.with_imerg else 0
+
+    def imerg_annual(self, fips):
+        if not self.with_imerg:
+            return []
+        return [{"year": y, "precip_mm": 1.2 * float(self._wx["precip_mm"][[d.year == y for d in self._wx["date"]]].sum()),
+                 "days": 366 if y % 4 == 0 else 365} for y in (2022, 2023, 2024)]
+
+    def imerg_daily(self, fips):
+        if not self.with_imerg:
+            return None
+        sel = np.array([d.year >= 2022 and d.year <= 2024 for d in self._wx["date"]])
+        return {"date": self._wx["date"][sel], "precip_mm": self._wx["precip_mm"][sel] * 1.2}
+
+    def nldas_monthly(self, fips):
+        if not self.with_nldas:
+            return []
+        out = []
+        for y in range(1995, 2026):
+            for m in range(1, 13):
+                v = 300.0 + 40.0 * np.cos(2 * np.pi * (m - 4) / 12) + 5.0 * ((y * 7 + m) % 5 - 2)
+                out.append({"month": dt.date(y, m, 1), "rootmoist_kg_m2": v, "soilm_0_10_kg_m2": 30.0, "soilm_10_40_kg_m2": 80.0,
+                            "soilm_40_100_kg_m2": 160.0, "evap_kg_m2": 50.0, "rainf_kg_m2": 70.0})
+        return out
 
     def evidence_search(self, q, strategy_code, limit=5):
         return [e for e in self._evidence if q.split()[0].lower() in e["quote"].lower()]

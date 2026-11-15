@@ -1,5 +1,5 @@
 {
- "run_id": "mc-49f6b0ae1fc0901d-n500-s42",
+ "run_id": "mc-9f6917ae86f5df81-n500-s42",
  "field_id": "191825003869023",
  "county_fips": "19169",
  "tier": "field",
@@ -19,7 +19,34 @@
   "drainagecl": "Well drained",
   "mukey": [
    "411341"
-  ]
+  ],
+  "baseline_rotation": "C-S",
+  "baseline_rotation_source": "CDL 2018-2025 observed corn/soybean sequence (8 years)",
+  "kc_field_scale": 1.169,
+  "openet_calibration": {
+   "years": "2016-2025",
+   "n_years": 10,
+   "precip_for_calibration": "GPM IMERG daily for 9 years, POWER otherwise",
+   "openet_may_sep_mm": 511.6,
+   "model_may_sep_eta_mm": 437.8,
+   "ratio_raw": 1.169,
+   "clipped": false,
+   "crops": "C-S-C-S-C-S-C-S-C-S"
+  },
+  "nldas_check": {
+   "r_monthly_anomaly": 0.582,
+   "n_months": 120,
+   "period": "2016-2025",
+   "variable": "NLDAS-2 Noah rootmoist (kg/m2) vs modelled available soil water (mm), monthly anomalies; county context cell, not field-precise"
+  },
+  "precip_source": "power",
+  "imerg_check": {
+   "loaded": true,
+   "rows": 3561,
+   "period": "2016-2025",
+   "full_years": 9,
+   "imerg_to_power_ratio": 1.219
+  }
  },
  "priorities_normalized": {
   "water": 0.25,
@@ -54,31 +81,31 @@
    "metrics": {
     "season_water_deficit_mm": {
      "unit": "mm/yr",
-     "p10": 52.12,
-     "p50": 104.669,
-     "p90": 167.134,
-     "cvar": 196.562
+     "p10": 115.029,
+     "p50": 188.337,
+     "p90": 265.448,
+     "cvar": 300.564
     },
     "stress_days": {
      "unit": "days/yr",
-     "p10": 33.25,
-     "p50": 49.875,
-     "p90": 65.0,
-     "cvar": 69.59
+     "p10": 49.225,
+     "p50": 64.75,
+     "p90": 76.75,
+     "cvar": 80.765
     },
     "season_etc_mm": {
      "unit": "mm/yr",
-     "p10": 508.542,
-     "p50": 551.354,
-     "p90": 595.38,
-     "cvar": 618.626
+     "p10": 594.486,
+     "p50": 644.533,
+     "p90": 696.0,
+     "cvar": 723.174
     },
     "eta_mm": {
      "unit": "mm/yr",
-     "p10": 472.866,
-     "p50": 506.574,
-     "p90": 537.044,
-     "cvar": 547.677
+     "p10": 478.381,
+     "p50": 518.388,
+     "p90": 555.617,
+     "cvar": 570.078
     },
     "runoff_mm": {
      "unit": "mm/yr",
@@ -89,17 +116,17 @@
     },
     "drainage_mm": {
      "unit": "mm/yr",
-     "p10": 219.095,
-     "p50": 306.2,
-     "p90": 389.665,
-     "cvar": 419.044
+     "p10": 212.22,
+     "p50": 294.782,
+     "p90": 370.011,
+     "cvar": 396.269
     },
     "offseason_drainage_mm": {
      "unit": "mm/yr",
-     "p10": 127.543,
-     "p50": 178.989,
-     "p90": 231.184,
-     "cvar": 251.214
+     "p10": 135.866,
+     "p50": 181.439,
+     "p90": 228.79,
+     "cvar": 247.687
     },
     "living_cover_days": {
      "unit": "days/yr",
@@ -117,10 +144,10 @@
     },
     "veg_index_days": {
      "unit": "days/yr",
-     "p10": 111.516,
-     "p50": 122.27,
-     "p90": 132.011,
-     "cvar": 107.473
+     "p10": 100.989,
+     "p50": 111.596,
+     "p90": 122.021,
+     "cvar": 97.33
     },
     "precip_mm": {
      "unit": "mm/yr",
@@ -131,20 +158,20 @@
     }
    },
    "scores": {
-    "n_cycle_index": 0.317,
+    "n_cycle_index": 0.312,
     "erosion_index": 0.245,
     "organic_matter_index": 0.347,
     "pest_break_index": 0.3,
-    "water_use_index": 0.402,
+    "water_use_index": 0.388,
     "forage_index": 0.1,
     "market_index": 0.8
    },
-   "stability_index": 0.657,
+   "stability_index": 0.586,
    "composite": {
-    "p10": 0.482,
-    "p50": 0.504,
-    "p90": 0.525,
-    "cvar": 0.473
+    "p10": 0.462,
+    "p50": 0.482,
+    "p90": 0.503,
+    "cvar": 0.453
    },
    "display": {
     "vegetation_pct": {
@@ -170,10 +197,10 @@
      "source_id": "power",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 52.12,
-     "p50": 104.669,
-     "p90": 167.134,
-     "cvar": 196.562,
+     "p10": 115.029,
+     "p50": 188.337,
+     "p90": 265.448,
+     "cvar": 300.564,
      "n_members": 1,
      "period": null
     },
@@ -182,10 +209,10 @@
      "source_id": "geos_s2s",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 67.441,
-     "p50": 132.398,
-     "p90": 206.264,
-     "cvar": 238.088,
+     "p10": 135.983,
+     "p50": 219.098,
+     "p90": 308.686,
+     "cvar": 344.867,
      "n_members": 10,
      "period": "2027-MAM+JJ"
     },
@@ -194,10 +221,10 @@
      "source_id": "nex_gddp",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 83.233,
-     "p50": 144.585,
-     "p90": 210.175,
-     "cvar": 241.015,
+     "p10": 154.743,
+     "p50": 237.549,
+     "p90": 315.7,
+     "cvar": 353.45,
      "n_members": 2,
      "period": "2031-2040",
      "scenario": "ssp245"
@@ -207,10 +234,10 @@
      "source_id": "nex_gddp",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 74.761,
-     "p50": 135.01,
-     "p90": 205.051,
-     "cvar": 239.429,
+     "p10": 147.144,
+     "p50": 226.512,
+     "p90": 311.186,
+     "cvar": 352.517,
      "n_members": 2,
      "period": "2031-2040",
      "scenario": "ssp585"
@@ -220,14 +247,14 @@
    "rank": 4,
    "goal_label": "Current practice (baseline)",
    "group_scores": {
-    "water": 0.402,
-    "soil": 0.303,
-    "stability": 0.657,
+    "water": 0.388,
+    "soil": 0.301,
+    "stability": 0.586,
     "income": 0.66
    },
    "pros": [
     "Matches existing equipment, seed and grain markets; no new management to learn",
-    "Lowest annual crop water use of the compared options in this run (507 mm/yr ET, P50)",
+    "Lowest annual crop water use of the compared options in this run (518 mm/yr ET, P50)",
     "County corn and soybean yields are published by USDA NASS for local benchmarking"
    ],
    "cons": [
@@ -237,13 +264,12 @@
    "why": "Current convention on this field (CDL history shows corn-soybean).",
    "benefits": [
     "Matches existing equipment, seed and grain markets; no new management to learn",
-    "Lowest annual crop water use of the compared options in this run (507 mm/yr ET, P50)",
+    "Lowest annual crop water use of the compared options in this run (518 mm/yr ET, P50)",
     "County corn and soybean yields are published by USDA NASS for local benchmarking"
    ],
    "info_gaps": [
     "In-field soil test not provided",
     "Crop prices not loaded: revenue_pct left empty (no yields in kg/ha or t/ha are produced)",
-    "County IMERG rows not loaded: POWER precipitation used for the water balance",
     "Tile drainage and irrigation not modelled"
    ],
    "local_review_risks": [
@@ -294,52 +320,52 @@
    "metrics": {
     "season_water_deficit_mm": {
      "unit": "mm/yr",
-     "p10": 52.879,
-     "p50": 107.571,
-     "p90": 167.706,
-     "cvar": 196.892
+     "p10": 114.122,
+     "p50": 187.192,
+     "p90": 262.203,
+     "cvar": 296.302
     },
     "stress_days": {
      "unit": "days/yr",
-     "p10": 33.975,
-     "p50": 50.625,
-     "p90": 65.5,
-     "cvar": 70.12
+     "p10": 49.25,
+     "p50": 64.75,
+     "p90": 76.775,
+     "cvar": 81.03
     },
     "season_etc_mm": {
      "unit": "mm/yr",
-     "p10": 509.462,
-     "p50": 551.445,
-     "p90": 595.38,
-     "cvar": 618.334
+     "p10": 585.985,
+     "p50": 635.355,
+     "p90": 685.851,
+     "cvar": 712.15
     },
     "eta_mm": {
      "unit": "mm/yr",
-     "p10": 543.046,
-     "p50": 577.461,
-     "p90": 611.697,
-     "cvar": 620.88
+     "p10": 542.836,
+     "p50": 582.854,
+     "p90": 622.399,
+     "cvar": 635.001
     },
     "runoff_mm": {
      "unit": "mm/yr",
-     "p10": 12.649,
-     "p50": 23.192,
-     "p90": 34.016,
-     "cvar": 38.635
+     "p10": 9.103,
+     "p50": 17.786,
+     "p90": 26.298,
+     "cvar": 29.967
     },
     "drainage_mm": {
      "unit": "mm/yr",
-     "p10": 153.876,
-     "p50": 244.366,
-     "p90": 330.911,
-     "cvar": 363.221
+     "p10": 157.342,
+     "p50": 246.866,
+     "p90": 328.728,
+     "cvar": 357.364
     },
     "offseason_drainage_mm": {
      "unit": "mm/yr",
-     "p10": 68.576,
-     "p50": 121.892,
-     "p90": 177.699,
-     "cvar": 198.199
+     "p10": 72.547,
+     "p50": 123.503,
+     "p90": 175.711,
+     "cvar": 195.954
     },
     "living_cover_days": {
      "unit": "days/yr",
@@ -357,10 +383,10 @@
     },
     "veg_index_days": {
      "unit": "days/yr",
-     "p10": 296.481,
-     "p50": 314.459,
-     "p90": 332.671,
-     "cvar": 289.118
+     "p10": 289.329,
+     "p50": 306.232,
+     "p90": 323.33,
+     "cvar": 282.442
     },
     "precip_mm": {
      "unit": "mm/yr",
@@ -371,31 +397,31 @@
     }
    },
    "scores": {
-    "n_cycle_index": 0.506,
-    "erosion_index": 0.874,
+    "n_cycle_index": 0.503,
+    "erosion_index": 0.901,
     "organic_matter_index": 0.729,
     "pest_break_index": 0.35,
-    "water_use_index": 0.319,
+    "water_use_index": 0.311,
     "forage_index": 0.3,
     "market_index": 0.75
    },
-   "stability_index": 0.669,
+   "stability_index": 0.599,
    "composite": {
-    "p10": 0.562,
-    "p50": 0.586,
-    "p90": 0.609,
-    "cvar": 0.55
+    "p10": 0.546,
+    "p50": 0.569,
+    "p90": 0.593,
+    "cvar": 0.534
    },
    "display": {
     "vegetation_pct": {
-     "p10": 147.3,
-     "p50": 157.8,
-     "p90": 169.1
+     "p10": 160.5,
+     "p50": 173.7,
+     "p90": 190.7
     },
     "water_use_pct": {
-     "p10": 12.5,
-     "p50": 14.0,
-     "p90": 16.2
+     "p10": 10.3,
+     "p50": 12.5,
+     "p90": 15.0
     },
     "revenue_pct": {
      "p10": null,
@@ -410,10 +436,10 @@
      "source_id": "power",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 52.879,
-     "p50": 107.571,
-     "p90": 167.706,
-     "cvar": 196.892,
+     "p10": 114.122,
+     "p50": 187.192,
+     "p90": 262.203,
+     "cvar": 296.302,
      "n_members": 1,
      "period": null
     },
@@ -422,10 +448,10 @@
      "source_id": "geos_s2s",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 67.619,
-     "p50": 132.725,
-     "p90": 206.779,
-     "cvar": 237.831,
+     "p10": 135.297,
+     "p50": 217.168,
+     "p90": 305.963,
+     "cvar": 341.522,
      "n_members": 10,
      "period": "2027-MAM+JJ"
     },
@@ -434,10 +460,10 @@
      "source_id": "nex_gddp",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 83.957,
-     "p50": 146.053,
-     "p90": 211.481,
-     "cvar": 241.958,
+     "p10": 154.073,
+     "p50": 237.277,
+     "p90": 314.291,
+     "cvar": 349.128,
      "n_members": 2,
      "period": "2031-2040",
      "scenario": "ssp245"
@@ -447,10 +473,10 @@
      "source_id": "nex_gddp",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 75.64,
-     "p50": 137.323,
-     "p90": 206.583,
-     "cvar": 239.989,
+     "p10": 148.682,
+     "p50": 227.318,
+     "p90": 309.874,
+     "cvar": 348.067,
      "n_members": 2,
      "period": "2031-2040",
      "scenario": "ssp585"
@@ -460,30 +486,29 @@
    "rank": 1,
    "goal_label": "Income / market fit",
    "group_scores": {
-    "water": 0.319,
-    "soil": 0.703,
-    "stability": 0.669,
+    "water": 0.311,
+    "soil": 0.711,
+    "stability": 0.599,
     "income": 0.66
    },
    "pros": [
     "Cuts winter bare-ground days from 181 to 4 per year (P50 vs A)",
-    "Less off-season drainage (nitrate-leaching proxy): 122 vs 179 mm/yr for A (P50)",
-    "Less surface runoff than A (23 vs 33 mm/yr, P50)"
+    "Less off-season drainage (nitrate-leaching proxy): 124 vs 181 mm/yr for A (P50)",
+    "Less surface runoff than A (18 vs 33 mm/yr, P50)"
    ],
    "cons": [
-    "The cover uses water: annual ET 577 vs 507 mm/yr for A (P50); terminate early before corn in dry springs"
+    "The cover uses water: annual ET 583 vs 518 mm/yr for A (P50); terminate early before corn in dry springs"
    ],
    "unique_feature": "Only option that keeps the corn-soybean cash sequence unchanged while covering the soil all winter.",
    "why": "Adds to the current rotation: a winter cereal rye cover keeps living roots over winter.",
    "benefits": [
     "Cuts winter bare-ground days from 181 to 4 per year (P50 vs A)",
-    "Less off-season drainage (nitrate-leaching proxy): 122 vs 179 mm/yr for A (P50)",
-    "Less surface runoff than A (23 vs 33 mm/yr, P50)"
+    "Less off-season drainage (nitrate-leaching proxy): 124 vs 181 mm/yr for A (P50)",
+    "Less surface runoff than A (18 vs 33 mm/yr, P50)"
    ],
    "info_gaps": [
     "In-field soil test not provided",
     "Crop prices not loaded: revenue_pct left empty (no yields in kg/ha or t/ha are produced)",
-    "County IMERG rows not loaded: POWER precipitation used for the water balance",
     "Tile drainage and irrigation not modelled"
    ],
    "local_review_risks": [
@@ -538,52 +563,52 @@
    "metrics": {
     "season_water_deficit_mm": {
      "unit": "mm/yr",
-     "p10": 29.028,
-     "p50": 71.676,
-     "p90": 135.815,
-     "cvar": 157.182
+     "p10": 66.528,
+     "p50": 129.98,
+     "p90": 211.089,
+     "cvar": 233.126
     },
     "stress_days": {
      "unit": "days/yr",
-     "p10": 21.725,
-     "p50": 36.75,
-     "p90": 52.5,
-     "cvar": 58.355
+     "p10": 31.95,
+     "p50": 46.5,
+     "p90": 62.525,
+     "cvar": 68.21
     },
     "season_etc_mm": {
      "unit": "mm/yr",
-     "p10": 466.419,
-     "p50": 508.738,
-     "p90": 556.245,
-     "cvar": 571.163
+     "p10": 540.573,
+     "p50": 587.598,
+     "p90": 642.201,
+     "cvar": 660.103
     },
     "eta_mm": {
      "unit": "mm/yr",
-     "p10": 559.505,
-     "p50": 594.173,
-     "p90": 627.919,
-     "cvar": 637.769
+     "p10": 567.075,
+     "p50": 610.058,
+     "p90": 651.351,
+     "cvar": 664.393
     },
     "runoff_mm": {
      "unit": "mm/yr",
-     "p10": 11.21,
-     "p50": 20.635,
-     "p90": 32.296,
-     "cvar": 36.398
+     "p10": 8.924,
+     "p50": 17.24,
+     "p90": 26.775,
+     "cvar": 30.193
     },
     "drainage_mm": {
      "unit": "mm/yr",
-     "p10": 141.78,
-     "p50": 228.939,
-     "p90": 321.211,
-     "cvar": 350.464
+     "p10": 135.972,
+     "p50": 218.321,
+     "p90": 305.239,
+     "cvar": 332.354
     },
     "offseason_drainage_mm": {
      "unit": "mm/yr",
-     "p10": 62.014,
-     "p50": 121.262,
-     "p90": 185.053,
-     "cvar": 210.656
+     "p10": 61.489,
+     "p50": 118.314,
+     "p90": 181.054,
+     "cvar": 205.353
     },
     "living_cover_days": {
      "unit": "days/yr",
@@ -601,10 +626,10 @@
     },
     "veg_index_days": {
      "unit": "days/yr",
-     "p10": 302.331,
-     "p50": 320.791,
-     "p90": 338.743,
-     "cvar": 295.558
+     "p10": 293.046,
+     "p50": 313.447,
+     "p90": 331.34,
+     "cvar": 285.57
     },
     "precip_mm": {
      "unit": "mm/yr",
@@ -615,31 +640,31 @@
     }
    },
    "scores": {
-    "n_cycle_index": 0.532,
-    "erosion_index": 0.892,
+    "n_cycle_index": 0.538,
+    "erosion_index": 0.909,
     "organic_matter_index": 0.756,
     "pest_break_index": 0.6,
-    "water_use_index": 0.298,
+    "water_use_index": 0.279,
     "forage_index": 0.4,
     "market_index": 0.5
    },
-   "stability_index": 0.781,
+   "stability_index": 0.728,
    "composite": {
-    "p10": 0.545,
-    "p50": 0.568,
-    "p90": 0.59,
-    "cvar": 0.534
+    "p10": 0.53,
+    "p50": 0.551,
+    "p90": 0.575,
+    "cvar": 0.519
    },
    "display": {
     "vegetation_pct": {
-     "p10": 151.1,
-     "p50": 162.8,
-     "p90": 176.1
+     "p10": 164.7,
+     "p50": 179.7,
+     "p90": 197.2
     },
     "water_use_pct": {
-     "p10": 13.7,
-     "p50": 17.3,
-     "p90": 21.3
+     "p10": 12.9,
+     "p50": 17.5,
+     "p90": 22.9
     },
     "revenue_pct": {
      "p10": null,
@@ -654,10 +679,10 @@
      "source_id": "power",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 29.028,
-     "p50": 71.676,
-     "p90": 135.815,
-     "cvar": 157.182,
+     "p10": 66.528,
+     "p50": 129.98,
+     "p90": 211.089,
+     "cvar": 233.126,
      "n_members": 1,
      "period": null
     },
@@ -666,10 +691,10 @@
      "source_id": "geos_s2s",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 39.801,
-     "p50": 89.849,
-     "p90": 159.792,
-     "cvar": 184.699,
+     "p10": 82.846,
+     "p50": 147.346,
+     "p90": 234.568,
+     "cvar": 264.449,
      "n_members": 10,
      "period": "2027-MAM+JJ"
     },
@@ -678,10 +703,10 @@
      "source_id": "nex_gddp",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 48.715,
-     "p50": 100.511,
-     "p90": 171.606,
-     "cvar": 192.465,
+     "p10": 96.982,
+     "p50": 164.689,
+     "p90": 250.028,
+     "cvar": 275.525,
      "n_members": 2,
      "period": "2031-2040",
      "scenario": "ssp245"
@@ -691,10 +716,10 @@
      "source_id": "nex_gddp",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 42.783,
-     "p50": 95.79,
-     "p90": 166.385,
-     "cvar": 190.593,
+     "p10": 86.457,
+     "p50": 158.209,
+     "p90": 248.181,
+     "cvar": 274.542,
      "n_members": 2,
      "period": "2031-2040",
      "scenario": "ssp585"
@@ -704,31 +729,30 @@
    "rank": 2,
    "goal_label": "Soil health",
    "group_scores": {
-    "water": 0.298,
-    "soil": 0.726,
-    "stability": 0.781,
+    "water": 0.279,
+    "soil": 0.734,
+    "stability": 0.728,
     "income": 0.48
    },
    "pros": [
-    "Lower growing-season water deficit: 72 vs 105 mm/yr for A (P50); the small grain uses spring moisture before summer drought",
+    "Lower growing-season water deficit: 130 vs 188 mm/yr for A (P50); the small grain uses spring moisture before summer drought",
     "Adds a third crop family, interrupting corn rootworm and soybean cyst nematode cycles",
     "Combines 2 changes: living cover 351 days/yr (P50)"
    ],
    "cons": [
-    "The cover uses water: annual ET 594 vs 507 mm/yr for A (P50); terminate early before corn in dry springs",
+    "The cover uses water: annual ET 610 vs 518 mm/yr for A (P50); terminate early before corn in dry springs",
     "Small-grain markets are thinner than corn/soybean in central Iowa; check local buyers and contracts"
    ],
    "unique_feature": "Three crop families plus a cover after the small grain: most diversity per year.",
    "why": "Adds to the current rotation: a winter cereal rye cover keeps living roots over winter; a small grain adds a third crop family that breaks corn-soybean pest cycles.",
    "benefits": [
-    "Lower growing-season water deficit: 72 vs 105 mm/yr for A (P50); the small grain uses spring moisture before summer drought",
+    "Lower growing-season water deficit: 130 vs 188 mm/yr for A (P50); the small grain uses spring moisture before summer drought",
     "Adds a third crop family, interrupting corn rootworm and soybean cyst nematode cycles",
     "Combines 2 changes: living cover 351 days/yr (P50)"
    ],
    "info_gaps": [
     "In-field soil test not provided",
     "Crop prices not loaded: revenue_pct left empty (no yields in kg/ha or t/ha are produced)",
-    "County IMERG rows not loaded: POWER precipitation used for the water balance",
     "Tile drainage and irrigation not modelled",
     "County yields loaded only for corn and soybeans; no small-grain or hay yield data"
    ],
@@ -788,31 +812,31 @@
    "metrics": {
     "season_water_deficit_mm": {
      "unit": "mm/yr",
-     "p10": 26.522,
-     "p50": 82.178,
-     "p90": 145.027,
-     "cvar": 175.076
+     "p10": 76.555,
+     "p50": 154.013,
+     "p90": 242.101,
+     "cvar": 282.876
     },
     "stress_days": {
      "unit": "days/yr",
-     "p10": 21.25,
-     "p50": 45.75,
-     "p90": 71.25,
-     "cvar": 81.06
+     "p10": 38.975,
+     "p50": 64.875,
+     "p90": 90.025,
+     "cvar": 98.12
     },
     "season_etc_mm": {
      "unit": "mm/yr",
-     "p10": 581.402,
-     "p50": 628.231,
-     "p90": 675.491,
-     "cvar": 698.156
+     "p10": 679.659,
+     "p50": 734.402,
+     "p90": 789.65,
+     "cvar": 816.144
     },
     "eta_mm": {
      "unit": "mm/yr",
-     "p10": 560.01,
-     "p50": 593.586,
-     "p90": 623.496,
-     "cvar": 635.075
+     "p10": 580.799,
+     "p50": 626.038,
+     "p90": 665.919,
+     "cvar": 678.525
     },
     "runoff_mm": {
      "unit": "mm/yr",
@@ -823,17 +847,17 @@
     },
     "drainage_mm": {
      "unit": "mm/yr",
-     "p10": 140.577,
-     "p50": 231.116,
-     "p90": 321.013,
-     "cvar": 353.031
+     "p10": 123.682,
+     "p50": 195.809,
+     "p90": 267.654,
+     "cvar": 297.548
     },
     "offseason_drainage_mm": {
      "unit": "mm/yr",
-     "p10": 70.559,
-     "p50": 115.429,
-     "p90": 167.246,
-     "cvar": 183.148
+     "p10": 68.08,
+     "p50": 107.747,
+     "p90": 152.06,
+     "cvar": 170.711
     },
     "living_cover_days": {
      "unit": "days/yr",
@@ -851,10 +875,10 @@
     },
     "veg_index_days": {
      "unit": "days/yr",
-     "p10": 177.116,
-     "p50": 190.754,
-     "p90": 202.444,
-     "cvar": 170.18
+     "p10": 162.413,
+     "p50": 179.012,
+     "p90": 193.173,
+     "cvar": 155.517
     },
     "precip_mm": {
      "unit": "mm/yr",
@@ -865,31 +889,31 @@
     }
    },
    "scores": {
-    "n_cycle_index": 0.669,
+    "n_cycle_index": 0.685,
     "erosion_index": 0.453,
     "organic_matter_index": 0.636,
     "pest_break_index": 0.7,
-    "water_use_index": 0.301,
+    "water_use_index": 0.262,
     "forage_index": 0.9,
     "market_index": 0.4
    },
-   "stability_index": 0.819,
+   "stability_index": 0.761,
    "composite": {
-    "p10": 0.525,
-    "p50": 0.549,
-    "p90": 0.574,
-    "cvar": 0.513
+    "p10": 0.503,
+    "p50": 0.526,
+    "p90": 0.552,
+    "cvar": 0.492
    },
    "display": {
     "vegetation_pct": {
-     "p10": 50.6,
-     "p50": 55.4,
-     "p90": 61.2
+     "p10": 52.6,
+     "p50": 59.5,
+     "p90": 66.9
     },
     "water_use_pct": {
-     "p10": 13.2,
-     "p50": 17.3,
-     "p90": 20.4
+     "p10": 16.3,
+     "p50": 20.9,
+     "p90": 24.6
     },
     "revenue_pct": {
      "p10": null,
@@ -904,10 +928,10 @@
      "source_id": "power",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 26.522,
-     "p50": 82.178,
-     "p90": 145.027,
-     "cvar": 175.076,
+     "p10": 76.555,
+     "p50": 154.013,
+     "p90": 242.101,
+     "cvar": 282.876,
      "n_members": 1,
      "period": null
     },
@@ -916,10 +940,10 @@
      "source_id": "geos_s2s",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 44.962,
-     "p50": 106.113,
-     "p90": 181.9,
-     "cvar": 210.897,
+     "p10": 98.686,
+     "p50": 184.908,
+     "p90": 281.131,
+     "cvar": 317.37,
      "n_members": 10,
      "period": "2027-MAM+JJ"
     },
@@ -928,10 +952,10 @@
      "source_id": "nex_gddp",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 50.419,
-     "p50": 117.45,
-     "p90": 189.403,
-     "cvar": 224.328,
+     "p10": 119.81,
+     "p50": 205.055,
+     "p90": 300.204,
+     "cvar": 343.131,
      "n_members": 2,
      "period": "2031-2040",
      "scenario": "ssp245"
@@ -941,10 +965,10 @@
      "source_id": "nex_gddp",
      "metric": "season_water_deficit_mm",
      "unit": "mm/yr",
-     "p10": 44.139,
-     "p50": 110.851,
-     "p90": 185.295,
-     "cvar": 221.246,
+     "p10": 107.184,
+     "p50": 200.434,
+     "p90": 294.743,
+     "cvar": 340.792,
      "n_members": 2,
      "period": "2031-2040",
      "scenario": "ssp585"
@@ -954,30 +978,29 @@
    "rank": 3,
    "goal_label": "Stability / resilience",
    "group_scores": {
-    "water": 0.301,
-    "soil": 0.586,
-    "stability": 0.819,
+    "water": 0.262,
+    "soil": 0.591,
+    "stability": 0.761,
     "income": 0.5
    },
    "pros": [
     "Perennial legume: fixes nitrogen and provides forage for livestock or hay sales",
-    "Deep roots (default 1.5 m) reach subsoil water; growing-season deficit 82 vs 105 mm/yr for A (P50)",
+    "Deep roots (default 1.5 m) reach subsoil water; growing-season deficit 154 vs 188 mm/yr for A (P50)",
     "Living cover 209 days/yr in this run (P50)"
    ],
    "cons": [
-    "Highest seasonal crop water demand of the options here (628 mm/yr, P50); soil profile is left drier for the next corn"
+    "Highest seasonal crop water demand of the options here (734 mm/yr, P50); soil profile is left drier for the next corn"
    ],
    "unique_feature": "Only option with a perennial legume (multi-year living roots and forage).",
    "why": "Adds to the current rotation: alfalfa adds deep roots, nitrogen fixation and forage.",
    "benefits": [
     "Perennial legume: fixes nitrogen and provides forage for livestock or hay sales",
-    "Deep roots (default 1.5 m) reach subsoil water; growing-season deficit 82 vs 105 mm/yr for A (P50)",
+    "Deep roots (default 1.5 m) reach subsoil water; growing-season deficit 154 vs 188 mm/yr for A (P50)",
     "Living cover 209 days/yr in this run (P50)"
    ],
    "info_gaps": [
     "In-field soil test not provided",
     "Crop prices not loaded: revenue_pct left empty (no yields in kg/ha or t/ha are produced)",
-    "County IMERG rows not loaded: POWER precipitation used for the water balance",
     "Tile drainage and irrigation not modelled",
     "County yields loaded only for corn and soybeans; no small-grain or hay yield data"
    ],
@@ -1068,7 +1091,7 @@
    "item": "kc_wheat_ini",
    "value": 0.4,
    "unit": "-",
-   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 12 winter wheat (non-frozen ini)"
+   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 12 winter wheat with frozen soils (Iowa winters)"
   },
   {
    "item": "kc_wheat_mid",
@@ -1080,7 +1103,7 @@
    "item": "kc_wheat_end",
    "value": 0.3,
    "unit": "-",
-   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 12 winter wheat"
+   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 12 winter wheat (0.25-0.4)"
   },
   {
    "item": "kc_alfalfa_ini",
@@ -1104,55 +1127,109 @@
    "item": "kc_cover_dormant",
    "value": 0.4,
    "unit": "-",
-   "source": "assumed; adapted from FAO-56 small-grain Kc_ini for a winter cereal rye cover"
+   "source": "assumption: cereal rye is not in FAO-56 Table 12; winter wheat with frozen soils Kc_ini used as analogue"
   },
   {
    "item": "kc_cover_spring",
    "value": 0.9,
    "unit": "-",
-   "source": "assumed; FAO-56 small-grain development value before termination"
+   "source": "assumption (no source): spring rye regrowth between FAO-56 winter wheat Kc_ini 0.4 and Kc_mid 1.15"
   },
   {
    "item": "kc_bare",
    "value": 0.3,
    "unit": "-",
-   "source": "assumed; FAO-56 Kc_ini lower bound for bare soil with infrequent wetting"
+   "source": "assumption: FAO-56 Table 12 lowest Kc_ini (0.3) used for bare soil between crops"
   },
   {
    "item": "zr_corn_m",
    "value": 1.0,
    "unit": "m",
-   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 maize 1.0-1.7 m"
+   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 maize 1.0-1.7 m (lower end)"
   },
   {
    "item": "zr_soy_m",
-   "value": 0.8,
+   "value": 0.6,
    "unit": "m",
-   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 soybeans 0.6-1.3 m"
+   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 soybeans 0.6-1.3 m (lower end)"
   },
   {
    "item": "zr_wheat_m",
-   "value": 1.2,
+   "value": 1.5,
    "unit": "m",
-   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 wheat 1.5-1.8 m (shallower, Iowa default)"
+   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 wheat 1.5-1.8 m (lower end)"
   },
   {
    "item": "zr_alfalfa_m",
    "value": 1.5,
    "unit": "m",
-   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 alfalfa 1.0-2.0 m"
+   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 alfalfa 1.0-2.0 m (capped at the 1.5 m bucket)"
   },
   {
    "item": "zr_cover_m",
    "value": 0.6,
    "unit": "m",
-   "source": "assumed cover-crop rooting depth"
+   "source": "assumption (no source): cereal rye cover rooting depth by termination"
+  },
+  {
+   "item": "p_corn",
+   "value": 0.55,
+   "unit": "-",
+   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 maize p = 0.55"
+  },
+  {
+   "item": "p_soy",
+   "value": 0.5,
+   "unit": "-",
+   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 soybeans p = 0.50"
+  },
+  {
+   "item": "p_wheat",
+   "value": 0.55,
+   "unit": "-",
+   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 wheat p = 0.55"
+  },
+  {
+   "item": "p_alfalfa",
+   "value": 0.55,
+   "unit": "-",
+   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 alfalfa hay p = 0.55"
+  },
+  {
+   "item": "p_cover",
+   "value": 0.55,
+   "unit": "-",
+   "source": "assumption: FAO-56 Table 22 wheat p used for the cereal rye cover"
   },
   {
    "item": "p_depletion",
    "value": 0.55,
    "unit": "-",
-   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 depletion fraction p (maize/wheat/alfalfa 0.55)"
+   "source": "FAO-56 (Allen et al. 1998, FAO Irrigation and Drainage Paper 56) Table 22 depletion fraction p (fallback)"
+  },
+  {
+   "item": "rye_residue_cover_frac",
+   "value": 0.5,
+   "unit": "fraction",
+   "source": "assumption (no source): surface fraction covered by terminated rye residue; effect size per FAO-56 ch. 7 (evaporation -5 % per 10 % mulch cover)"
+  },
+  {
+   "item": "cn_row_crop_residue",
+   "value": 75.0,
+   "unit": "-",
+   "source": "USDA NRCS TR-55 (1986) Table 2-2b row crops SR + crop residue, good, HSG B"
+  },
+  {
+   "item": "kc_field_scale_min",
+   "value": 0.8,
+   "unit": "-",
+   "source": "assumption (no source): lower bound of the OpenET-based field Kc scale"
+  },
+  {
+   "item": "kc_field_scale_max",
+   "value": 1.25,
+   "unit": "-",
+   "source": "assumption (no source): upper bound of the OpenET-based field Kc scale"
   },
   {
    "item": "cn_row_crop",
@@ -1194,7 +1271,7 @@
    "item": "crop_calendar",
    "value": null,
    "unit": null,
-   "source": "Iowa crop calendar defaults (day of year): corn plant May 1 / harvest Sep 28; soybean May 10 / Sep 22; winter wheat plant Oct 2 / harvest Jul 15; cereal rye cover planted 7 days after harvest, terminated 10 days before the next cash crop; post-wheat cover planted Jul 24; alfalfa spring-seeded Apr 15, second year terminated Oct 15. Kc stage lengths follow FAO-56 Table 11 style linear curves."
+   "source": "Iowa crop calendar defaults (day of year): corn plant May 1 / harvest Sep 28; soybean May 10 / Sep 22; winter wheat plant Oct 2 / harvest Jul 15; cereal rye cover planted 7 days after harvest, terminated 10 days before the next cash crop; post-wheat cover planted Jul 24; alfalfa spring-seeded Apr 15, second year terminated Oct 15. Kc is linear between stage break points (ini/dev/mid/late) in the FAO-56 Table 11 pattern; the stage dates are the team Iowa calendar above, not a verified Table 11 row (assumption)."
   },
   {
    "item": "small_grain",
@@ -1243,7 +1320,19 @@
    "item": "hydrologic_soil_group",
    "value": "B",
    "unit": null,
-   "source": "HSG not loaded; TR-55 group B curve numbers"
+   "source": "assumption: SSURGO hydgrp not loaded; TR-55 group B curve numbers for every field"
+  },
+  {
+   "item": "baseline_rotation",
+   "value": "C-S",
+   "unit": null,
+   "source": "CDL 2018-2025 observed corn/soybean sequence (8 years); A = this sequence, B = A + cereal rye after every cash crop; C (C-S-W + cover) and D (C-S-Alf-Alf) use the PRD 4 rotations"
+  },
+  {
+   "item": "cover_crop_effects",
+   "value": null,
+   "unit": null,
+   "source": "Cereal rye is modelled through its own water use (Kc, roots), TR-55 residue curve number and FAO-56 ch. 7 mulch evaporation reduction after termination. Qualitative direction (rye uses spring soil water; residue reduces runoff and evaporation) per SARE 'Managing Cover Crops Profitably' (3rd ed., 2007) and Iowa State University Extension cover-crop guidance; no numeric coefficient is taken from those sources."
   },
   {
    "item": "weather",
@@ -1260,13 +1349,14 @@
   "MATLAB input calibration_params.csv not found in /srv/hackathon/data/processed/v1/matlab; item skipped (defaults used where needed)",
   "MATLAB input coefficients.csv not found in /srv/hackathon/data/processed/v1/matlab; item skipped (defaults used where needed)",
   "No calibration_param rows (DB or MATLAB CSV): all coefficients are documented defaults",
+  "GPM IMERG loaded for this county (2016-2025, 3561 days). The water balance keeps NASA POWER precipitation because the Monte Carlo resamples 1995-2025 and IMERG is not loaded for the full period; IMERG/POWER annual precipitation ratio over 9 full years = 1.219 (POWER is drier, so modelled deficits may be on the high side).",
+  "Soil-water check: monthly anomaly correlation with NLDAS-2 Noah root-zone moisture r = 0.582 over 120 months (2016-2025); county context cell, not field-precise.",
   "GEOS-S2S next season: member MAM and Jun-Jul means applied as precip ratio / temperature shift vs the POWER 1995-2024 climatology of the same months (raw model vs POWER, no hindcast bias correction).",
   "NEX-GDDP-CMIP6 2030s: delta method per model (2031-2040 vs model historical 1985-2014; MAM, JJA, else annual) applied to resampled POWER years. Models: ACCESS-CM2, MPI-ESM1-2-HR. Distribution across models, not a forecast."
  ],
  "info_gaps": [
   "In-field soil test not provided",
   "Crop prices not loaded: revenue_pct left empty (no yields in kg/ha or t/ha are produced)",
-  "County IMERG rows not loaded: POWER precipitation used for the water balance",
   "Tile drainage and irrigation not modelled"
  ],
  "disclaimer": "Supportive comparison only. Not a single optimum. Not a substitute for farmer or agronomist judgment. Nitrogen figures, if any, are literature ranges pending a field soil test.",
