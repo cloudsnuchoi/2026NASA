@@ -36,7 +36,6 @@ This is the one canonical list of data, models, services, libraries and tools us
 | Open-Meteo Climate API | https://open-meteo.com/en/docs/climate-api | 200 / 200 | … Tier 1 future-climate context, shown as a range, never as a year-by-year forecast. Terms (CC BY 4.0 data, attribution required): https://open-meteo.com/en/terms (200 / 200). |
 | US Census cartographic boundary files (county) | https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html | 200 / 200 | … county polygons for the Corn Belt states. |
 | Esri World Imagery (basemap tiles) | https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9 | 200 / 200 | … satellite basemap (and Esri World Boundaries and Places labels) in the map. Attribution shown on the map: "© Esri, Maxar, Earthstar Geographics, and the GIS User Community". Terms: https://www.esri.com/en-us/legal/terms/full-master-agreement (200 / 200); attribution rules: https://www.esri.com/en-us/legal/terms/data-attributions (200 / 200). |
-| USDA ERS Commodity Costs and Returns | https://www.ers.usda.gov/data-products/commodity-costs-and-returns/ | 200 / 200 | … source for Quick Screen price/cost assumptions **only if** the final UI cites it (pending — labelled "assumption"). |
 
 ### 2.2 Open-source libraries (actually imported or loaded)
 

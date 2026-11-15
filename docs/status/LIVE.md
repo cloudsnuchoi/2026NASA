@@ -1,14 +1,14 @@
-# 아몰라 실시간 현황 · 22:20 KST
+# 아몰라 실시간 현황 · 22:56 KST
 
-일정: 1차 제출 21:00 (지남) · 동결 23:00 (0시간 39분 남음) · 최종 제출 23:30 (1시간 9분 남음)
-최종 제출 23:30 KST까지 **1시간 9분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (0시간 3분 남음) · 최종 제출 23:30 (0시간 33분 남음)
+최종 제출 23:30 KST까지 **0시간 33분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
 | 데이터 | 100% | 11/11 |
 | 엔진·API | 100% | 6/6 |
 | AI 모델 | 100% | 5/5 |
-| MATLAB | 69% | 9/13 |
+| MATLAB | 100% | 13/13 |
 | UI | 100% | 7/7 |
 | 인프라·봇 | 100% | 6/6 |
 
@@ -38,22 +38,22 @@
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
-- ✅ /explain (DeepSeek) — 6.7 s, deepseek-flash
+- ✅ /explain (DeepSeek) — 6.5 s, deepseek-flash
 
-## MATLAB 69%
+## MATLAB 100%
 - ✅ 윤성 1차 CSV: drought_2012_county.csv
 - ✅ 윤성 1차 CSV: climate_annual.csv
 - ✅ 윤성 1차 CSV: calibration_params.csv
-- 🟡 woochan: v8_cards_20fields.csv + coefficients_sources.csv — 🟡 접속함·작업 중
+- ✅ woochan: v8_cards_20fields.csv + coefficients_sources.csv — ✅ 결과 파일 있음
 - ✅ yoonsung: drought_compare_2012.png + drought_compare_2012_summary.csv — ✅ 결과 파일 있음
 - ✅ jimin: baresoil_days_20fields.csv — ✅ 결과 파일 있음
 - ✅ jieun: fig_p10p90.png + fig_backtest2012.png — ✅ 결과 파일 있음
 - ✅ yoonsung 추가: yoonsung_nldas_2012 — nldas_vs_engine_2012.png
 - ✅ yoonsung 추가: yoonsung_season_anomaly — season_anomaly_1995_2025.png
 - ✅ yoonsung 추가: yoonsung_s2s_box — s2s_vs_history_box.png
-- 🟡 jimin 추가: jimin_growing_season — growing_season_20fields.csv
-- 🟡 jimin 추가: jimin_ndvi_anomaly — ndvi_anomaly.png
-- 🟡 jimin 추가: jimin_bare_vs_rye — bare_vs_strategyB.csv
+- ✅ jimin 추가: jimin_growing_season — growing_season_20fields.csv
+- ✅ jimin 추가: jimin_ndvi_anomaly — ndvi_anomaly.png
+- ✅ jimin 추가: jimin_bare_vs_rye — bare_vs_strategyB.csv
 
 ## UI 100%
 - ✅ frontend/ 코드 (main)
@@ -76,31 +76,25 @@
 - 없음
 
 ## 다음 할 일
-1. MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv
-2. MATLAB: jimin 추가: jimin_growing_season
-3. MATLAB: jimin 추가: jimin_ndvi_anomaly
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
-- ✅ /explain (DeepSeek) — 6.7 s, deepseek-flash
+- ✅ /explain (DeepSeek) — 6.5 s, deepseek-flash
 
 ## 에이전트 레인 (tmux)
 | 세션 | 모델 | 하는 일 | 상태 | 기다리는 것 | 마지막 활동 |
 | --- | --- | --- | --- | --- | --- |
 | api | — | model_api 상시 실행 (:8090) | — | — | 19:27 |
 | bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | running | — | 21:20 |
-| final | ? | ? | running | — | 21:56 |
 | live | — | 이 현황 생성기 (5분) | — | — | 15:54 |
-| mat3 | ? | ? | running | — | 21:58 |
 | mfixq | ? | ? | running | — | 19:53 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | — | — | 12:11 |
 | mwatch | ? | ? | running | — | 20:40 |
 | rbatch | ? | ? | running | — | 21:00 |
 | runner | — | GitHub Actions 러너 | — | — | 13:09 |
-| sub2 | ? | ? | running | — | 20:17 |
 | web | — | 프론트+API 프록시 (:8095) | — | — | 21:56 |
 | web-tunnel | — | 공개 데모 터널 | — | — | 19:00 |
 
@@ -123,14 +117,15 @@
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 22:15 | — |
+| 김우찬 | 22:40 | — |
 | 김윤성 | 21:55 | — |
 | 고지은 | 21:04 | — |
-| 하지민 | 22:18 | — |
+| 하지민 | 22:38 | — |
 | 강다은 | 17:18 | — |
-| Hylē | 16:01 | 22:01 |
+| Hylē | 16:01 | 22:34 |
 
 ## 최근 머지된 PR
+- #78 feat(matlab): 윤성 NASS 2012 비교 결과 반영(슬라이드, S5), 새 스크립트 2개
 - #77 fix(ui): 결과 화면에 'A decision aid — it does not replace your judgement' 문구
 - #76 fix(ui): 분석 화면을 목업 v8 기준으로 복원, 스냅샷 배지, Pages CORS 제거, 프록시 제한 조정
 - #75 docs(submission): v2 슬라이드(MATLAB 그림, 모바일 화면)와 V8 실행 로그 출처
@@ -138,4 +133,3 @@
 - #73 fix(bot): MATLAB 방 캡처 요구 금지 규칙
 - #71 feat(matlab): 서버 봇 직접 안내(notify.log), 레인 상태, MATLAB 결과 30분 배치
 - #72 fix(ui): 모바일 360/390/768 점검과 UX-AUDIT 수정
-- #70 feat(matlab): run_all_<name>.m 원클릭 실행과 JSON 실행 로그, mwatch 자동 수정
