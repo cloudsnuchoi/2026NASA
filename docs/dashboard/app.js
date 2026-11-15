@@ -10,7 +10,18 @@
   const THEME_KEY = "fieldshift-theme";
   const COMMENT_REFRESH_MS = 2 * 60 * 1000;
   const FULL_SYNC_MS = 10 * 60 * 1000;
-  const DEADLINE = new Date("2026-11-15T23:59:00+09:00");
+  let DEADLINE = new Date("2026-11-15T23:59:00+09:00");
+  /* live.json deadline (submission target) overrides the default header countdown */
+  if (window.FieldShiftSite && FieldShiftSite.onLive) {
+    FieldShiftSite.onLive(function (data) {
+      const d = data && data.deadline ? new Date(data.deadline) : null;
+      if (!d || isNaN(d)) return;
+      DEADLINE = d;
+      const label = document.querySelector("#countdown .label");
+      const hm = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", hour12: false }).format(d);
+      if (label) label.textContent = "남은 시간 (마감 " + hm + " KST · live.json)";
+    });
+  }
   const COMMENTS_SINCE = "2026-11-14T15:00:00Z"; /* 2026-11-15 00:00 KST */
   const STALE_30 = 30 * 60 * 1000;
   const STALE_60 = 60 * 60 * 1000;

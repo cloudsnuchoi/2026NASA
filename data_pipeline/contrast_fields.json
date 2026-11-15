@@ -1,0 +1,13 @@
+{
+  "note": "Contrast demo fields (CSB 2018-2025 rev23 CSBID). Picked from CSB fields 25-80 ha, all 8 CSB years corn/soy, compactness>0.6, then SSURGO area-dominant mapunit via SDA (contrast_soil_probe.py). See docs/CONTRAST-FIELDS.md.",
+  "fields": [
+    {"field_id": "171825001292309", "county_fips": "17113", "state_alpha": "IL", "soil": "Osco, well drained, high AWC"},
+    {"field_id": "171825006921423", "county_fips": "17113", "state_alpha": "IL", "soil": "Drummer, poorly drained, high OM; mostly continuous corn"},
+    {"field_id": "171825006923844", "county_fips": "17113", "state_alpha": "IL", "soil": "Wyanet, well drained, low AWC"},
+    {"field_id": "311825001242480", "county_fips": "31109", "state_alpha": "NE", "soil": "Aksarben, well drained, lower AWC"},
+    {"field_id": "311825002820374", "county_fips": "31109", "state_alpha": "NE", "soil": "Wymore, moderately well drained claypan"},
+    {"field_id": "311825008109480", "county_fips": "31109", "state_alpha": "NE", "soil": "Yutan, well drained, eroded loess; more corn"},
+    {"field_id": "391825000729943", "county_fips": "39159", "state_alpha": "OH", "soil": "Brookston, poorly drained, lower AWC"},
+    {"field_id": "391825009407249", "county_fips": "39159", "state_alpha": "OH", "soil": "Fox, well drained outwash, high K"}
+  ]
+}

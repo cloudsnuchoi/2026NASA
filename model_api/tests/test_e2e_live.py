@@ -32,12 +32,17 @@ OPTIMUM_KEYS = {"best", "best_strategy", "optimal", "optimum", "recommended", "r
 EPS = 1e-6
 
 
+DEMO_COUNTY: dict[str, str] = {}  # demo field -> county (Story + contrast fields)
+
+
 def _reachable() -> tuple[bool, list[str]]:
     try:
         h = httpx.get(f"{BASE}/health", timeout=3).json()
         if not h.get("db"):
             return False, []
-        return True, [f["field_id"] for f in httpx.get(f"{BASE}/fields", timeout=20).json()["fields"]]
+        fl = httpx.get(f"{BASE}/fields", timeout=20).json()["fields"]
+        DEMO_COUNTY.update({f["field_id"]: f["county_fips"].strip() for f in fl})
+        return True, [f["field_id"] for f in fl]
     except Exception:
         return False, []
 
@@ -154,9 +159,11 @@ def test_health():
 
 def test_fields_demo_list():
     st, d = get("/fields")
-    assert st == 200 and d["demo_only"] is True and d["total"] == len(d["fields"]) == 12
-    for f in d["fields"]:
-        assert f["county_fips"].strip() == STORY and f["state_alpha"] == "IA"
+    assert st == 200 and d["demo_only"] is True and d["total"] == len(d["fields"]) >= 12
+    story = [f for f in d["fields"] if f["county_fips"].strip() == STORY]
+    assert len(story) == 12 and d["fields"][:12] == story  # Story first; contrast fields follow (docs/CONTRAST-FIELDS.md)
+    for f in story:
+        assert f["state_alpha"] == "IA"
         lon, lat = f["centroid"]["coordinates"]
         assert -94.0 < lon < -93.0 and 41.8 < lat < 42.3
         assert f["area_ha"] > 0
@@ -204,7 +211,7 @@ def test_profile(fid):
               "soil_summary", "disclaimer", "sources", "region_label", "precip_mm_yr", "et_mm_day", "et0_mm_day", "ndvi_peak",
               "ndvi_class", "t2m_mean_c", "cdl_history", "soil", "vision", "hero_state", "period", "info_gaps"):
         assert k in d, k
-    assert d["field_id"] == fid and d["county_fips"] == STORY
+    assert d["field_id"] == fid and d["county_fips"] == DEMO_COUNTY[fid]
     assert d["centroid"]["type"] == "Point" and d["geometry"]["type"] in ("Polygon", "MultiPolygon")
     assert d["ndvi_class"] in ("good", "fair", "low", None)
     assert d["hero_state"] in ("normal", "drought", "wet", "heat", "frost")
@@ -403,7 +410,8 @@ def test_simulate_county(fips):
 # /locate
 # ---------------------------------------------------------------------------------------------------
 def test_locate_story_field():
-    _, f = get(f"/field/{DEMO[-1]}/profile")
+    story = [f for f in DEMO if DEMO_COUNTY[f] == STORY]
+    _, f = get(f"/field/{story[-1]}/profile")
     lon, lat = f["centroid"]["coordinates"]
     st, d = get("/locate", lat=lat, lon=lon)
     assert st == 200 and d["service_tier"] == "field" and d["in_service_area"] is True

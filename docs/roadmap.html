@@ -19,6 +19,7 @@
     </div>
   </header>
   <main class="wrap">
+    <section id="live-status" aria-label="라이브 현황"></section>
     <section class="timeline" id="timeline">
       <div class="timeline-meta">
         <div><strong>오늘 시간표</strong><div class="muted">CHECKLIST 1–5절 + 23:30 업로드 창. 노란 칸이 지금 구간, 빨간 선이 현재 시각입니다.</div></div>
@@ -33,7 +34,9 @@
   </main>
   <footer id="site-footer" class="site-footer"></footer>
   <script src="./site/site.js"></script>
+  <script src="./site/live.js"></script>
   <script>
+    FieldShiftLive.mount("live-status");
     FieldShiftSite.mount({ active: "roadmap" });
 
     const DAY0 = new Date("2026-11-15T08:00:00+09:00");

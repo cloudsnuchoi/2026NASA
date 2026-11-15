@@ -380,3 +380,58 @@ body.explainer .wrap { padding-top: 1.15rem; }
 .tier-strip .k { color: var(--accent); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; margin-right: 0.4rem; }
 .tier-strip strong { margin-right: 0.35rem; }
 @media (max-width: 720px) { .tier-strip { grid-template-columns: 1fr; } }
+
+/* Nav: team chat + 내보내기 menu */
+.site-links a.chat-link { color: #c9f2dc !important; border: 1px solid rgba(61, 214, 140, 0.4); }
+.export-menu { position: relative; flex-shrink: 0; }
+.export-menu > summary { list-style: none; cursor: pointer; display: inline-flex; }
+.export-menu > summary::-webkit-details-marker { display: none; }
+.export-pop {
+  position: absolute; right: 0; top: calc(100% + 4px); z-index: 90;
+  display: flex; flex-direction: column; min-width: 9rem;
+  background: #0c1a28; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 10px;
+  padding: 0.3rem; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.export-pop button {
+  background: none; border: 0; color: #f3f6fa; font: inherit; font-size: 0.88rem; font-weight: 700;
+  text-align: left; padding: 0.45rem 0.6rem; border-radius: 6px; cursor: pointer;
+}
+.export-pop button:hover, .export-pop button:focus-visible { background: rgba(255, 255, 255, 0.12); }
+
+/* Live status panel (status/live.json) */
+.live-status { margin: 0 0 1.2rem; }
+.live-card h3 { margin: 1rem 0 0.45rem; font-size: 1rem; }
+.live-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 0.6rem; }
+.live-head h2 { margin: 0; }
+.live-head .stat-row { flex: 0 1 30rem; }
+.live-head .stat .n { font-size: 1.25rem; }
+.live-missing { font-size: 1.15rem; font-weight: 800; color: var(--warn); }
+.live-lane { border-bottom: 1px solid var(--line); }
+.live-lane > summary {
+  display: grid; grid-template-columns: 9rem 1fr 3.4rem auto; align-items: center; gap: 0.6rem;
+  padding: 0.5rem 0; cursor: pointer;
+}
+.live-lane .lane-name { font-weight: 800; }
+.live-lane .lane-counts { font-size: 0.82rem; white-space: nowrap; }
+.live-items { list-style: none; margin: 0 0 0.6rem; padding: 0 0 0 1rem; }
+.live-item { display: flex; gap: 0.45rem; padding: 0.22rem 0; font-size: 0.95rem; }
+.live-item.s-blocked strong { color: var(--bad); }
+.live-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 1.2rem; }
+.live-list { margin: 0; padding-left: 1.1rem; }
+.live-list li { margin: 0.2rem 0; }
+@media (max-width: 800px) {
+  .live-grid { grid-template-columns: 1fr; }
+  .live-lane > summary { grid-template-columns: 6.5rem 1fr 3rem; }
+  .live-lane .lane-counts { grid-column: 1 / -1; }
+  .export-pop { right: auto; left: 0; }
+}
+
+/* Print / PDF: hide chrome and controls */
+@media print {
+  .site-nav, .site-footer, .export-menu, button, .icon-btn, .tool-row, #token-box, .nav-toggle { display: none !important; }
+  html, body { background: #fff !important; color: #000 !important; }
+  .card, .info-card, .timeline, .member-card { box-shadow: none !important; break-inside: avoid; }
+  details.live-lane:not([open]) > .live-items { display: block; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.8em; color: #555; }
+  .site-links a::after, .docs a::after { content: none; }
+}
