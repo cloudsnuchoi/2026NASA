@@ -157,8 +157,8 @@ sleep 10 && grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' /srv/hackathon/db/
 3. 사람마다 첫 이슈를 `!assign`으로 보낸다. 예:
    - `!assign 지은 #12`
    - `!assign 지민 #13`
-   - `!assign 다은 <sim 이슈번호>`
-   - `!assign 윤성 <spike 이슈번호>`
+   - `!assign 다은 #30`
+   - `!assign 윤성 #26`
    - `!assign 우찬 #24`
 
 ## 재시작·장애 대응
