@@ -29,9 +29,10 @@ inputFile = '/data/processed/v1/matlab/inputs/fields_20.csv';
 outputDir = '/data/processed/v1/matlab/outputs/woochan';
 outputFile = fullfile(outputDir, 'v8_cards_20fields.csv');
 failureFile = fullfile(outputDir, 'v8_failures_20fields.csv');
-if isfile(outputFile) || isfile(failureFile)
-    error('FieldShift:OutputExists', 'Refusing to overwrite existing V8 batch outputs.');
-end
+% Server-side prefetch of every API response (data_pipeline/v8_prefetch.py).
+% Cache first; live webread (60 s timeout, 2 retries) only if a file is missing.
+cacheRoot = '/data/processed/v1/matlab/inputs/v8_api_cache';
+% Existing outputs are moved to outputs/woochan/old/<yyyymmdd_HHMMSS>/ at write time.
 if ~isfile(inputFile)
     error('FieldShift:InputMissing', 'Required input is missing: %s', inputFile);
 end
@@ -70,8 +71,9 @@ for fieldIdx = 1:height(fields)
         polyLat = [lat4, lat4(1)];
         polyLon = [lon4, lon4(1)];
         pinLat = mean(lat4); pinLon = mean(lon4);
+        cacheDir = fullfile(cacheRoot, char(fieldID));
         stage = "USGS";
-        [geo, dem] = fetch_real_usgs_terrain_noaddon(pinLat, pinLon, polyLat, polyLon);
+        [geo, dem] = fetch_real_usgs_terrain_noaddon(pinLat, pinLon, polyLat, polyLon, cacheDir);
         if ~geo.isSupported
             error('FieldShift:Unsupported', '%s', geo.message);
         end
@@ -79,9 +81,9 @@ for fieldIdx = 1:height(fields)
             error('FieldShift:Area', 'Polygon area must be positive.');
         end
         stage = "POWER";
-        env = fetch_live_nasa_power(pinLat, pinLon);
+        env = fetch_live_nasa_power(pinLat, pinLon, cacheDir);
         stage = "NWS_OpenMeteo";
-        proj = predict_future_climate_with_weather_agency(pinLat, pinLon, env);
+        proj = predict_future_climate_with_weather_agency(pinLat, pinLon, env, cacheDir);
         stage = "cards";
         cards = compute_fao_rotation_cards(selectedCrops, geo, dem, env, proj);
         stage = "allocation";
@@ -108,9 +110,7 @@ for fieldIdx = 1:height(fields)
         fprintf(2, '[%d/20] %s FAILED (%s): %s\n', fieldIdx, fieldID, stage, cause.message);
     end
 end
-if ~isfolder(outputDir)
-    mkdir(outputDir);
-end
+archive_existing_outputs(outputDir, {outputFile, failureFile});
 writetable(rows, outputFile, 'Encoding', 'UTF-8');
 writetable(failures, failureFile, 'Encoding', 'UTF-8');
 fprintf('V8 batch: %d/20 fields succeeded, %d rows, %d failed fields. NOT forecast.\n', ...
@@ -175,7 +175,7 @@ function rows = empty_card_table()
     env = struct('pastYears', nan(10,1), 'past', past, 'current', current, 'sourceTag', "");
     climate = struct('temp_C', nan(3,1), 'precip_mm', nan(3,1), 'evap_mm', nan(3,1));
     proj = struct('decadeTrendTemp_C', NaN, 'nwsTempAnomaly_C', NaN, ...
-        'shortTermYears', nan(3,1), 'shortTerm', climate, 'epochs', climate, 'sourceTag', "");
+        'et0ModelAvailable', false, 'shortTermYears', nan(3,1), 'shortTerm', climate, 'epochs', climate, 'sourceTag', "");
     card = struct('rotName', "", 'resultNum', NaN, 'ETm_mm', NaN, 'netProfit_ac', NaN, ...
         'somFactor', NaN, 'ndviRaw', NaN, 'epochScores', nan(1,3), 'deficitPct', NaN, ...
         'nFix_kg', NaN, 'waterIdx', NaN, 'somIdx', NaN, 'waterDiff_pct', NaN, ...
@@ -196,7 +196,47 @@ function tf = nws_fahrenheit(periods)
     end
 end
 
-function [geo, dem] = fetch_real_usgs_terrain_noaddon(pinLat, pinLon, polyLat, polyLon)
+function archive_existing_outputs(outputDir, files)
+    % Never overwrite: move previous outputs to <outputDir>/old/<yyyymmdd_HHMMSS>/.
+    if ~isfolder(outputDir)
+        mkdir(outputDir);
+    end
+    existing = files(cellfun(@isfile, files));
+    if isempty(existing)
+        return;
+    end
+    stamp = char(datetime('now', 'Format', 'yyyyMMdd_HHmmss'));
+    oldDir = fullfile(outputDir, 'old', stamp);
+    mkdir(oldDir);
+    for k = 1:numel(existing)
+        movefile(existing{k}, oldDir);
+    end
+    fprintf('Previous outputs moved to %s\n', oldDir);
+end
+
+function [res, fromCache] = cached_webread(cacheDir, name, url, opts)
+    % Prefetched raw JSON first (same response body as webread would decode).
+    cacheFile = fullfile(cacheDir, [name '.json']);
+    fromCache = isfile(cacheFile);
+    if fromCache
+        res = jsondecode(fileread(cacheFile));
+        return;
+    end
+    opts.Timeout = 60;
+    lastErr = [];
+    for attempt = 1:3 % first try + 2 retries
+        try
+            res = webread(url, opts);
+            return;
+        catch cause
+            lastErr = cause;
+            pause(2 * attempt);
+        end
+    end
+    rethrow(lastErr);
+end
+
+function [geo, dem] = fetch_real_usgs_terrain_noaddon(pinLat, pinLon, polyLat, polyLon, cacheDir)
     polyLat = reshape(polyLat, 1, []);
     polyLon = reshape(polyLon, 1, []);
 
@@ -235,14 +275,14 @@ function [geo, dem] = fetch_real_usgs_terrain_noaddon(pinLat, pinLon, polyLat, p
 
     % 3) USGS National Map 3DEP Elevation API 실시간 호출 (폴리곤 꼭짓점 실제 해발고도 조회)
     nVerts = numel(polyLat) - 1;
-    opts = weboptions('Timeout', 8);
+    opts = weboptions('Timeout', 60);
     elevList = zeros(1, nVerts);
     apiSuccess = true;
     try
         for k = 1:nVerts
             url = sprintf('https://epqs.nationalmap.gov/v1/json?x=%.6f&y=%.6f&wkid=4326&units=Meters', ...
                 polyLon(k), polyLat(k));
-            res = webread(url, opts);
+            res = cached_webread(cacheDir, sprintf('epqs_%d', k), url, opts);
             elevList(k) = str2double(string(res.value));
         end
         if any(~isfinite(elevList)) || any(elevList < -100)
@@ -262,7 +302,7 @@ function [geo, dem] = fetch_real_usgs_terrain_noaddon(pinLat, pinLon, polyLat, p
     dem.isLiveAPI = apiSuccess;
 end
 
-function env = fetch_live_nasa_power(lat, lon)
+function env = fetch_live_nasa_power(lat, lon, cacheDir)
     % NASA POWER API 호출 (2016-01-01 ~ 2025-12-31 과거 10년 실제 일별 관측 데이터)
     url = sprintf(['https://power.larc.nasa.gov/api/temporal/daily/point?' ...
         'parameters=T2M,T2M_MAX,T2M_MIN,PRECTOTCORR,ALLSKY_SFC_SW_DWN,GWETROOT' ...
@@ -271,7 +311,7 @@ function env = fetch_live_nasa_power(lat, lon)
     env.pastYears = (2016:2025)';
     nYrs = numel(env.pastYears);
     try
-        raw = webread(url, weboptions('Timeout', 12));
+        raw = cached_webread(cacheDir, 'power', url, weboptions('Timeout', 60));
         p = raw.properties.parameter;
         fNames = fieldnames(p.T2M); % 'x20160101' 형태
 
@@ -331,7 +371,7 @@ function env = fetch_live_nasa_power(lat, lon)
     env.current.soilMoisture = round(mean(env.past.soilMoisture), 2);
 end
 
-function proj = predict_future_climate_with_weather_agency(lat, lon, env)
+function proj = predict_future_climate_with_weather_agency(lat, lon, env, cacheDir)
     % Prototype deterministic extrapolation/blend; NOT a forecast or distribution.
     % Open-Meteo MRI_AGCM3_2_S is not NOAA GFS or NASA NEX-GDDP-CMIP6.
     % 1단계: 과거 10년 실측 시계열 선형 회귀(polyfit) 추세 계산
@@ -349,11 +389,11 @@ function proj = predict_future_climate_with_weather_agency(lat, lon, env)
     % 2단계: 미국 기상청(NOAA National Weather Service) 공식 API 실시간 호출
     nwsAnomaly_C = 0.0;
     try
-        optsNWS = weboptions('Timeout', 8, 'UserAgent', 'FieldShift_AgriEngine_MATLAB/1.0');
+        optsNWS = weboptions('Timeout', 60, 'UserAgent', 'FieldShift_AgriEngine_MATLAB/1.0');
         ptUrl = sprintf('https://api.weather.gov/points/%.4f,%.4f', lat, lon);
-        ptMeta = webread(ptUrl, optsNWS);
-        fcUrl = string(ptMeta.properties.forecast);
-        fcData = webread(fcUrl, optsNWS);
+        ptMeta = cached_webread(cacheDir, 'nws_points', ptUrl, optsNWS);
+        fcUrl = char(string(ptMeta.properties.forecast));
+        fcData = cached_webread(cacheDir, 'nws_forecast', fcUrl, optsNWS);
         periods = fcData.properties.periods;
         if isstruct(periods)
             tempsF = [periods.temperature];
@@ -381,11 +421,25 @@ function proj = predict_future_climate_with_weather_agency(lat, lon, env)
 
     proj.shortTermYears = (2026:2028)';
     try
-        raw = webread(url, weboptions('Timeout', 12));
-        timeCells = raw.daily.time;
-        tVec  = raw.daily.temperature_2m_mean;
-        pVec  = raw.daily.precipitation_sum;
-        etVec = raw.daily.et0_fao_evapotranspiration;
+        raw = cached_webread(cacheDir, 'openmeteo', url, weboptions('Timeout', 60));
+        timeCells = cellstr(raw.daily.time);
+        tVec  = double(raw.daily.temperature_2m_mean(:));
+        pVec  = double(raw.daily.precipitation_sum(:));
+        % MRI_AGCM3_2_S does NOT provide ET0: Open-Meteo returns all nulls and
+        % daily_units = "undefined" (jsondecode -> all NaN, or [] / cell of []).
+        % That was the 19:23 KST failure. Treat it as an information gap: the
+        % evap blend then uses only V8's own POWER-trend term (flag below).
+        % Partial nulls in any variable still fail closed.
+        etRaw = raw.daily.et0_fao_evapotranspiration;
+        if isempty(etRaw) || (iscell(etRaw) && all(cellfun(@isempty, etRaw(:))))
+            etVec = nan(numel(timeCells), 1);
+        elseif iscell(etRaw)
+            error('FieldShift:ClimateIncomplete', 'Open-Meteo ET0 has an unexpected mixed type.');
+        else
+            etVec = double(etRaw(:));
+        end
+        et0Missing = all(isnan(etVec));
+        proj.et0ModelAvailable = ~et0Missing;
         yrs = cellfun(@(s) str2double(s(1:4)), timeCells);
 
         expectedDates = datetime(2026,1,1):datetime(2039,12,31);
@@ -394,7 +448,8 @@ function proj = predict_future_climate_with_weather_agency(lat, lon, env)
                 ~all(ismember(expectedTimes, timeCells)) || ...
                 numel(tVec) ~= numel(timeCells) || numel(pVec) ~= numel(timeCells) || ...
                 numel(etVec) ~= numel(timeCells) || ...
-                any(~isfinite([tVec(:); pVec(:); etVec(:)])) || ...
+                any(~isfinite([tVec(:); pVec(:)])) || ...
+                (~et0Missing && any(~isfinite(etVec(:)))) || ...
                 any(pVec(:) < 0) || any(etVec(:) < 0)
             error('FieldShift:ClimateIncomplete', 'Open-Meteo daily series is incomplete or invalid.');
         end
@@ -410,9 +465,13 @@ function proj = predict_future_climate_with_weather_agency(lat, lon, env)
             trendP = env.current.precip_mm + slopePrecPerYr * (yr - 2023);
             proj.shortTerm.precip_mm(k,1) = round(0.6 * modelP + 0.4 * trendP, 1);
 
-            modelE = sum(etVec(yMask), 'omitnan');
             trendE = env.current.evap_mm + slopeEvapPerYr * (yr - 2023);
-            proj.shortTerm.evap_mm(k,1) = round(0.6 * modelE + 0.4 * trendE, 1);
+            if et0Missing
+                proj.shortTerm.evap_mm(k,1) = round(trendE, 1); % model term = information gap
+            else
+                modelE = sum(etVec(yMask), 'omitnan');
+                proj.shortTerm.evap_mm(k,1) = round(0.6 * modelE + 0.4 * trendE, 1);
+            end
         end
 
         % 단기(2026~2029) 및 2030년대(2030~2039) 예측 산출
@@ -423,14 +482,22 @@ function proj = predict_future_climate_with_weather_agency(lat, lon, env)
         t30s = round(0.6 * mean(tVec(m30s), 'omitnan') + 0.4 * (env.current.temp_C + slopeTempPerYr * 12.0 + nwsAnomaly_C), 1);
         p20s = round(0.6 * (sum(pVec(m20s), 'omitnan') / 4)  + 0.4 * (env.current.precip_mm + slopePrecPerYr * 4.5), 0);
         p30s = round(0.6 * (sum(pVec(m30s), 'omitnan') / 10) + 0.4 * (env.current.precip_mm + slopePrecPerYr * 12.0), 0);
-        e20s = round(0.6 * (sum(etVec(m20s), 'omitnan') / 4)  + 0.4 * (env.current.evap_mm + slopeEvapPerYr * 4.5), 0);
-        e30s = round(0.6 * (sum(etVec(m30s), 'omitnan') / 10) + 0.4 * (env.current.evap_mm + slopeEvapPerYr * 12.0), 0);
+        if et0Missing % model ET0 = information gap; POWER-trend term only
+            e20s = round(env.current.evap_mm + slopeEvapPerYr * 4.5, 0);
+            e30s = round(env.current.evap_mm + slopeEvapPerYr * 12.0, 0);
+        else
+            e20s = round(0.6 * (sum(etVec(m20s), 'omitnan') / 4)  + 0.4 * (env.current.evap_mm + slopeEvapPerYr * 4.5), 0);
+            e30s = round(0.6 * (sum(etVec(m30s), 'omitnan') / 10) + 0.4 * (env.current.evap_mm + slopeEvapPerYr * 12.0), 0);
+        end
 
         proj.epochs.names     = {'2016-2025 baseline', '2026-2029 prototype NOT forecast', '2030-2039 prototype NOT forecast'};
         proj.epochs.temp_C    = [env.current.temp_C, t20s, t30s];
         proj.epochs.precip_mm = [env.current.precip_mm, p20s, p30s];
         proj.epochs.evap_mm   = [env.current.evap_mm, e20s, e30s];
         proj.sourceTag = 'Prototype deterministic blend: POWER trend + NWS short-term anomaly + Open-Meteo MRI_AGCM3_2_S; NOT forecast';
+        if et0Missing
+            proj.sourceTag = [proj.sourceTag '; INFORMATION GAP: MRI_AGCM3_2_S provides no ET0, future evap = POWER trend only'];
+        end
     catch cause
         error('FieldShift:ClimateFailure', 'Open-Meteo climate data unavailable: %s', cause.message);
     end

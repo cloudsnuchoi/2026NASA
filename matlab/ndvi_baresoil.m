@@ -15,7 +15,6 @@ function result = ndvi_baresoil()
 inputDir = '/data/processed/v1/matlab/inputs';
 outputDir = '/data/processed/v1/matlab/outputs/jimin';
 outputFile = fullfile(outputDir, 'baresoil_days_20fields.csv');
-assert(~isfile(outputFile), 'Refusing to overwrite: %s', outputFile);
 threshold = 0.3;           % Provisional team screening parameter, not evidence.
 validFracMin = 0.5;        % Provisional QA setting from matlab/TASKS.md.
 maxGapDays = 20;           % Provisional interpolation cap; do not bridge winter.
@@ -93,16 +92,8 @@ for f = 1:height(fields)
     end
 end
 % Numeric NaN cells are written as empty CSV fields by writetable.
-if ~isfolder(outputDir), mkdir(outputDir); end
-% Atomic reservation protects existing outputs even from concurrent runs.
-file = javaObject('java.io.File', outputFile);
-assert(file.createNewFile(), 'Refusing to overwrite: %s', outputFile);
-try
-    writetable(result, outputFile, 'Encoding', 'UTF-8');
-catch err
-    delete(outputFile); % Only this invocation's reserved, incomplete output.
-    rethrow(err);
-end
+archive_existing_outputs(outputDir, {outputFile}); % old outputs -> old/<stamp>/
+writetable(result, outputFile, 'Encoding', 'UTF-8');
 fprintf('Wrote %s (%d field-years); provisional screening counts only.\n', ...
     outputFile, height(result));
 end
@@ -124,4 +115,18 @@ end
 t = readtable(path, opts);
 assert(~any(ismissing(t.field_id) | strlength(t.field_id) == 0), ...
     'Missing field_id in %s', path);
+end
+
+function archive_existing_outputs(outputDir, files)
+% Never overwrite: move previous outputs to <outputDir>/old/<yyyymmdd_HHMMSS>/.
+if ~isfolder(outputDir), mkdir(outputDir); end
+existing = files(cellfun(@isfile, files));
+if isempty(existing), return; end
+stamp = char(datetime('now', 'Format', 'yyyyMMdd_HHmmss'));
+oldDir = fullfile(outputDir, 'old', stamp);
+mkdir(oldDir);
+for k = 1:numel(existing)
+    movefile(existing{k}, oldDir);
+end
+fprintf('Previous outputs moved to %s\n', oldDir);
 end
