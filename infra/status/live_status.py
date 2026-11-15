@@ -257,6 +257,61 @@ def lane_done(name: str) -> bool:
     return p.exists() and f"{name.upper()}-LANE-DONE" in p.read_text(errors="replace")[-20000:]
 
 
+# --------------------------------------------------------------------------- agent lane states
+LANE_STATES = Path(os.environ.get("LANE_STATES_FILE", "/srv/hackathon/state/status/lane_states.json"))
+PENDING_NOTICES = Path(os.environ.get("PENDING_NOTICES_FILE", "/srv/hackathon/state/status/pending_notices.json"))
+PROJECTS = Path("/srv/hackathon/projects")
+LANE_WORKTREE = {"notify": "2026NASA-mauto", "mwatch": "2026NASA-mauto"}  # lane -> worktree dir when not 2026NASA-<lane>
+STATES = ("running", "blocked", "waiting-merge", "waiting-notify", "done")
+
+
+def _read_json(p: Path) -> dict:
+    try:
+        v = json.loads(p.read_text(encoding="utf-8"))
+        return v if isinstance(v, dict) else {}
+    except Exception:
+        return {}
+
+
+def derive_lane_state(alive: bool, unmerged: int, pending: int, done: bool = False,
+                      override: dict | None = None) -> dict:
+    """Override file wins; else alive -> running; commits not in origin/main -> waiting-merge;
+    pending notices -> waiting-notify; finished lane (LANE-DONE marker) -> done; otherwise blocked."""
+    if override and override.get("state") in STATES:
+        return {"state": override["state"], "waits_on": str(override.get("waits_on") or "")}
+    if alive and not done:
+        return {"state": "running", "waits_on": ""}
+    if unmerged:
+        return {"state": "waiting-merge", "waits_on": f"main에 없는 커밋 {unmerged}개 (감독 머지)"}
+    if pending:
+        return {"state": "waiting-notify", "waits_on": f"보낼 알림 {pending}건"}
+    if done:
+        return {"state": "done", "waits_on": ""}
+    return {"state": "blocked", "waits_on": "프로세스 없음·완료 표시 없음"}
+
+
+def unmerged_commits(lane: str) -> int:
+    wt = PROJECTS / LANE_WORKTREE.get(lane, f"2026NASA-{lane}")
+    if not (wt / ".git").exists():
+        return 0
+    out = sh(["git", "-C", str(wt), "rev-list", "--count", "origin/main..HEAD"], timeout=10).strip()
+    return int(out) if out.isdigit() else 0
+
+
+def lane_states(tmux: list[dict]) -> dict:
+    """Agent lanes = tmux sessions running a model (TMUX_INFO model != '—') + lanes named in the override file."""
+    overrides = _read_json(LANE_STATES)
+    pending = _read_json(PENDING_NOTICES)
+    alive = {t["name"] for t in tmux}
+    lanes = {n for n, (model, _) in TMUX_INFO.items() if model not in ("—", "?")} | (alive - set(TMUX_INFO)) | set(overrides)
+    out = {}
+    for lane in sorted(lanes):
+        p = pending.get(lane) or []
+        out[lane] = derive_lane_state(lane in alive, unmerged_commits(lane), len(p) if isinstance(p, list) else int(p or 0),
+                                      lane_done(lane), overrides.get(lane))
+    return out
+
+
 # --------------------------------------------------------------------------- build
 def build() -> dict:
     cache = load_cache()
@@ -326,6 +381,12 @@ def build() -> dict:
     sim = [item("sim/ 코드", any(p.startswith("sim/") and not p.endswith(".gitkeep") for p in paths)), item("복셀 시뮬 (#30)", closed(30))]
     tmux = tmux_sessions()
     names = {t["name"] for t in tmux}
+    try:
+        lstates = lane_states(tmux)
+    except Exception as exc:
+        lstates = {"error": {"state": "blocked", "waits_on": type(exc).__name__}}
+    for t in tmux:
+        t.update(lstates.get(t["name"], {}))
     mm_ok = False
     try:
         mm_ok = http_json(f"{MM}/api/v4/system/ping", timeout=5).get("status") == "OK"
@@ -373,6 +434,7 @@ def build() -> dict:
         "stretch": [{"name": "복셀 시뮬 (다은)", "status": "stretch",
                      "detail": "19:30까지 공개 링크 없음 → Stretch, 진행률 계산 제외" if not sim[0]["status"] == "done" else "sim/ 코드 있음"}],
         "lane_agents_done": {n: lane_done(n) for n in ("l1", "l2", "prd", "l4", "l5")},
+        "lane_states": lstates,
     }
     CACHE.parent.mkdir(parents=True, exist_ok=True)
     CACHE.write_text(json.dumps(cache), encoding="utf-8")
@@ -393,8 +455,14 @@ def to_md(d: dict) -> str:
     L += ["", "## 막힌 점"] + ([f"- {b}" for b in d["blockers"]] or ["- 없음"])
     L += ["", "## 다음 할 일"] + [f"{i}. {n}" for i, n in enumerate(d["next"], 1)]
     L += ["", "## AI 모델"] + [f"- {icon.get(m['status'], '🟡')} {m['name']} — {m['detail']}" for m in d["ai_models"]]
-    L += ["", "## 에이전트 레인 (tmux)", "| 세션 | 모델 | 하는 일 | 마지막 활동 |", "| --- | --- | --- | --- |"]
-    L += [f"| {t['name']} | {t['model']} | {t['task']} | {t['last_activity']} |" for t in d["tmux"]]
+    L += ["", "## 에이전트 레인 (tmux)", "| 세션 | 모델 | 하는 일 | 상태 | 기다리는 것 | 마지막 활동 |",
+          "| --- | --- | --- | --- | --- | --- |"]
+    L += [f"| {t['name']} | {t['model']} | {t['task']} | {t.get('state', '—')} | {t.get('waits_on') or '—'} | {t['last_activity']} |"
+          for t in d["tmux"]]
+    gone = {k: v for k, v in (d.get("lane_states") or {}).items() if k not in {t["name"] for t in d["tmux"]}}
+    if gone:
+        L += ["", "## 레인 상태 (tmux 없음)", "| 레인 | 상태 | 기다리는 것 |", "| --- | --- | --- |"]
+        L += [f"| {k} | {v.get('state')} | {v.get('waits_on') or '—'} |" for k, v in sorted(gone.items())]
     L += ["", "## 사람 (마지막 활동, KST)", "| 이름 | Mattermost | 레포 |", "| --- | --- | --- |"]
     L += [f"| {p['name']} | {p['mattermost_last'] or '—'} | {p['repo_last'] or '—'} |" for p in d["people"]]
     L += ["", "## 최근 머지된 PR"] + [f"- #{p['number']} {p['title']}" for p in d["merged_prs"]]
