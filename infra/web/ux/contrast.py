@@ -67,6 +67,15 @@ rows = [
     ),
     ("non-text: user polygon stroke #f7f6f0 vs dark field #2c3a24", h("f7f6f0"), h("2c3a24"), "ui"),
     ("non-text: pilot outline #f2c46d vs dark field #2c3a24", h("f2c46d"), h("2c3a24"), "ui"),
+    # after phase-2 fixes
+    ("AFTER slate-600 #475569 on white ('information gap', ranges)", h("475569"), W, "small"),
+    ("AFTER slate-600 on #f3f5ee (Tier 1 tiles, footer)", h("475569"), S, "small"),
+    ("AFTER slate-500 on white ('(assumption)', units)", h("64748b"), W, "small"),
+    ("AFTER #3d7a1f on white ('TIER 1 · QUICK SCREEN')", h("3d7a1f"), W, "small"),
+    ("AFTER emerald-100/80 on white/10 over #173a2b (model id)", blend(h("d1fae5"), 0.8, blend(W, 0.1, F)), blend(W, 0.1, F), "small"),
+    ("AFTER #102a1b on white/25 over #74b93d (story badge)", h("102a1b"), blend(W, 0.25, h("74b93d")), "small"),
+    ("AFTER #0f291e on #82c341 (hero CTA)", h("0f291e"), h("82c341"), "small"),
+    ("AFTER amber-950 #451a03 on amber-100 (static banner)", h("451a03"), h("fef3c7"), "small"),
     ("disabled CTA (opacity .4) — exempt", h("0f291e"), blend(h("82c341"), 0.4, h("f7f6f0")), "exempt"),
 ]
 need = {"small": 4.5, "large": 3.0, "ui": 3.0, "exempt": 0}

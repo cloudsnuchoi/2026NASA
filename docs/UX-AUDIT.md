@@ -133,7 +133,7 @@ Fix F4: `min-height: 44px` on all `button`s in pages, Leaflet zoom 44 px on `(po
 - Tier 1 / Tier 2 failure: red box with the raw error text, e.g. `Quick Screen unavailable (HTTP 429)`. "Information gap — no fallback values" is correct honesty-wise; missing: plain-language cause (rate limit / upstream down) and a Retry button.
 - `/fields-geo` failure: one toast; preset buttons then say "Pilot fields still loading…" indefinitely. Needs a retry and an honest message.
 - `/explain` failure: "Explanation unavailable: <message>". OK, could add retry.
-- Information gaps: rendered as `information gap` in slate-400 italic → contrast failure (§3.6). The full-page capture also showed the results footer clipped at the bottom of the document — to be re-checked locally in phase 2 (it may be a capture artefact of the fade-in animation).
+- Information gaps: rendered as `information gap` in slate-400 italic → contrast failure (§3.6). The full-page capture showed the results footer clipped at the bottom; re-checked by scrolling a live 390 px viewport to the end — the footer renders completely, so this is a full-page-capture artefact, not a bug.
 - `prefers-reduced-motion` is not honoured (Ken Burns hero, bouncing arrow, page fade, sunflower).
 
 ### 3.9 Design-token consistency
@@ -157,7 +157,42 @@ Fix F4: `min-height: 44px` on all `button`s in pages, Leaflet zoom 44 px on `(po
 
 All fixes keep the honesty labels (screening estimate, relative-index tooltip, P10–P90, possible range (scenario), S7, AI-image badges, "does not replace your judgement") and add no numbers.
 
-## 5. Reproduce
+## 5. Phase 2 — implemented (20:43–20:50 KST, branch `feat/ux-mobile`)
+
+Applied to `frontend/` and mirrored into `docs/demo/` (the demo keeps its own snapshot API layer). No layout redesign; no numbers added; every honesty label kept.
+
+| Fix | Status | Where |
+| --- | --- | --- |
+| F1 hero value line + "Draw your field →" CTA, "decision-support tool — does not replace your judgement. Free, no login." | done | `index.html` hero |
+| F2 contrast (table below) | done | `app.js` GAP/labels, `index.html` badge/footer |
+| F3 results jump nav (Strategies A–D · Quick Screen · Checklist), Evidence in `<details>` with count, Tier 1 heading "Quick Screen for your field" (engine name kept as subtitle) | done | `app.js` |
+| F4 44 px targets: all page buttons, Undo/Clear, Leaflet zoom on coarse pointers, 20 px S7 checkboxes with 44 px label rows | done | `index.html` CSS |
+| F5 "Tap" on touch devices, live "corner N of 4" hint on the map, sticky Selected/Run bar on phones, crop photos 112 px on phones | done | both |
+| F6 one `P10–P90 a–b` notation (nowrap), A = "baseline", "days" unit, legend point styles, chart caption says backtest is one season and green = matches your crops | done | `app.js` |
+| F7 result ranges/labels ≥ 12 px (`text-xs`); remaining 9–11 px nodes are photo badges, Leaflet attribution and the legend swatches | done | `app.js` |
+| F8 plain-language 429 / network / upstream errors, raw detail kept, Retry button; pilot-outline load retry | done | `app.js` |
+| F9 `prefers-reduced-motion`, `aria-pressed` on crop cards, `:focus-visible` ring, chart `role="img"` + label | done | both |
+| New: `overflow-x: hidden` on `body` made it a scroll container, so `position: sticky` never stuck → `overflow-x: clip` (hidden kept as fallback) | done | `index.html` |
+| New (static demo only): the fixed "static snapshot" banner covered "Next: choose crops" on phones (Playwright: banner intercepts pointer events) → banner flows at page top below `lg`, fixed bottom-left only on desktop | done | `docs/demo/app.js` |
+| F10 design-token consolidation | not done (documented) | — |
+
+Contrast after the fixes (`infra/web/ux/contrast.py`):
+
+| Pair | Ratio | Result |
+| --- | ---: | --- |
+| slate-600 on white ("information gap", ranges) | 7.58:1 | PASS |
+| slate-600 on #f3f5ee (Tier 1 tiles, footer) | 6.89:1 | PASS |
+| slate-500 on white ("(assumption)", units) | 4.76:1 | PASS |
+| #3d7a1f on white ("TIER 1 · QUICK SCREEN") | 5.25:1 | PASS |
+| emerald-100/80 on white/10 over #173a2b (model id, disclaimer) | 5.91:1 | PASS |
+| #102a1b on white/25 over #74b93d (story badge) | 8.03:1 | PASS |
+| #0f291e on #82c341 (hero CTA) | 7.25:1 | PASS |
+
+Verification before each commit (local server on this worktree, live model_api): `node --check` both `app.js`; `pytest model_api/tests/test_quick.py test_api_contract.py` → 23 passed; `mobile_check.py` at 360/390/1280 → document width = viewport, 4 touch taps → 4 vertices, Story preset → Quick + Deep, 0 page errors, no visible control under 44 px except the Leaflet attribution link (16 hits are Evidence links inside closed `<details>`, 7 are the 20 px checkboxes whose label rows are 44 px); `error_check.py` → mocked 429 shows the plain message + information gap + Retry, Retry then renders the real result; static demo (`docs/demo/?mode=static`) at 390/1280 plus `tools/test_static_demo.py` → 9/9 PASS, 0 page errors; → preset flow completes, banner does not overlap Run, 0 page errors. Sticky check at 390 px: Run bar bottom 832 px (viewport 844) on the crops page, jump nav top 0 after scrolling 3,000 px.
+
+After screenshots: `docs/screens/mobile/after/` (`390-01-first-screen.jpg`, `390-04-map-touch-4.jpg`, `390-07-results-top.jpg`, `390-09-error-429.jpg`, `demo-390-crops.jpg`, …). The public tunnel still serves the deployed checkout; these fixes reach it only after merge and redeploy.
+
+## 6. Reproduce
 
 ```bash
 /srv/hackathon/venv/bin/python infra/web/ux/mobile_check.py "$(cat /srv/hackathon/state/status/demo_url.txt)" docs/screens/mobile 360,390,768
