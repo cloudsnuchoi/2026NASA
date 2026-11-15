@@ -74,6 +74,8 @@ class Config:
     history_turns: int = 16
     doc_budget: int = 60000
     max_tokens: int = 2500
+    agent_silent_min: float = 10.0  # flag a laptop agent-loop silent longer than this
+    agent_feedback_cooldown_min: float = 30.0
     auto_dispatch: bool = True  # !assign also posts "!task #N <prompt>" for the member's laptop agent-loop
 
     @classmethod
@@ -95,6 +97,8 @@ class Config:
         c.history_turns = int(e("HISTORY_TURNS", c.history_turns))
         c.doc_budget = int(e("DOC_BUDGET_CHARS", c.doc_budget))
         c.max_tokens = int(e("ORCH_MAX_TOKENS", c.max_tokens))
+        c.agent_silent_min = float(e("AGENT_SILENT_MIN", c.agent_silent_min))
+        c.agent_feedback_cooldown_min = float(e("AGENT_FEEDBACK_COOLDOWN_MIN", c.agent_feedback_cooldown_min))
         c.auto_dispatch = e("AUTO_DISPATCH", "1").strip().lower() not in ("0", "false", "no", "")
         return c
 
@@ -354,6 +358,7 @@ class Incoming:
     file_count: int = 0
     agent_kind: str = ""  # set when the post comes from a laptop agent-loop (props.amolla_agent)
     agent_state: str = ""
+    agent_props: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -373,7 +378,7 @@ class Orchestrator:
     def __init__(self, cfg: Config, llm: LLM, gh: GitHubContext, docs: DocsContext, members: Dict[str, Member]):
         self.cfg, self.llm, self.gh, self.docs, self.members = cfg, llm, gh, docs, members
         self.state: Dict[str, ChannelState] = {}
-        self.agents: Dict[str, dict] = {}  # channel_name -> last agent-loop heartbeat/status
+        self.agents: Dict[str, dict] = {}  # member username -> last agent-loop check-in (props + at)
         self._load_state()
 
     # ---- persistence
@@ -407,10 +412,8 @@ class Orchestrator:
 
     def handle(self, inc: Incoming) -> List[Outgoing]:
         msg = inc.message.strip()
-        if inc.agent_kind:  # laptop agent-loop output: remember heartbeats, never reply
-            if inc.agent_kind in ("heartbeat", "status"):
-                self.agents[inc.channel_name] = {"state": inc.agent_state or "?", "at": time.time(), "text": msg[:200]}
-            return []
+        if inc.agent_kind:  # laptop agent-loop output: remember check-ins, reply only with rule-based feedback
+            return self.on_agent(inc) if inc.agent_kind in ("heartbeat", "status") else []
         if msg.lower().startswith(("!task", "!agent")):
             return []  # addressed to the member's laptop agent-loop
         if not msg and not inc.file_count:
@@ -502,24 +505,91 @@ class Orchestrator:
             if self.cfg.auto_dispatch and target.uses_git:
                 task_prompt = extract_prompt(reply) or rest
                 outs.append(Outgoing(f"name:{ch}", f"!task {('#' + m.group(1) + ' ') if m else ''}{task_prompt}"[:MAX_POST]))
-                ag = self.agents.get(ch)
-                note = " 노트북 agent-loop에도 `!task`로 보냈어요" + ("." if ag and time.time() - ag["at"] < 1800 else " (최근 30분 heartbeat 없음 — 노트북이 꺼져 있을 수 있어요).")
+                ag = self.agents.get(target.username)
+                fresh = ag and time.time() - ag["at"] < self.cfg.agent_silent_min * 60 and ag.get("state") != "offline"
+                note = " 노트북 agent-loop에도 `!task`로 보냈어요" + ("." if fresh else f" (최근 {self.cfg.agent_silent_min:g}분 heartbeat 없음 — 노트북이 꺼져 있을 수 있어요).")
             outs.append(Outgoing(inc.channel_id, f"{target.name}님 1on1 채널(~{ch})로 보냈어요.{note}", root))
             return outs
         return out(f"모르는 명령이에요: {cmd}\n\n{HELP}")
 
-    def agent_summary(self, channel_name: Optional[str] = None) -> str:
-        """Laptop agent-loop liveness from heartbeats seen since the bridge started."""
-        chans = [channel_name] if channel_name else [f"1on1-{u}" for u, m in self.members.items() if u != self.cfg.hyle]
-        lines = ["노트북 agent-loop:"]
-        for ch in chans:
-            a = self.agents.get(ch)
-            if not a:
-                lines.append(f"- ~{ch}: 기록 없음 (bridge 재시작 뒤 heartbeat 아직 없음 / 미설치)")
+    # ---- laptop agent-loop check-ins
+    def _feedback(self, a: dict, kind: str, text: str, now: float) -> List[Outgoing]:
+        """One rule-based message to the member's 1on1, rate-limited per kind."""
+        user = a["member"]
+        if user not in self.members or user == self.cfg.hyle:
+            return []
+        last = a.setdefault("fb", {}).get(kind, 0)
+        if now - last < self.cfg.agent_feedback_cooldown_min * 60:
+            return []
+        a["fb"][kind] = now
+        return [Outgoing(f"name:1on1-{user}", text)]
+
+    def on_agent(self, inc: Incoming, now: Optional[float] = None) -> List[Outgoing]:
+        now = now or time.time()
+        props = dict(inc.agent_props or {})
+        user = props.get("member") or inc.username
+        state = props.get("state") or inc.agent_state or "?"
+        prev = self.agents.get(user, {})
+        a = {**prev, **{k: str(v) for k, v in props.items() if k != "amolla_agent"}}
+        a.update(member=user, state=state, at=now, text=inc.message[:300])
+        if state != prev.get("state"):
+            a["since"] = now
+        was_silent = prev.get("silent_flagged", False)
+        a["silent_flagged"] = False
+        self.agents[user] = a
+        outs: List[Outgoing] = []
+        if was_silent and state != "offline":
+            outs += [Outgoing(f"name:1on1-{user}", f"🟢 @{user} agent-loop 다시 연결됐어요. 고마워요!")] if user in self.members and user != self.cfg.hyle else []
+        if state == "error" and prev.get("state") != "error":
+            outs += self._feedback(a, "error", f"🔴 @{user} 노트북 작업이 실패했어요. 바로 위 스레드의 마지막 줄을 보고, 모르겠으면 여기에 그대로 붙여 물어보세요. "
+                                   f"@{self.cfg.hyle} 참고.", now)
+        try:
+            dirty = int(a.get("dirty", "0"))
+        except ValueError:
+            dirty = 0
+        if state == "idle" and dirty > 0 and now - a.get("since", now) >= 15 * 60:
+            outs += self._feedback(a, "dirty", f"🟡 @{user} 커밋 안 된 파일이 {dirty}개 있어요 (`{a.get('branch', '?')}`). 이대로면 다음 `!task`가 시작되지 않아요. "
+                                   "Codex/agy에게 \"지금 변경을 이슈 브랜치에 커밋하고 PR 올려줘\"라고 하거나, 버려도 되면 Hylē에게 물어보세요.", now)
+        return outs
+
+    def check_silence(self, now: Optional[float] = None) -> List[Outgoing]:
+        """Called every minute by run_live: flag laptops silent > agent_silent_min (once per silence)."""
+        now = now or time.time()
+        outs: List[Outgoing] = []
+        for user, a in self.agents.items():
+            if a.get("silent_flagged") or a.get("state") == "offline":
                 continue
-            mins = int((time.time() - a["at"]) // 60)
-            alive = "🟢" if mins <= 25 else "⚫ 끊김?"
-            lines.append(f"- ~{ch}: {alive} {a['state']} · {mins}분 전")
+            if now - a["at"] > self.cfg.agent_silent_min * 60:
+                a["silent_flagged"] = True
+                mins = int((now - a["at"]) // 60)
+                if user in self.members and user != self.cfg.hyle:
+                    outs.append(Outgoing(f"name:1on1-{user}", f"⚠️ @{user} 노트북 agent-loop 소식이 {mins}분째 없어요. 노트북이 잠들었거나 터미널이 닫혔을 수 있어요. "
+                                         f"한 줄 설치 명령을 다시 실행해 주세요. @{self.cfg.hyle} 참고."))
+        return outs
+
+    def agent_summary(self, channel_name: Optional[str] = None, now: Optional[float] = None) -> str:
+        """Aggregated laptop check-ins for !status."""
+        now = now or time.time()
+        if channel_name and channel_name.startswith("1on1-"):
+            users = [channel_name[len("1on1-"):]]
+        else:
+            users = [u for u in self.members if u != self.cfg.hyle] + [u for u in self.agents if u not in self.members or u == self.cfg.hyle]
+        lines = [f"노트북 agent-loop (⚠️ = {self.cfg.agent_silent_min:g}분 넘게 소식 없음):"]
+        for u in users:
+            a = self.agents.get(u)
+            name = self.members[u].name if u in self.members else u
+            if not a:
+                lines.append(f"- {name} (@{u}): ⚪ 기록 없음 (미설치이거나 bridge 재시작 뒤 아직 check-in 없음)")
+                continue
+            mins = int((now - a["at"]) // 60)
+            if a.get("state") == "offline":
+                icon = "⚫ 꺼짐"
+            elif now - a["at"] > self.cfg.agent_silent_min * 60:
+                icon = "⚠️ 응답 없음"
+            else:
+                icon = {"idle": "🟢", "busy": "🟡", "error": "🔴"}.get(a.get("state", ""), "⚪")
+            lines.append(f"- {name} (@{u}): {icon} {a.get('state', '?')} · 작업 {a.get('task', '-')} · `{a.get('branch', '?')}` · "
+                         f"{a.get('commit', '?')} · 변경 {a.get('dirty', '?')} · {mins}분 전")
         return "\n".join(lines)
 
     def build_system(self, channel_name: str, member: Member) -> str:
@@ -657,6 +727,7 @@ class Mattermost:
                 post_id=post.get("id", ""),
                 agent_kind=str(props.get("amolla_agent")),
                 agent_state=str(props.get("state", "")),
+                agent_props=props,
             )
         if ev.get("event") != "posted" or props.get("from_bot") == "true":
             return None
@@ -684,6 +755,7 @@ async def run_live(orch: Orchestrator, mm: Mattermost) -> None:
     ws_url = re.sub(r"^http", "ws", orch.cfg.mm_url) + "/api/v4/websocket"
     locks: Dict[str, asyncio.Lock] = {}
     backoff = 1
+    asyncio.create_task(_silence_watch(orch, mm))
     while True:
         try:
             async with websockets.connect(ws_url, ping_interval=20, ping_timeout=20, max_size=8 * 2**20) as ws:
@@ -704,6 +776,17 @@ async def run_live(orch: Orchestrator, mm: Mattermost) -> None:
             log.warning("websocket error: %s; reconnect in %ss", exc, backoff)
             await asyncio.sleep(backoff)
             backoff = min(backoff * 2, 60)
+
+
+async def _silence_watch(orch: Orchestrator, mm: Mattermost, every: float = 60.0) -> None:
+    """Flag laptop agent-loops that stopped checking in (see Orchestrator.check_silence)."""
+    while True:
+        await asyncio.sleep(every)
+        try:
+            for o in orch.check_silence():
+                await asyncio.to_thread(mm.send, o)
+        except Exception:
+            log.exception("silence watch failed")
 
 
 async def _process(orch: Orchestrator, mm: Mattermost, inc: Incoming, lock: asyncio.Lock) -> None:

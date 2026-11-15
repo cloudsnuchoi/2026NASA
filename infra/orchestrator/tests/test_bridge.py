@@ -211,9 +211,9 @@ def test_agent_posts_are_silent_and_feed_status(orch):
     assert orch.handle(inc("hyle", "1on1-jieun", "!task #12 지도")) == []
     assert orch.handle(inc("jieun", "1on1-jieun", "!agent")) == []
     st = orch.handle(inc("jieun", "1on1-jieun", "!status"))[0].message
-    assert "~1on1-jieun: 🟢 idle" in st
+    assert "고지은 (@jieun): 🟢 idle" in st
     st_all = orch.handle(inc("hyle", "backend", "!status"))[0].message
-    assert "~1on1-jimin: 기록 없음" in st_all
+    assert "하지민 (@jimin): ⚪ 기록 없음" in st_all
 
 
 def test_parse_event_agent_loop_posts():
@@ -229,3 +229,44 @@ def test_parse_event_agent_loop_posts():
         assert i.agent_kind == "heartbeat" and i.agent_state == "busy" and i.channel_name == "1on1-jieun"
     human = dict(post, props={})
     assert mm.parse_event({"event": "post_edited", "data": {"post": json.dumps(human)}}) is None
+
+
+def hb(user, state="idle", chan=None, **props):
+    i = inc(user, chan or f"1on1-{user}", f"{state} heartbeat")
+    i.agent_kind, i.agent_state = "heartbeat", state
+    i.agent_props = {"amolla_agent": "heartbeat", "state": state, "member": user, **props}
+    return i
+
+
+def test_checkin_aggregation_from_shared_status_channel(orch):
+    assert orch.handle(hb("jimin", "busy", chan="agent-status", task="#13 S4", branch="feat/13-s4",
+                          commit="abc1234 feat: s4 (2 minutes ago)", dirty="3")) == []
+    st = orch.handle(inc("hyle", "backend", "!status"))[0].message
+    assert "하지민 (@jimin): 🟡 busy · 작업 #13 S4 · `feat/13-s4` · abc1234 feat: s4 (2 minutes ago) · 변경 3 · 0분 전" in st
+
+
+def test_silence_flag_once_and_recovery(orch):
+    t0 = 1_000_000.0
+    orch.on_agent(hb("daeun"), now=t0)
+    assert orch.check_silence(now=t0 + 9 * 60) == []
+    outs = orch.check_silence(now=t0 + 11 * 60)
+    assert len(outs) == 1 and outs[0].channel == "name:1on1-daeun" and "11분째" in outs[0].message and "@hyle" in outs[0].message
+    assert orch.check_silence(now=t0 + 12 * 60) == []  # once per silence
+    assert "⚠️ 응답 없음" in orch.agent_summary(now=t0 + 12 * 60)
+    back = orch.on_agent(hb("daeun"), now=t0 + 13 * 60)
+    assert any("다시 연결" in o.message for o in back)
+    orch.on_agent(hb("daeun", "offline"), now=t0 + 14 * 60)
+    assert orch.check_silence(now=t0 + 60 * 60) == []  # clean shutdown is not "silent"
+
+
+def test_feedback_on_error_and_stale_dirty(orch):
+    t0 = 2_000_000.0
+    orch.on_agent(hb("jieun", "busy"), now=t0)
+    err = orch.on_agent(hb("jieun", "error"), now=t0 + 60)
+    assert len(err) == 1 and err[0].channel == "name:1on1-jieun" and "실패" in err[0].message
+    assert orch.on_agent(hb("jieun", "error"), now=t0 + 240) == []  # no repeat while still error
+    orch.on_agent(hb("jieun", "idle", dirty="2", branch="feat/12-x"), now=t0 + 300)
+    assert orch.on_agent(hb("jieun", "idle", dirty="2", branch="feat/12-x"), now=t0 + 300 + 10 * 60) == []
+    d = orch.on_agent(hb("jieun", "idle", dirty="2", branch="feat/12-x"), now=t0 + 300 + 16 * 60)
+    assert len(d) == 1 and "커밋 안 된 파일이 2개" in d[0].message
+    assert orch.on_agent(hb("jieun", "idle", dirty="2"), now=t0 + 300 + 19 * 60) == []  # cooldown

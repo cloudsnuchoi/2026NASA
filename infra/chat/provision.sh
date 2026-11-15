@@ -58,6 +58,7 @@ data-matlab|데이터·MATLAB|김윤성·김우찬 MATLAB 산출 (SOT 4절 5종 
 backend|백엔드·API·RAG|model_api, data_pipeline, rag, infra
 sim-voxel|복셀 시뮬|three.js 복셀 시뮬 (sim/)
 random|잡담|아무 이야기
+agent-status|🤖 에이전트 현황|노트북 agent-loop check-in (3분마다 한 사람당 글 하나를 고쳐 씀). 사람 대화 금지
 CH
 
 say "bot orchestrator (REST, as $ADMIN)"
@@ -80,7 +81,7 @@ if ! grep -q '^MM_BOT_TOKEN=.\+' "$ORCH_ENV" 2>/dev/null; then
   echo "token written to $ORCH_ENV"
 else echo "token already in $ORCH_ENV"; fi
 mmctl team users add "$TEAM" orchestrator >/dev/null 2>&1 || true
-for ch in announce uiux-design demo-video ppt-slides data-matlab backend sim-voxel random; do
+for ch in announce uiux-design demo-video ppt-slides data-matlab backend sim-voxel random agent-status; do
   mmctl channel users add "$TEAM:$ch" orchestrator >/dev/null 2>&1 || true
 done
 

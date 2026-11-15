@@ -97,7 +97,8 @@ class Config:
     git_mode: str = "loop"  # loop: loop does branch/commit/push/PR/STATUS ; agent: agent does it ; off
     github_repo: str = "cloudsnuchoi/2026NASA"
     poll_sec: float = 4.0
-    heartbeat_min: float = 10.0
+    heartbeat_min: float = 3.0  # check-in with the orchestrator every 3–5 min
+    status_channel: str = ""  # "" = my 1:1 channel; e.g. "agent-status" for a shared board channel
     progress_sec: float = 90.0
     timeout_min: float = 60.0
 
@@ -105,7 +106,7 @@ class Config:
         "MM_URL": "mm_url", "MM_TOKEN": "mm_token", "MM_TEAM": "team", "CHANNEL": "channel", "AGENT": "agent",
         "AGENT_CMD": "agent_cmd", "PROMPT_VIA": "prompt_via", "REPO_DIR": "repo_dir", "ALLOW_USERS": "allow_users",
         "TRIGGER": "trigger", "GIT_MODE": "git_mode", "GITHUB_REPO": "github_repo", "POLL_SEC": "poll_sec",
-        "HEARTBEAT_MIN": "heartbeat_min", "PROGRESS_SEC": "progress_sec", "TIMEOUT_MIN": "timeout_min",
+        "HEARTBEAT_MIN": "heartbeat_min", "STATUS_CHANNEL": "status_channel", "PROGRESS_SEC": "progress_sec", "TIMEOUT_MIN": "timeout_min",
     }
 
     @classmethod
@@ -172,6 +173,7 @@ class MM:
         self.s.headers["Authorization"] = f"Bearer {cfg.mm_token}"
         self.me: dict = {}
         self.channel_id = ""
+        self.status_channel_id = ""
         self.allow_ids: Dict[str, str] = {}
 
     def api(self, method: str, path: str, **kw):
@@ -187,19 +189,26 @@ class MM:
             self.cfg.channel = f"1on1-{self.me['username']}"
         team = self.api("GET", f"/teams/name/{self.cfg.team}")
         self.channel_id = self.api("GET", f"/teams/{team['id']}/channels/name/{self.cfg.channel}")["id"]
+        self.status_channel_id = self.channel_id
+        if self.cfg.status_channel and self.cfg.status_channel != self.cfg.channel:
+            try:
+                self.status_channel_id = self.api("GET", f"/teams/{team['id']}/channels/name/{self.cfg.status_channel}")["id"]
+            except Exception as exc:
+                log(f"~{self.cfg.status_channel} 채널을 못 찾아서 heartbeat는 1:1 채널에 올려요 ({type(exc).__name__})")
         users = self.api("POST", "/users/usernames", json=self.cfg.allow_users)
         self.allow_ids = {u["id"]: u["username"] for u in users}
 
-    def post(self, message: str, root_id: str = "", kind: str = "reply", extra: Optional[dict] = None) -> dict:
+    def post(self, message: str, root_id: str = "", kind: str = "reply", extra: Optional[dict] = None, channel_id: str = "") -> dict:
         props = {PROP: kind}
         props.update(extra or {})
         msg = redact(message, [self.cfg.mm_token])[:15000]
-        return self.api("POST", "/posts", json={"channel_id": self.channel_id, "message": msg, "root_id": root_id, "props": props})
+        return self.api("POST", "/posts", json={"channel_id": channel_id or self.channel_id, "message": msg,
+                                                "root_id": root_id, "props": props})
 
     def edit(self, post_id: str, message: str, extra: Optional[dict] = None) -> dict:
         props = {PROP: "heartbeat"}
         props.update(extra or {})
-        return self.api("PUT", f"/posts/{post_id}/patch", json={"message": message, "props": props})
+        return self.api("PUT", f"/posts/{post_id}/patch", json={"message": redact(message, [self.cfg.mm_token]), "props": props})
 
     def new_posts(self, since_ms: int) -> List[dict]:
         d = self.api("GET", f"/channels/{self.channel_id}/posts", params={"since": since_ms})
@@ -343,6 +352,25 @@ class Runner:
                        "--title", title[:72], "--body", body, timeout=120).splitlines()[-1]
 
 
+def git_snapshot(repo: Path) -> Dict[str, str]:
+    """branch, last commit, uncommitted file count. Never raises (heartbeat must not die)."""
+    out = {"branch": "?", "commit": "?", "dirty": "?"}
+
+    def g(*a: str) -> str:
+        r = subprocess.run([shutil.which("git") or "git", "-C", str(repo), *a], capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", timeout=10)
+        return r.stdout.strip() if r.returncode == 0 else ""
+
+    try:
+        out["branch"] = g("rev-parse", "--abbrev-ref", "HEAD") or "?"
+        out["commit"] = (g("log", "-1", "--format=%h %s (%cr)") or "?")[:90]
+        st = g("status", "--porcelain")
+        out["dirty"] = str(len([x for x in st.splitlines() if x.strip()])) if st is not None else "?"
+    except Exception:
+        pass
+    return out
+
+
 class AgentLoop:
     def __init__(self, cfg: Config, mm: MM):
         self.cfg, self.mm = cfg, mm
@@ -352,13 +380,28 @@ class AgentLoop:
         self.hb_post = ""
         self.stop = threading.Event()
         self.started = int(time.time() * 1000)
+        self.notes: List[str] = []  # recent feedback from orchestrator/Hylē (not !task)
+        self.notes_total = 0
 
     # ---- status
-    def heartbeat_text(self) -> str:
-        cur = f" · 작업 중: {'#' + str(self.current.issue) if self.current and self.current.issue else (self.current.text[:40] if self.current else '')}" if self.current else ""
+    def task_label(self) -> str:
+        if not self.current:
+            return "-"
+        return f"#{self.current.issue} {self.current.text[:40]}" if self.current.issue else self.current.text[:50]
+
+    def snapshot(self) -> Dict[str, str]:
+        snap = git_snapshot(Path(self.cfg.repo_dir).expanduser())
+        snap.update(state=self.state, task=self.task_label(), queue=str(self.q.qsize()), agent=self.cfg.agent,
+                    member=str(self.mm.me.get("username", "")), notes=str(self.notes_total),
+                    every_min=f"{self.cfg.heartbeat_min:g}", ts=str(int(time.time())))
+        return snap
+
+    def heartbeat_text(self, snap: Optional[Dict[str, str]] = None) -> str:
+        s = snap or self.snapshot()
         icon = {"idle": "🟢", "busy": "🟡", "error": "🔴"}.get(self.state, "⚪")
-        return (f"{icon} online · agent-loop {VERSION} · @{self.mm.me.get('username')} · {self.cfg.agent} · {self.state}{cur}"
-                f" · 대기 {self.q.qsize()} · {time.strftime('%H:%M')} KST")
+        return (f"{icon} **@{s['member']}** agent-loop · {s['agent']} · **{s['state']}** · 작업: {s['task']} · 대기 {s['queue']}\n"
+                f"`{s['branch']}` · {s['commit']} · 커밋 안 된 파일 {s['dirty']}개 · 피드백 {s['notes']}건 · "
+                f"{time.strftime('%H:%M')} KST (매 {s['every_min']}분 갱신)")
 
     def set_state(self, state: str, note: str = "") -> None:
         changed = state != self.state
@@ -371,15 +414,17 @@ class AgentLoop:
         self.heartbeat()
 
     def heartbeat(self) -> None:
-        extra = {"state": self.state, "agent": self.cfg.agent, "ts": str(int(time.time()))}
+        """Check-in: one post per laptop, edited in place (bridge.py reads posted + post_edited)."""
         try:
+            extra = self.snapshot()
+            text = self.heartbeat_text(extra)
             if self.hb_post:
                 try:
-                    self.mm.edit(self.hb_post, self.heartbeat_text(), extra)
+                    self.mm.edit(self.hb_post, text, extra)
                     return
                 except requests.HTTPError:
                     self.hb_post = ""
-            self.hb_post = self.mm.post(self.heartbeat_text(), kind="heartbeat", extra=extra).get("id", "")
+            self.hb_post = self.mm.post(text, kind="heartbeat", extra=extra, channel_id=self.mm.status_channel_id).get("id", "")
         except Exception as exc:
             log(f"heartbeat failed: {exc}")
 
@@ -396,6 +441,10 @@ class AgentLoop:
             return
         parsed = parse_task(msg, self.cfg.trigger)
         if not parsed:
+            if msg and p.get("channel_id", self.mm.channel_id) == self.mm.channel_id:
+                self.notes = (self.notes + [f"[{time.strftime('%H:%M')} @{who}] {msg[:500]}"])[-3:]
+                self.notes_total += 1
+                log(f"\a📩 @{who}: {msg[:300]}")  # bell + show in the terminal so the member sees it
             return
         issue, text = parsed
         if not text and not issue:
@@ -464,6 +513,8 @@ class AgentLoop:
             runner.status_comment(job.issue, "🟢 진행 중", job.text[:80], 10, "에이전트 작업 중")
             scope = f"이슈 #{job.issue}" if job.issue else "아래 지시"
             prompt = INSTRUCTION_BLOCK.format(issue_scope=scope, branch=branch, issue=job.issue or "N") + job.text
+            if self.notes:
+                prompt += "\n[참고: 최근 중앙 에이전트/Hylē 피드백 — 지시와 충돌하면 지시가 우선]\n" + "\n".join(self.notes)
             if job.issue:
                 prompt += f"\n(이슈 본문은 `gh issue view {job.issue} -R {self.cfg.github_repo}` 로 볼 수 있음. 못 쓰면 지시만 따라.)"
             if self.cfg.git_mode == "agent":
@@ -516,7 +567,7 @@ class AgentLoop:
             self.stop.set()
             try:
                 if self.hb_post:
-                    self.mm.edit(self.hb_post, f"⚫ offline · agent-loop · @{self.mm.me.get('username')} · {time.strftime('%H:%M')} KST", {"state": "offline"})
+                    self.mm.edit(self.hb_post, f"⚫ offline · agent-loop · @{self.mm.me.get('username')} · {time.strftime('%H:%M')} KST", dict(self.snapshot(), state="offline"))
             except Exception:
                 pass
             log("종료")

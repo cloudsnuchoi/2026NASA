@@ -98,7 +98,7 @@ grep -E '^(MM_BOT_TOKEN|OPENAI_API_KEY|ORCH_MODEL)=.+' .env | cut -d= -f1    # �
 
 # 6a. 오프라인 시험 (키 없이 30초)
 python3 -m venv .venv && .venv/bin/pip install -q -r requirements-dev.txt
-.venv/bin/python -m pytest -q tests                  # 17 passed
+.venv/bin/python -m pytest -q tests                  # 24 passed
 printf 'jieun: 처음인데 뭐부터 해요?\n' | .venv/bin/python bridge.py --dry-run --mock-llm
 # 6b. 실제 LLM으로 오프라인 시험 (선택)
 printf 'jieun: 처음인데 뭐부터 해요?\n' | .venv/bin/python bridge.py --dry-run
@@ -160,6 +160,19 @@ sleep 10 && grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' /srv/hackathon/db/
    - `!assign 다은 #30`
    - `!assign 윤성 #26`
    - `!assign 우찬 #24`
+
+## 10. 팀원 노트북 agent-loop (Hylē 5분 + 팀원 각 5분)
+
+순서가 중요하다. **1–6단계(채팅 + 오케스트레이터)가 먼저 떠 있어야** 팀원 설치가 성공한다.
+1. 개인 액세스 토큰 권한: System Console → User Management → Users → 사람 선택 → Manage Roles → *Allow this account to generate personal access tokens* 체크 (5명). 또는
+   `docker exec amolla-mattermost mmctl --local permissions role assign system_user_access_token yoonsung woochan jieun jimin daeun` (이 역할에 대한 mmctl 사용은 미검증 — 실패하면 UI).
+2. ~announce에 채팅 주소 + 아래 한 줄 + `infra/agent-loop/README.md` 링크를 올린다.
+   - Windows: `irm https://raw.githubusercontent.com/cloudsnuchoi/2026NASA/main/infra/agent-loop/install.ps1 | iex`
+   - macOS: `bash -c "$(curl -fsSL https://raw.githubusercontent.com/cloudsnuchoi/2026NASA/main/infra/agent-loop/install.sh)"`
+3. 확인: 각 1:1 채널(또는 ~agent-status)에 `🟢 @아이디 agent-loop …` 글이 생기고 3분마다 시각이 바뀐다. 아무 채널에서 `!status` → "노트북 agent-loop" 표.
+4. 그다음 9단계의 `!assign`을 보내면, 봇 설명 + `!task #N …`이 같이 가고 노트북이 바로 작업을 시작한다.
+- 봇은 check-in이 10분 넘게 끊기면 그 1:1 채널에 ⚠️ 알림을, 작업 실패·커밋 안 된 변경 방치 때 피드백을 1회씩 보낸다 (`AGENT_SILENT_MIN`, `AGENT_FEEDBACK_COOLDOWN_MIN`).
+- ~agent-status 채널은 5단계 provision.sh를 다시 실행하면 생긴다 (기존 채널은 그대로). 팀원은 설정에 `"STATUS_CHANNEL": "agent-status"`를 넣으면 그 채널에 check-in한다. 기본은 1:1 채널.
 
 ## 재시작·장애 대응
 

@@ -12,12 +12,28 @@ Hylē / 중앙 봇 ──"!task #12 지도 화면"──▶ ~1on1-jieun (Matterm
      스레드에 진행·결과 ◀──────────────────┤  커밋 → push → PR "Closes #12" → 이슈에 STATUS 댓글
 ```
 
+- **3분마다 중앙 에이전트에 check-in** 해요: 지금 작업, 브랜치, 마지막 커밋, 커밋 안 된 파일 수, 바쁨/쉼. 한 사람당 글 하나를 계속 고쳐 써서 채팅이 시끄럽지 않아요.
+- 봇이나 Hylē가 1:1 채널에 쓴 피드백(`!task`가 아닌 글)은 터미널에 `📩`로 보이고(삑 소리), **다음 작업 프롬프트에 자동으로 붙어요**.
 - 내 노트북에서, **내 Codex·agy 계정**과 **내 GitHub 로그인**으로 돌아가요.
 - 한 번에 한 작업만 해요. 그동안 온 `!task`는 줄을 서요.
-- 10분마다 채널의 `🟢 online` 표시를 고쳐 써요. 바쁠 때와 끝났을 때는 `STATUS busy/idle/error`를 올려요.
+- 바쁠 때와 끝났을 때는 `STATUS busy/idle/error`를 1:1 채널에 올려요.
 - **머지는 안 해요.** 머지는 Hylē가 해요.
 
 ---
+
+## 0. 전체 순서 (이 순서를 지켜야 해요)
+
+| # | 누가 | 어디서 | 무엇을 | 끝난 표시 |
+| --- | --- | --- | --- | --- |
+| 1 | Hylē | VPS의 Claude Code | `infra/RUNBOOK.md` 0–5단계: Mattermost 기동 → 터널 주소 → `provision.sh` (팀·채널·계정·`orchestrator` 봇·`1on1-*` 채널·`~agent-status`) | 채팅 주소로 로그인됨 |
+| 2 | Hylē | VPS의 Claude Code | RUNBOOK 6단계: 오케스트레이터 `bridge.py` 실행 (이 커밋 버전) | `docker logs` 에 `websocket connected as @orchestrator` |
+| 3 | Hylē | Mattermost System Console | RUNBOOK 10단계 1번: 5명에게 **개인 액세스 토큰 권한** | 팀원 프로필 → 보안에 "개인 액세스 토큰" 메뉴가 보임 |
+| 4 | Hylē | ~announce + 카톡 | 채팅 주소, 각자 임시 비밀번호(개인 DM), 아래 한 줄 설치 명령 공지 | – |
+| 5 | 팀원 5명 | 각자 노트북 | 아래 1단계(토큰) → 2단계(한 줄 설치) → 터미널 켜두기 | 내 1:1 채널에 `🟢 @내아이디 agent-loop …` 글, 3분마다 시각이 바뀜 |
+| 6 | Hylē | 아무 채널 | `!status` 로 5명 모두 🟢인지 확인 → `!assign 지은 #12` 처럼 첫 작업 배정 | 노트북이 `📥 받음 → ▶️ 시작 → ✅ 완료 · PR` 스레드를 올림 |
+
+> 1–2가 안 끝났는데 5를 하면 "채팅 연결 실패"가 나요. 채팅 주소(quick tunnel)는 VPS에서 터널을 다시 켤 때마다 바뀌어요. 바뀌면 4. 문제 해결의 `--set-url`을 쓰세요.
+> MATLAB 담당(윤성·우찬)도 설치는 똑같이 해요 (check-in·피드백용). 다만 `!assign`은 MATLAB 담당에게 `!task`를 자동으로 보내지 않아요.
 
 ## 1. Mattermost에서 개인 액세스 토큰 만들기 (처음 한 번, 2분)
 
@@ -66,6 +82,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/cloudsnuchoi/2026NASA/ma
 
 | 증상 | 해결 |
 | --- | --- |
+| 봇이 "⚠️ 소식이 10분째 없어요" | 노트북이 잠들었거나 창이 닫힌 거예요. 2단계 한 줄을 다시 실행 |
 | `채팅 서버 연결 실패` 반복 | 채팅 주소가 바뀌었을 수 있어요 (quick tunnel은 재시작마다 바뀜). ~announce에서 새 주소를 확인하고: macOS `~/.amolla-agent-venv/bin/python ~/.amolla-agent-venv/agent_loop.py --set-url https://새주소` / Windows `& "$HOME\.amolla-agent-venv\Scripts\python.exe" "$HOME\.amolla-agent-venv\agent_loop.py" --set-url https://새주소` 그다음 한 줄 설치를 다시 실행 |
 | `토큰이 틀렸거나 만료됐어요 (401)` | 1단계로 새 토큰을 만들고, Windows는 `$env:AMOLLA_SETUP=1` 입력 후 / macOS는 `~/.amolla-agent.json`을 지우고 한 줄 설치를 다시 실행 |
 | `채널을 못 찾음`·404 | 내 1:1 채널 이름이 `1on1-<내아이디>`가 아니면 설정 파일의 `CHANNEL`을 실제 이름으로 고쳐요 (채널 URL 끝부분) |
@@ -90,7 +107,9 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/cloudsnuchoi/2026NASA/ma
 | `ALLOW_USERS` | `["orchestrator","hyle"]` | 지시를 받아들일 Mattermost 아이디 |
 | `TRIGGER` | `!task` | 시작 단어 |
 | `GIT_MODE` | `loop` | `loop`: agent-loop가 브랜치·커밋·push·PR·STATUS를 함. `agent`: 에이전트에게 맡김. `off`: git 안 건드림 |
-| `HEARTBEAT_MIN` / `PROGRESS_SEC` / `TIMEOUT_MIN` | 10 / 90 / 60 | heartbeat 주기, 진행 메시지 간격, 작업 제한 시간 |
+| `HEARTBEAT_MIN` | `3` | 중앙 에이전트 check-in 주기(분). 3–5 권장. 봇은 10분 넘게 소식이 없으면 ⚠️ |
+| `STATUS_CHANNEL` | (빈 값 = 내 1:1 채널) | check-in 글을 올릴 채널. `agent-status` 로 하면 모두의 현황이 한 채널에 모여요 |
+| `PROGRESS_SEC` / `TIMEOUT_MIN` | 90 / 60 | 작업 중 진행 메시지 간격, 작업 제한 시간 |
 
 ### 에이전트 명령 (기본값과 이유)
 
@@ -114,12 +133,20 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/cloudsnuchoi/2026NASA/ma
 
 - 보내는 사람이 `ALLOW_USERS`(기본 `orchestrator`, `hyle`)에 있어야 실행된다.
 - `!task #N` → 브랜치 `feat/N-<slug>` (그 이슈 브랜치가 이미 있으면 재사용), PR 본문 `Closes #N`, 이슈에 `STATUS:` 댓글(🟢 진행 중 → 🟡 리뷰 대기, 실패 시 🔴 막힘). 형식은 `docs/PROMPTS.md`의 STATUS와 같다.
-- agent-loop의 글에는 `props.amolla_agent` 값이 붙는다: `heartbeat`(한 글을 고쳐 씀, `props.state`=idle/busy/error/offline), `status`(상태 바뀔 때 새 글), `reply`(스레드 답글).
+- agent-loop의 글에는 `props.amolla_agent` 값이 붙는다: `heartbeat`(check-in, 한 글을 `HEARTBEAT_MIN`마다 고쳐 씀), `status`(상태 바뀔 때 새 글), `reply`(스레드 답글).
+- check-in `props`(모두 문자열): `member`, `state`(idle/busy/error/offline), `task`, `branch`, `commit`(`<sha> <제목> (<얼마 전>)`), `dirty`(커밋 안 된 파일 수), `queue`, `agent`, `notes`(받은 피드백 수), `every_min`, `ts`.
+- 피드백: 허용된 사람(봇·Hylē)이 1:1 채널에 쓴 `!task`가 아닌 글은 모두 피드백으로 받는다 (최근 3개, 각 500자). 봇의 일반 답변도 포함된다.
 
 **bridge.py가 하는 일 (이 커밋에서 추가)**
 - `!assign 지은 #12 …` → 지금처럼 설명 메시지를 보내고, git 쓰는 팀원이면 LLM 답의 첫 코드블록(복사-붙여넣기 프롬프트)을 `!task #12 <프롬프트>`로 **같은 채널에 한 번 더** 보낸다. MATLAB 담당(git 안 씀)에게는 안 보낸다. 끄려면 `.env`에 `AUTO_DISPATCH=0`.
 - `!task`, `!agent`로 시작하는 글과 `props.amolla_agent`가 붙은 글에는 **대답하지 않는다** (팀원 본인 계정으로 올라오지만 사람 말이 아니므로).
-- heartbeat·status를 기억해서 `!status`에 `노트북 agent-loop: ~1on1-jieun: 🟢 idle · 3분 전` 같은 줄을 붙인다 (25분 넘게 소식 없으면 `⚫ 끊김?`). bridge를 재시작하면 다음 heartbeat(최대 10분)까지는 "기록 없음"으로 나온다.
+- check-in을 사람별로 모아 `!status`에 붙인다: `고지은 (@jieun): 🟡 busy · 작업 #12 … · \`feat/12-s1\` · abc1234 … · 변경 0 · 1분 전`. 1:1 채널에서는 그 사람만, 다른 채널에서는 전원.
+  10분(`AGENT_SILENT_MIN`) 넘게 소식이 없으면 `⚠️ 응답 없음`, Ctrl+C로 끄면 `⚫ 꺼짐`, 한 번도 없으면 `⚪ 기록 없음`. bridge를 재시작하면 다음 check-in(최대 3분)까지 "기록 없음".
+- **피드백 (LLM 안 씀, 규칙 기반, 같은 종류는 30분에 1번)**: 그 사람 1:1 채널에
+  - check-in이 10분 넘게 끊기면 ⚠️ "다시 실행해 주세요 @hyle" (끊길 때마다 1번), 다시 들어오면 🟢 "다시 연결됐어요"
+  - 작업 실패(`error`)로 바뀌면 🔴 "스레드 마지막 줄 보고 물어보세요 @hyle"
+  - 쉬는 중인데 커밋 안 된 파일이 15분 넘게 남아 있으면 🟡 "커밋하고 PR 올리라고 하세요"
+  - 그 밖의 내용 피드백(코드 리뷰 등)은 기존처럼 `!review`, 1:1 대화, `!assign`으로 한다.
 - Hylē가 1:1 채널에 직접 `!task …`를 써도 된다. 봇은 조용히 있고 노트북이 실행한다.
 
 ## Hylē가 할 일 (한 번)

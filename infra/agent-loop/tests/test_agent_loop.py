@@ -26,11 +26,11 @@ class FakeMM:
         self.lock = threading.Lock()
         self.users = {"u-me": "jieun", "u-bot": "orchestrator", "u-hyle": "hyle", "u-x": "stranger"}
 
-    def add(self, user_id, message, root_id="", props=None):
+    def add(self, user_id, message, root_id="", props=None, channel_id="c1"):
         with self.lock:
             self.n += 1
             pid = f"p{self.n}"
-            self.posts[pid] = {"id": pid, "user_id": user_id, "channel_id": "c1", "message": message,
+            self.posts[pid] = {"id": pid, "user_id": user_id, "channel_id": channel_id, "message": message,
                                "root_id": root_id, "props": props or {}, "create_at": int(time.time() * 1000) + self.n,
                                "update_at": 0, "delete_at": 0}
             return self.posts[pid]
@@ -71,10 +71,13 @@ class FakeMM:
                     return self._send(200, {"id": "t1"})
                 if p == "/api/v4/teams/t1/channels/name/1on1-jieun":
                     return self._send(200, {"id": "c1"})
+                if p == "/api/v4/teams/t1/channels/name/agent-status":
+                    return self._send(200, {"id": "c2"})
                 if p == "/api/v4/channels/c1/posts":
                     since = int(parse_qs(u.query).get("since", ["0"])[0])
                     with mm.lock:
-                        ps = {k: v for k, v in mm.posts.items() if max(v["create_at"], v["update_at"]) > since}
+                        ps = {k: v for k, v in mm.posts.items()
+                              if v["channel_id"] == "c1" and max(v["create_at"], v["update_at"]) > since}
                     return self._send(200, {"order": list(ps), "posts": ps})
                 self._send(404, {})
 
@@ -85,8 +88,8 @@ class FakeMM:
                 if p == "/api/v4/users/usernames":
                     return self._send(200, [{"id": k, "username": v} for k, v in mm.users.items() if v in body])
                 if p == "/api/v4/posts":
-                    assert body["channel_id"] == "c1"
-                    return self._send(201, mm.add("u-me", body["message"], body.get("root_id", ""), body.get("props")))
+                    assert body["channel_id"] in ("c1", "c2")
+                    return self._send(201, mm.add("u-me", body["message"], body.get("root_id", ""), body.get("props"), body["channel_id"]))
                 self._send(404, {})
 
             def do_PUT(self):
@@ -95,6 +98,7 @@ class FakeMM:
                 p, body = urlparse(self.path).path, self._body()
                 pid = p.split("/")[4]
                 with mm.lock:
+                    mm.edits = getattr(mm, "edits", 0) + 1
                     mm.posts[pid].update(message=body["message"], props=body.get("props", {}), update_at=int(time.time() * 1000))
                     return self._send(200, mm.posts[pid])
 
@@ -230,3 +234,42 @@ def test_parse_and_safety():
         c.command()
     assert al.Config(agent="codex").command()[0][:4] == ["codex", "exec", "--sandbox", "workspace-write"]
     assert al.Config(agent="agy").command() == (["agy", "-p", "{prompt}"], "arg")
+
+
+def test_checkin_snapshot_status_channel_and_feedback_pickup(server, repo):
+    fake, url = server
+    work, _, _ = repo
+    (work / "wip.txt").write_text("x")  # 1 uncommitted file -> dirty=1
+    cfg = make_cfg(url, work, [sys.executable, "-c", "print(1)"])
+    cfg.status_channel = "agent-status"
+    loop, _ = start_loop(cfg)
+    hbp = lambda: [p for p in fake.posts.values() if (p["props"] or {}).get("amolla_agent") == "heartbeat"]  # noqa: E731
+    assert wait_for(lambda: hbp())
+    h = hbp()[0]
+    assert h["channel_id"] == "c2"  # dedicated #agent-status channel
+    pr = h["props"]
+    assert pr["member"] == "jieun" and pr["branch"] == "main" and pr["dirty"] == "1" and pr["state"] == "idle"
+    assert pr["commit"].startswith(git(work, "rev-parse", "--short", "HEAD")) and "init" in pr["commit"]
+    assert "`main`" in h["message"] and "커밋 안 된 파일 1개" in h["message"]
+    # periodic check-in: heartbeat_min=0.02 (~1.2 s) -> the same post is edited again and again
+    assert wait_for(lambda: getattr(fake, "edits", 0) >= 2, 10)
+    assert len(hbp()) == 1
+    # feedback (not !task) from the orchestrator is picked up and counted in the next check-in
+    fake.add("u-bot", "S1 지도는 fixtures 먼저 붙이고 API는 나중에 해요")
+    fake.add("u-x", "spam from a stranger")
+    assert wait_for(lambda: loop.notes_total == 1)
+    assert "fixtures 먼저" in loop.notes[0] and "@orchestrator" in loop.notes[0]
+    assert wait_for(lambda: hbp()[0]["props"].get("notes") == "1", 10)
+    loop.stop.set()
+
+
+def test_feedback_goes_into_next_prompt(server, repo):
+    fake, url = server
+    work, _, _ = repo
+    dump = [sys.executable, "-c", "import sys;p=sys.stdin.read();print('HAS_FEEDBACK', '지도는 MapLibre' in p and '최근 중앙 에이전트' in p)"]
+    loop, _ = start_loop(make_cfg(url, work, dump))
+    fake.add("u-hyle", "지도는 MapLibre로 통일해요")
+    assert wait_for(lambda: loop.notes_total == 1)
+    t = fake.add("u-hyle", "!task 지도 정리")
+    assert wait_for(lambda: any(p["root_id"] == t["id"] and "HAS_FEEDBACK True" in p["message"] for p in fake.posts.values()))
+    loop.stop.set()
