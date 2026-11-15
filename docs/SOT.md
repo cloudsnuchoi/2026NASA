@@ -179,7 +179,7 @@ MATLAB 출력은 `/data/processed/v{N}/matlab/` 아래 다음 파일만 만든�
 
 서비스 DB: **Postgres 16 + PostGIS + pgvector**. 협업 도구(Mattermost 등)와 **데이터베이스를 분리**한다. 분석 중간 테이블은 Parquet + DuckDB도 허용하나, API가 읽는 값은 아래 테이블(또는 이와 동등한 뷰)에 있어야 한다.
 
-임베딩 차원은 사용하는 모델에 맞춰 한 숫자로 고정하고, 그 숫자를 이 절 또는 이슈에 기록한다. 아래는 예시로 `vector(1536)`을 썼다.
+임베딩은 `intfloat/multilingual-e5-small`(MIT, 한·영, 384차원)로 고정한다(2026-11-15 Hylē 승인, DECISIONS). 문서는 `passage: `, 질의는 `query: ` 접두사를 붙인다.
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS postgis;
@@ -281,7 +281,7 @@ CREATE TABLE evidence_chunk (
   url             text,
   license         text,
   quote           text NOT NULL,
-  embedding       vector(1536)               -- 모델 확정 후 차원 고정
+  embedding       vector(384)                -- intfloat/multilingual-e5-small (2026-11-15 확정)
 );
 
 -- 주말 안에 임베딩이 실패하면 embedding 을 비우고 키워드 검색만 한다.
@@ -753,7 +753,7 @@ GEOS-S2S가 스파이크에서 실패하면 `next_season`은 `null`이고 `info_
 ## 7. 아직 비워 두는 값
 
 - ~~아이오와 본편 카운티 이름과 `county_fips`~~ — **닫힘 (2026-11-15 11:10 KST):** Story County, `19169`, `IA`.
-- 데모 `field_id` 실값, POWER 격자 해상도, CSB ID 컬럼명, 임베딩 차원, 공개 API 베이스 URL.
+- 데모 `field_id` 실값, POWER 격자 해상도, CSB ID 컬럼명, 공개 API 베이스 URL. (임베딩 차원은 384로 확정, 5절)
 - GEOS-S2S 압축 파일 내부 형식·변수명·리드 월 수, NEX-GDDP 사용 모델 3개 이름, Prithvi 체크포인트 로드 방식(mmseg vs terratorch), `ndvi_class`·`hero_state` 임계값, 후보 생성 규칙 최종안(TEAM_SPEC O1).
 
 이 목록에 없는 숫자를 계약인 것처럼 추가하지 않는다.
