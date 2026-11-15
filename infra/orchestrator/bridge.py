@@ -605,6 +605,7 @@ class Orchestrator:
         import threading
 
         self.notifier = None  # set by run_live: Mattermost (typing, placeholder post, edits)
+        self.active: Dict[str, dict] = {}  # channel_id -> progress state of the answer being generated
         self._tl = threading.local()
         self._memo_locks: Dict[str, object] = {}
         self.state: Dict[str, ChannelState] = {}
@@ -941,7 +942,8 @@ class Orchestrator:
         import threading
 
         ch, root = ctx
-        state = {"label": label, "t0": time.time(), "stop": threading.Event()}
+        state = {"label": label, "t0": time.time(), "stop": threading.Event(), "extra": 0}
+        self.active[ch] = state
         try:
             self.notifier.typing(ch, root)
             self._tl.placeholder = state["pid"] = self.notifier.placeholder(ch, root, f"⏳ 답변 준비 중… ({label})")
@@ -954,7 +956,7 @@ class Orchestrator:
                 try:
                     secs = int(time.time() - state["t0"])
                     self.notifier.typing(ch, root)
-                    self.notifier.edit(state["pid"], f"⏳ 아직 생각 중… {secs}초 ({state['label']})")
+                    self.notifier.edit(state["pid"], f"⏳ 아직 생각 중… {secs}초 ({state['label']})" + self._extra_note(state))
                 except Exception:
                     pass
         if deep:
@@ -965,7 +967,22 @@ class Orchestrator:
         if state:
             state["label"] = label
             try:
-                self.notifier.edit(state["pid"], f"⏳ 답변 준비 중… ({label})")
+                self.notifier.edit(state["pid"], f"⏳ 답변 준비 중… ({label})" + self._extra_note(state))
+            except Exception:
+                pass
+
+    @staticmethod
+    def _extra_note(state) -> str:
+        n = state.get("extra", 0)
+        return f"\n📨 추가 메시지 {n}개 받음, 이어서 답할게요" if n else ""
+
+    def note_extra(self, channel_id: str, n: int) -> None:
+        """Called by the batcher when the same person sends more while an answer is being generated."""
+        state = self.active.get(channel_id)
+        if state and state.get("pid") and not state["stop"].is_set():
+            state["extra"] = n
+            try:
+                self.notifier.edit(state["pid"], f"⏳ 답변 준비 중… ({state['label']})" + self._extra_note(state))
             except Exception:
                 pass
 
@@ -1209,6 +1226,7 @@ async def run_live(orch: Orchestrator, mm: Mattermost) -> None:
     locks: Dict[str, asyncio.Lock] = {}
     backoff = 1
     asyncio.create_task(_silence_watch(orch, mm))
+    batcher = Batcher(orch, mm, locks, delay=float(os.environ.get("BATCH_DELAY", "4")))
     orch.notifier = mm
     while True:
         try:
@@ -1234,12 +1252,69 @@ async def run_live(orch: Orchestrator, mm: Mattermost) -> None:
                         continue
                     if inc is None:
                         continue
-                    lock = locks.setdefault(inc.channel_id, asyncio.Lock())
-                    asyncio.create_task(_process(orch, mm, inc, lock))
+                    batcher.add(inc)
         except Exception as exc:
             log.warning("websocket error: %s; reconnect in %ss", exc, backoff)
             await asyncio.sleep(backoff)
             backoff = min(backoff * 2, 60)
+
+
+def merge_incoming(batch: List[Incoming], follow_up: bool = False) -> Incoming:
+    """Several short posts from one person -> one question (answered in the first post's thread)."""
+    first = batch[0]
+    text = "\n".join(m.message for m in batch if m.message.strip())
+    if follow_up:
+        text = "(앞 답변을 만드는 동안 보낸 추가 메시지)\n" + text
+    return Incoming(channel_id=first.channel_id, channel_name=first.channel_name, channel_type=first.channel_type,
+                    user_id=first.user_id, username=first.username, message=text, post_id=first.post_id,
+                    root_id=first.root_id, mentioned=any(m.mentioned for m in batch),
+                    file_count=sum(m.file_count for m in batch), file_ids=[f for m in batch for f in m.file_ids],
+                    create_at=max(m.create_at for m in batch))
+
+
+class Batcher:
+    """Debounce a person's rapid posts (wait `delay` s, then answer them together). Posts that arrive while
+    an answer is being generated are queued (the answer is not interrupted) and answered right after, together,
+    with the previous answer in context. Commands and agent-loop posts bypass the queue."""
+
+    def __init__(self, orch: Orchestrator, mm, locks: Dict[str, asyncio.Lock], delay: float = 4.0, process=None):
+        self.orch, self.mm, self.locks, self.delay = orch, mm, locks, delay
+        self.process = process or _process
+        self.pending: Dict[tuple, List[Incoming]] = {}
+        self.running: set = set()
+        self.scheduled: set = set()
+
+    def add(self, inc: Incoming) -> None:
+        lock = self.locks.setdefault(inc.channel_id, asyncio.Lock())
+        if inc.agent_kind or inc.message.strip().startswith("!"):
+            asyncio.create_task(self.process(self.orch, self.mm, inc, lock))
+            return
+        key = (inc.channel_id, inc.user_id)
+        self.pending.setdefault(key, []).append(inc)
+        if key in self.running:
+            self.orch.note_extra(inc.channel_id, len(self.pending[key]))
+        if key not in self.scheduled:
+            self.scheduled.add(key)
+            asyncio.create_task(self._run(key, lock))
+
+    async def _run(self, key, lock) -> None:
+        follow_up = False
+        try:
+            while True:
+                await asyncio.sleep(self.delay)
+                batch = self.pending.pop(key, [])
+                if not batch:
+                    break
+                self.running.add(key)
+                try:
+                    await self.process(self.orch, self.mm, merge_incoming(batch, follow_up), lock)
+                finally:
+                    self.running.discard(key)
+                follow_up = True
+                if not self.pending.get(key):
+                    break
+        finally:
+            self.scheduled.discard(key)
 
 
 async def _silence_watch(orch: Orchestrator, mm: Mattermost, every: float = 60.0) -> None:
