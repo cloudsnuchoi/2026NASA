@@ -64,7 +64,29 @@ Outside the pilot fields the tool says: *"Deep analysis available in 4 pilot cou
 
 **Satellite AI check.** For 2024, Prithvi's most common class matched the USDA Cropland Data Layer crop on **19 of 20** pilot fields, with a mean pixel agreement of **0.883**. Most pilot fields are uniform corn or soybean fields, so this is not a general accuracy figure; the model card reports 60.64 % overall pixel accuracy on its own test set. Prithvi is a supporting layer; the crop label of record is the Cropland Data Layer.
 
-**MATLAB prototype validation — in progress.** Our two MATLAB members built the original formulas (V8) and offline analyses (2012 county drought anomalies for the 12 Corn Belt states, climate summaries). A comparison script now runs on all 20 pilot fields, but no result is validated yet: the V8 water-demand output and the engine's seasonal deficit use different definitions, and the NDVI bare-day comparison is still being prepared. We report this as "in progress", not as agreement.
+**MATLAB cross-checks (first results).** Our MATLAB members built the original formulas (prototype V8) and offline analyses. Two outputs are ready:
+
+- *2012 drought, county level* (`drought_compare_2012_summary.csv`). Across the 4 pilot counties, the May–September 2012 precipitation anomaly and the engine's 2012 water deficit for the current rotation (A, mean over the county's pilot fields) have Pearson **r = −0.87 (n = 4 counties)**: drier counties got larger deficits. Per county: Lancaster NE −49.8 % precipitation, 643 mm deficit; Story IA −49.0 %, 470 mm; McLean IL −32.2 %, 415 mm; Union OH −10.1 %, 307 mm. Maximum temperature was 1.4–3.5 °C above normal. With only four points, and with both sides built on NASA POWER weather, this is a consistency check, not an independent validation. The root-zone soil-moisture column is empty (information gap).
+- *Bare-soil days from HLS NDVI* (`baresoil_days_20fields.csv`). For all **20 pilot fields, 2023–2025** (60 field-years), the median is **81 bare-soil days per year** (range 19–139) and **43 winter bare days** (range 10–59; 59 field-years with a value). Cloud-free HLS observations covered 27–67 % of days. These years do not overlap the 2012 replay, so they are not compared with the engine's 2012 winter bare days.
+
+**In progress:** the V8 annual crop water demand and the engine's seasonal water deficit use different definitions, so that comparison is not reported as agreement.
+
+### Team
+
+- **Hylē** — full stack, data pipeline, model API, project lead
+- **김윤성** — MATLAB: climate analysis (2012 drought, climate summaries)
+- **김우찬** — MATLAB: vegetation and scenarios; prototype V8
+- **고지은** — UI/UX + MATLAB slide figures
+- **하지민** — UI/UX + MATLAB NDVI bare-soil analysis
+- **강다은** — 3D simulation (planned) + demo video
+
+<!-- Demo video owner: TODO(Hylē) -->
+
+### Links
+
+- Project (static snapshot): https://cloudsnuchoi.github.io/2026NASA/demo/
+- Live server (team VPS; may go offline after judging): https://watts-astrology-asus-blessed.trycloudflare.com
+- Slides: https://cloudsnuchoi.github.io/2026NASA/submission/slides/
 
 ### Benefits & Impact
 
@@ -108,7 +130,10 @@ Live model_api: http://127.0.0.1:8090 (health ok, db true).
 - "GEOS-S2S 10 members", "NEX-GDDP 2 models x 2 scenarios": docs/spike-report.md GEOS-S2S + NEX-GDDP (ACCESS-CM2, MPI-ESM1-2-HR; ssp245, ssp585); /simulate scenario_results n_members.
 - "Prithvi 19 of 20, mean pixel agreement 0.883, model card 60.64 % aAcc": docs/PRITHVI.md 요약 + 주의 1.
 - "12 Corn Belt states" (MATLAB drought analysis): /srv/hackathon/data/processed/v1/matlab/drought_2012_county.csv(.manifest.json, 13,464 rows, script matlab/climate/drought_2012_analysis.m).
-- MATLAB validation status: /srv/hackathon/projects/2026NASA-mat/docs/MATLAB-VALIDATION.md (uncommitted, 2026-11-15T19:02 KST): V8 deficit not validated; NDVI bare days not validated; 2012 county check = same-source POWER cross-check only. docs/MATLAB-VALIDATION.md is not on main -> "in progress".
+- MATLAB cross-checks (20:20 KST): /srv/hackathon/data/processed/v1/matlab/outputs/yoonsung/drought_compare_2012_summary.csv (pearson_r_precip_vs_deficit -0.8653, n_for_r 4; per-county engine_A_deficit_2012_mm 414.77/469.93/643.3/306.5, precip_anomaly_pct_2012_MJJAS -32.21/-49.02/-49.85/-10.06, tmax 1.42–3.51; rzsm_z NaN). outputs/jimin/baresoil_days_20fields.csv: 60 rows, 20 fields, 2023–2025; bare_days median 81 min 19 max 139; winter_bare_days median 43 min 10 max 59, 1 NaN (171825006923844 2023); coverage 0.274–0.666.
+- Team roles: Hylē directive to SUB lane 2026-11-15 20:15 KST. Demo video owner not assigned -> TODO(Hylē).
+- Live server URL: /srv/hackathon/state/status/demo_url.txt (20:17 KST).
+- Old MATLAB validation status: /srv/hackathon/projects/2026NASA-mat/docs/MATLAB-VALIDATION.md (uncommitted, 2026-11-15T19:02 KST): V8 deficit not validated; NDVI bare days not validated; 2012 county check = same-source POWER cross-check only. docs/MATLAB-VALIDATION.md is not on main -> "in progress".
 - CVaR definition: /strategies/compare cvar_definition.
 - "unmatched numbers are flagged": model_api/README.md /explain (unverified_numbers); docs/QA-REPORT.md A10.
 - "insufficient_evidence": model_api/README.md, QA-REPORT A10 (evidence_chunk empty).

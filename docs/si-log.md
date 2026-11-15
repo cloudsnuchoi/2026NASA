@@ -17,3 +17,7 @@
 | 2026-11-15 19:43–20:15 KST | MATLAB-fix 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | V8 배치 실패 원인 분석(USGS 8 s 타임아웃, Open-Meteo MRI_AGCM3_2_S ET0 전부 null), 서버 API 사전 수집 캐시 `data_pipeline/v8_prefetch.py`, V8 캐시 우선 읽기·ET0 정보 공백 처리, 4개 스크립트 old/<stamp> 보관 정책, MATLAB 정적 검사·Python 사전 검증 (`fix/matlab-scripts`) | 이 로그, `matlab/contrib/woochan/CHANGELOG.md` |
 - 2026-11-15 20:45 KST · Claude Code (Opus) · MAUTO: matlab/autorun run_all + logger, infra/matlab/mwatch.py, fixq_worker run_all hint
 - 2026-11-15 21:10 KST · Claude Code (Opus) · NOTIFY: infra/matlab/notify.py (notify.log + dedupe), mwatch new-script/group notices, fixq via notify, live_status lane states, results_batch.sh
+- 2026-11-15 20:25 KST · Claude Opus 5.5 (STATIC lane) · docs/demo static GitHub Pages copy + API fallback layer, tools/make_demo_snapshot.py, tools/test_static_demo.py (Playwright, live API blocked)
+| 2026-11-15 20:30–21:00 KST | SITE2 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | `docs/DATA_SOURCES.md`(URL curl 확인·제출 양식 텍스트), `docs/PRITHVI-AGREEMENT.md`(vision_result 20필지 분포), 사이트 탭 구현 상태 갱신·`docs/matlab-results/`, `frontend/data-sources.js` 패널 (`feat/site-truth`) | 이 로그 |
+| 2026-11-15 20:17–22:55 KST | SUB 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | 제출 문서: `submission-form.md`(폼 순서 복붙본), 팀 역할, MATLAB 교차 확인 문단(실제 출력 CSV만 인용), 슬라이드 갱신 (`feat/submission-v1`) | 이 로그, `docs/submission/` |
+| 2026-11-15 20:25 KST | STATIC 레인 에이전트 | 코딩 어시스턴트 (Claude Code) | GitHub Pages 정적 데모(`docs/demo/`), API 대체 계층, `tools/make_demo_snapshot.py`, `tools/test_static_demo.py` | 이 로그, `docs/demo/` |

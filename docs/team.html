@@ -31,41 +31,42 @@
       </ul>
     </section>
 
-    <h2>역할과 담당 (2026-11-15 09:30 확정, 강다은 11:10 확인)</h2>
+    <h2>역할과 실제 기여 (2026-11-15 KST 갱신)</h2>
     <div class="role-grid">
       <article class="info-card">
         <p class="k">오케스트레이터 · 풀스택</p>
         <h3>Hylē <code>@cloudsnuchoi</code></h3>
-        <p>FastAPI, DB, ETL 적재, Prithvi, MC, RAG/LLM, Mattermost 봇, Pages, 머지·배포. 폴더: <code>model_api/</code>, <code>data_pipeline/</code>, <code>rag/</code>, <code>infra/</code>, <code>docs/</code>.</p>
+        <p>FastAPI 엔진(Tier 1 <code>/quick</code>, Tier 2 MC·CVaR·백테스트, <code>/explain</code>), DB·ETL 적재, Prithvi 추론, Mattermost 봇, Pages, 머지·배포. 폴더: <code>model_api/</code>, <code>data_pipeline/</code>, <code>rag/</code>, <code>infra/</code>, <code>docs/</code>.</p>
       </article>
       <article class="info-card">
-        <p class="k">MATLAB A · 기후</p>
+        <p class="k">MATLAB · 기후 (빌드 단계 검증)</p>
         <h3>김윤성 <code>@ssbb215356</code></h3>
-        <p>POWER, IMERG, SMAP, NLDAS, GEOS-S2S, 아노말리, 백테스트 보조. <code>matlab/climate/</code>. git 없이 VPS에 저장, Hylē가 커밋.</p>
+        <p>2012 가뭄 카운티 비교(<code>matlab/drought_compare_2012.m</code> → <a href="./matlab-results/">그림·CSV</a>), 콘벨트 12주 2012 카운티 가뭄 아노말리. git 없이 VPS에 저장, Hylē가 커밋.</p>
       </article>
       <article class="info-card">
-        <p class="k">MATLAB B · 식생</p>
+        <p class="k">MATLAB · V8 프로토타입 (빌드 단계 검증)</p>
         <h3>김우찬 <code>@flyingbear-code</code></h3>
-        <p>HLS NDVI 평활(SG), 맨땅, NEX-GDDP delta. <code>matlab/vegetation/</code>, <code>matlab/scenario/</code>. git 없이 VPS에 저장.</p>
+        <p>팀 V8 프로토타입을 데모 필지 20개에 일괄 실행(<code>matlab/FieldShift_V8_batch.m</code> → <a href="./matlab-results/v8_cards_20fields.csv">v8_cards_20fields.csv</a>). V8 식은 Tier 1 FAO-56 엔진으로 이식. git 없이 VPS에 저장.</p>
       </article>
       <article class="info-card">
-        <p class="k">UI/UX A · S0–S3</p>
+        <p class="k">UI/UX · MATLAB 슬라이드 그림</p>
         <h3>고지은 <code>@jieun-Ribby</code></h3>
-        <p>랜딩, 지도, 핀, 프로필, 작물·슬라이더, 디자인 시스템. <code>frontend/</code>.</p>
+        <p>ART FARM 화면 디자인, MATLAB 슬라이드 그림(<code>matlab/slide_figures.m</code> → <a href="./matlab-results/">fig_backtest2012, fig_p10p90</a>).</p>
       </article>
       <article class="info-card">
-        <p class="k">UI/UX B · S4–S7</p>
+        <p class="k">UI/UX · MATLAB NDVI 맨땅 분석</p>
         <h3>하지민 <code>@hahah383</code></h3>
-        <p>전략 카드, 차트, 타임라인, 용어, 슬라이드 디자인. <code>frontend/</code>, 드라이브 PRD·DESIGN.</p>
+        <p>ART FARM 화면 디자인, HLS NDVI 맨땅 일수 분석(<code>matlab/ndvi_baresoil.m</code> → <a href="./matlab-results/baresoil_days_20fields.csv">baresoil_days_20fields.csv</a>).</p>
       </article>
       <article class="info-card">
-        <p class="k">복셀 시뮬 · 데모 영상</p>
+        <p class="k">데모 영상 · 3D 시뮬(미사용(향후))</p>
         <h3>강다은 <code>@kangdaeun2005</code></h3>
-        <p>three.js 복셀 밭, 자동 재생. <code>sim/</code>. 영상 소스는 드라이브와 제출용.</p>
+        <p>제출용 데모 영상 담당. three.js 복셀 3D 시뮬은 이번 제출에 없음(향후).</p>
       </article>
     </div>
 
     <h2>인계 파일 형식</h2>
+    <p class="src-note">실제 상태(2026-11-15): 아래 고정 파일 5종은 DB에 적재되지 않았습니다(해당 테이블 0행). 이번 제출의 MATLAB 산출물은 빌드 단계 검증용 그림·CSV이며 <a href="./matlab-results/">matlab-results/</a>에 있습니다.</p>
     <p>MATLAB → <code>/data/processed/vN/matlab/</code> (Parquet 우선, CSV면 UTF-8·쉼표·헤더 1줄, 결측은 빈칸, 0 금지). 파일마다 <code>{file}.manifest.json</code>. 적재는 <code>data_pipeline/load_matlab.py</code>. MATLAB은 DB에 직접 쓰지 않습니다.</p>
     <div class="table-wrap">
       <table>
