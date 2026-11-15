@@ -1,6 +1,6 @@
-# 아몰라 실시간 현황 · 16:46 KST
+# 아몰라 실시간 현황 · 16:51 KST
 
-제출 목표 22:00 KST까지 **5시간 13분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **5시간 8분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
@@ -89,7 +89,6 @@
 | bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | 16:01 |
 | live | — | 이 현황 생성기 (5분) | 15:54 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | 12:11 |
-| prithvi | claude-opus-5-5 | Prithvi 작물 분류 추론 | 15:42 |
 | runner | — | GitHub Actions 러너 | 13:09 |
 
 ## 사람 (마지막 활동, KST)
@@ -100,9 +99,10 @@
 | 고지은 | 15:50 | — |
 | 하지민 | 14:56 | — |
 | 강다은 | 13:47 | — |
-| Hylē | 16:01 | 16:19 |
+| Hylē | 16:01 | 16:49 |
 
 ## 최근 머지된 PR
+- #48 data(imerg,nldas): IMERG 일별 2001–2025 + NLDAS-2 월별 1995–2025 (12주 카운티)
 - #46 data(fields): 대비 데모 필지 8개 추가 (IL·NE·OH) — 필지별 결과 차이 확대
 - #45 feat(site): live 현황 패널(dashboard·roadmap), 모든 탭 내보내기, 팀 채팅 버튼
 - #44 feat(orchestrator): 끊어 보낸 메시지 묶기(4초) + 답변 중 추가 메시지 대기열
@@ -110,4 +110,3 @@
 - #42 fix(orchestrator): 봇 답변 품질 (MATLAB 경로·TASKS 맥락·툴박스/토큰 규칙·안내 템플릿·캡처 읽기)
 - #41 fix(model): 전략이 물수지에 실제로 반영되게 수정 (QA P1 E1·E3·E4) + NLDAS 반영
 - #40 feat(orchestrator): 디자인 채널은 사람이 쓴 모든 글에 답 + PRD 결정 메모
-- #39 test(qa): model_api 라이브 E2E + DB 점검 SQL + QA 보고서

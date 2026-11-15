@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T16:46:33+09:00",
+ "generated_at": "2026-11-15T16:51:42+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 313,
+ "remaining_min": 308,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "lanes": [
   {
@@ -285,12 +285,6 @@
    "last_activity": "12:11"
   },
   {
-   "name": "prithvi",
-   "model": "claude-opus-5-5",
-   "task": "Prithvi 작물 분류 추론",
-   "last_activity": "15:42"
-  },
-  {
    "name": "runner",
    "model": "—",
    "task": "GitHub Actions 러너",
@@ -332,7 +326,7 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "16:19"
+   "repo_last": "16:49"
   }
  ],
  "blockers": [],
@@ -342,6 +336,11 @@
   "MATLAB: field_season.csv"
  ],
  "merged_prs": [
+  {
+   "number": 48,
+   "title": "data(imerg,nldas): IMERG 일별 2001–2025 + NLDAS-2 월별 1995–2025 (12주 카운티)",
+   "merged_at": "2026-11-15T07:49:14Z"
+  },
   {
    "number": 46,
    "title": "data(fields): 대비 데모 필지 8개 추가 (IL·NE·OH) — 필지별 결과 차이 확대",
@@ -376,11 +375,6 @@
    "number": 40,
    "title": "feat(orchestrator): 디자인 채널은 사람이 쓴 모든 글에 답 + PRD 결정 메모",
    "merged_at": "2026-11-15T06:05:22Z"
-  },
-  {
-   "number": 39,
-   "title": "test(qa): model_api 라이브 E2E + DB 점검 SQL + QA 보고서",
-   "merged_at": "2026-11-15T06:00:08Z"
   }
  ],
  "ai_models": [
