@@ -2,6 +2,6 @@
 hyle	Hylē	full-stack·orchestrator	area: infra	yes
 yoonsung	김윤성	MATLAB A (climate)	area: matlab	no
 woochan	김우찬	MATLAB B (vegetation·scenario)	area: matlab	no
-jieun	고지은	UI/UX A (S0–S3)	area: frontend	no
-jimin	하지민	UI/UX B (S4–S7·slides)	area: frontend	no
+jieun	고지은	UI/UX A + MATLAB 발표 그림·데모 UI 확인 (11-15 저녁, Hylē 확정)	area: matlab+frontend	no
+jimin	하지민	UI/UX B + MATLAB 맨땅 분석 (11-15 저녁, Hylē 확정)	area: matlab+frontend	no
 daeun	강다은	sim·voxel demo (확인 필요)	area: sim	no
