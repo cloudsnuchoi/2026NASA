@@ -42,9 +42,9 @@ flowchart LR
 
 **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · **Status dashboard:** [docs/dashboard/](docs/dashboard/index.html) ([GitHub Pages](https://cloudsnuchoi.github.io/2026NASA/dashboard/))
 
-Readable Pages: [Status board](https://cloudsnuchoi.github.io/2026NASA/dashboard/) · [Roadmap & checklist](https://cloudsnuchoi.github.io/2026NASA/roadmap.html) · [데이터셋](https://cloudsnuchoi.github.io/2026NASA/data.html) · [아키텍처·파이프라인](https://cloudsnuchoi.github.io/2026NASA/architecture.html) · [AI 모델](https://cloudsnuchoi.github.io/2026NASA/models.html) · [개요/PRD](https://cloudsnuchoi.github.io/2026NASA/overview.html) · [팀](https://cloudsnuchoi.github.io/2026NASA/team.html)
+Readable Pages: [Status board](https://cloudsnuchoi.github.io/2026NASA/dashboard/) · [Roadmap & checklist](https://cloudsnuchoi.github.io/2026NASA/roadmap.html) · [Datasets](https://cloudsnuchoi.github.io/2026NASA/data.html) · [Architecture & pipeline](https://cloudsnuchoi.github.io/2026NASA/architecture.html) · [SI models](https://cloudsnuchoi.github.io/2026NASA/models.html) · [Overview / PRD](https://cloudsnuchoi.github.io/2026NASA/overview.html) · [Team](https://cloudsnuchoi.github.io/2026NASA/team.html)
 
-**Team drive (Team Amolla):** [Google Drive 공유 폴더](https://drive.google.com/drive/folders/1pUlXbE_VNiMGHVYSkHHT4Mr-nzo--Yqd) — subfolders `PRD`, `DESIGN`, `FRONT`, `BACK`, `DATA`.
+**Team drive (Team Amolla):** [Shared Google Drive folder](https://drive.google.com/drive/folders/1pUlXbE_VNiMGHVYSkHHT4Mr-nzo--Yqd) — subfolders `PRD`, `DESIGN`, `FRONT`, `BACK`, `DATA`.
 
 **Team Amolla** · [NASA Space Apps Challenge 2026](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/) (Seoul) · Challenge 07 *Field Shift: Adapting Farms with NASA Data*.
 
@@ -83,7 +83,7 @@ These documents are frozen in Korean. Identifiers in code stay English.
 | --- | --- |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, **build vs service pipelines**, decision model, collaboration workflow, AI 4 layers and algorithms |
 | [docs/dashboard/](docs/dashboard/index.html) | Live team board: per-member `STATUS:` comments, countdown, area bars, PR queue. Also on [GitHub Pages](https://cloudsnuchoi.github.io/2026NASA/dashboard/) |
-| GitHub Pages explainers | Tabs: [Status board](https://cloudsnuchoi.github.io/2026NASA/dashboard/), [Roadmap & checklist](https://cloudsnuchoi.github.io/2026NASA/roadmap.html), [데이터셋](https://cloudsnuchoi.github.io/2026NASA/data.html), [아키텍처·파이프라인](https://cloudsnuchoi.github.io/2026NASA/architecture.html), [AI 모델](https://cloudsnuchoi.github.io/2026NASA/models.html), [개요/PRD](https://cloudsnuchoi.github.io/2026NASA/overview.html), [팀](https://cloudsnuchoi.github.io/2026NASA/team.html) |
+| GitHub Pages explainers | Tabs: [Status board](https://cloudsnuchoi.github.io/2026NASA/dashboard/), [Roadmap & checklist](https://cloudsnuchoi.github.io/2026NASA/roadmap.html), [Datasets](https://cloudsnuchoi.github.io/2026NASA/data.html), [Architecture & pipeline](https://cloudsnuchoi.github.io/2026NASA/architecture.html), [SI models](https://cloudsnuchoi.github.io/2026NASA/models.html), [Overview / PRD](https://cloudsnuchoi.github.io/2026NASA/overview.html), [Team](https://cloudsnuchoi.github.io/2026NASA/team.html) |
 | [docs/TEAM_SPEC.md](docs/TEAM_SPEC.md) | Product lock status, user flow & screens, requirement traceability, data mapping, AI 4-layer architecture, data spike, roles & handoff contracts, CLI guide, timeline |
 | [docs/PRD.md](docs/PRD.md) | Problem, users, decision, scope, success criteria, demo, cut order |
 | [docs/SOT.md](docs/SOT.md) | Datasets, IDs/units/CRS, aggregation, directories, DB schema, API contract |
