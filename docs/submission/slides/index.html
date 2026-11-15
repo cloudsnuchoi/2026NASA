@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ART FARM — Field Shift: Adapting Farms with NASA Data</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  :root { --ink:#1d2a22; --muted:#5b6b60; --green:#2f6b45; --soil:#8a5a2b; --bg:#f6f3ea; --card:#ffffff; --line:#d9d3c3; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:#cfcabd; font-family: "Helvetica Neue", Arial, sans-serif; color:var(--ink); }
+  .slide { width:1280px; height:720px; margin:24px auto; padding:56px 72px; background:var(--bg); position:relative; overflow:hidden;
+           page-break-after:always; break-after:page; box-shadow:0 2px 12px rgba(0,0,0,.15); }
+  @media print { html, body { background:var(--bg); } .slide { margin:0; box-shadow:none; } }
+  h1 { font-size:76px; margin:0 0 8px; letter-spacing:2px; color:var(--green); }
+  h2 { font-size:40px; margin:0 0 24px; color:var(--green); }
+  h3 { font-size:24px; margin:0 0 10px; }
+  p, li { font-size:22px; line-height:1.4; }
+  ul { margin:0; padding-left:26px; }
+  .sub { font-size:30px; color:var(--soil); margin:0 0 40px; }
+  .muted { color:var(--muted); }
+  .small { font-size:16px; }
+  .foot { position:absolute; left:72px; right:72px; bottom:26px; font-size:14px; color:var(--muted); display:flex; justify-content:space-between; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:28px; }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:22px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px 22px; }
+  .card p, .card li { font-size:19px; }
+  .tag { display:inline-block; font-size:14px; padding:3px 10px; border-radius:20px; background:#e5efe7; color:var(--green); margin-right:6px; }
+  .quote { font-size:34px; font-style:italic; margin:0 0 30px; }
+  table { border-collapse:collapse; width:100%; font-size:18px; }
+  th, td { border-bottom:1px solid var(--line); padding:7px 8px; text-align:left; }
+  th { color:var(--muted); font-weight:600; }
+  .big { font-size:46px; font-weight:700; color:var(--soil); }
+  .fieldmark { position:absolute; right:72px; top:64px; width:300px; height:300px; }
+</style>
+</head>
+<body>
+
+<!-- 1. Title -->
+<section class="slide">
+  <svg class="fieldmark" viewBox="0 0 100 100" aria-hidden="true">
+    <rect x="5" y="5" width="90" height="90" rx="6" fill="#e5efe7" stroke="#2f6b45" stroke-width="2"/>
+    <g stroke="#2f6b45" stroke-width="3" opacity=".7"><line x1="15" y1="20" x2="85" y2="20"/><line x1="15" y1="35" x2="85" y2="35"/><line x1="15" y1="50" x2="85" y2="50"/></g>
+    <g stroke="#8a5a2b" stroke-width="3" opacity=".7"><line x1="15" y1="65" x2="85" y2="65"/><line x1="15" y1="80" x2="85" y2="80"/></g>
+  </svg>
+  <h1>ART FARM</h1>
+  <p class="sub">Field Shift: Adapting Farms with NASA Data</p>
+  <p class="quote">“What should I plant next year so both my soil and my wallet survive?”</p>
+  <p>Team <strong>Amolra</strong> (아몰라) — Korean for <em>“I have no idea!”</em><br>
+     We built ART FARM so farmers never have to say “Amolra” again.</p>
+  <div class="foot"><span>NASA Space Apps Challenge 2026</span><span>Decision support only — does not replace farmer judgment</span></div>
+</section>
+
+<!-- 2. Problem -->
+<section class="slide">
+  <h2>The problem</h2>
+  <div class="grid2">
+    <div>
+      <ul>
+        <li>Corn Belt farmers mostly grow corn and soybean in turn. The soil lies bare much of the winter.</li>
+        <li>Adding a cover crop, a small grain or alfalfa is a choice that is <strong>hard to undo</strong>: it touches soil, water and next year’s harvest.</li>
+        <li>The weather that decides the outcome is uncertain. A single forecast number would be false confidence.</li>
+        <li>NASA satellites see bare soil, drought and soil moisture — but the data sit in many archives a farmer has no time to learn.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>What farmers need</h3>
+      <p>Not an AI that picks the answer, but a tool that:</p>
+      <ul>
+        <li>compares rotations side by side</li>
+        <li>shows trade-offs and the bad-year tail</li>
+        <li>says what it does not know</li>
+        <li>leaves the decision to the farmer and a local adviser</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>ART FARM</span><span>2 / 7</span></div>
+</section>
+
+<!-- 3. How it works: two tiers -->
+<section class="slide">
+  <h2>How it works — two tiers</h2>
+  <div class="grid2">
+    <div class="card">
+      <span class="tag">Tier 1</span><h3>Quick Screen — anywhere in the Corn Belt</h3>
+      <ul>
+        <li>Click 4 corners of a field on a satellite map</li>
+        <li>10 years of NASA POWER weather + USGS 3DEP elevation</li>
+        <li>FAO-56 crop water formulas (ported from our team’s MATLAB prototype V8)</li>
+        <li>Pick 2–3 of corn / soybean / wheat; no ranking</li>
+        <li>Every result labelled <strong>“screening estimate”</strong></li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag">Tier 2</span><h3>Deep Analysis — 20 pilot fields, 4 counties</h3>
+      <ul>
+        <li>Story IA (12), McLean IL (3), Lancaster NE (3), Union OH (2)</li>
+        <li>Field soil (SSURGO), crop history (USDA CDL), field ET (OpenET)</li>
+        <li>Monte Carlo water balance, 500 seasons, fixed seed → P10–P90 + CVaR</li>
+        <li>4 strategy cards A–D, 2012 drought replay, Prithvi crop check</li>
+        <li>LLM explains only numbers the engine returned</li>
+      </ul>
+    </div>
+  </div>
+  <p class="small muted" style="margin-top:18px">A = current corn–soybean · B = A + cereal rye cover · C = corn–soybean–small grain + cover · D = corn–soybean–alfalfa (reference card). Outside pilot fields: “Deep analysis available in 4 pilot counties.”</p>
+  <div class="foot"><span>ART FARM</span><span>3 / 7</span></div>
+</section>
+
+<!-- 4. Data -->
+<section class="slide">
+  <h2>NASA data at the core</h2>
+  <table>
+    <tr><th>NASA dataset</th><th>Used for</th></tr>
+    <tr><td>NASA POWER (daily)</td><td>Weather for every county, 1995–2025; reference ET (FAO-56)</td></tr>
+    <tr><td>HLS Landsat/Sentinel-2 v2.0</td><td>NDVI, bare-soil periods; input to Prithvi</td></tr>
+    <tr><td>Prithvi-EO-1.0 crop classification</td><td>Satellite crop check (inference only)</td></tr>
+    <tr><td>GEOS-S2S-3</td><td>Next-season range (10 ensemble members)</td></tr>
+    <tr><td>NEX-GDDP-CMIP6</td><td>2030s range (2 models × 2 emission scenarios)</td></tr>
+    <tr><td>GPM IMERG · NLDAS-2 · SMAP</td><td>County context: rainfall, root-zone and surface soil moisture (coarse, labelled)</td></tr>
+  </table>
+  <p class="small muted" style="margin-top:16px">Also: USDA NASS CDL, Crop Sequence Boundaries, Quick Stats · USDA NRCS SSURGO · USGS 3DEP · OpenET · US Census boundaries · NOAA NWS API · Open-Meteo · Esri World Imagery. Full links in the submission.</p>
+  <div class="foot"><span>ART FARM</span><span>4 / 7</span></div>
+</section>
+
+<!-- 5. Results -->
+<section class="slide">
+  <h2>Real results — Story County, Iowa (field 191825003869023)</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>2012 drought replay — growing-season water deficit</h3>
+      <svg viewBox="0 0 560 250" width="100%" role="img" aria-label="2012 water deficit by strategy: A 463, B 451, C 366, D 513 mm">
+        <g font-size="16" fill="#1d2a22">
+          <text x="0" y="40">A corn–soy</text><rect x="120" y="22" width="324" height="26" fill="#8a5a2b"/><text x="452" y="41">463 mm</text>
+          <text x="0" y="95">B + rye</text><rect x="120" y="77" width="316" height="26" fill="#a37748"/><text x="444" y="96">451 mm</text>
+          <text x="0" y="150">C + grain</text><rect x="120" y="132" width="256" height="26" fill="#2f6b45"/><text x="384" y="151">366 mm</text>
+          <text x="0" y="205">D + alfalfa</text><rect x="120" y="187" width="359" height="26" fill="#6b7f72"/><text x="487" y="206">513 mm</text>
+        </g>
+      </svg>
+      <p class="small muted">Actual 2009–2012 NASA POWER weather. Winter bare-soil days in 2012: A 181 · B 9 · C 3.</p>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:18px">
+        <h3>Uncertainty, not a point forecast</h3>
+        <p>Current rotation (A), water deficit over 500 resampled seasons (1995–2025):</p>
+        <p><span class="big">115–265 mm</span> <span class="muted">P10–P90 (P50 188)</span></p>
+        <p>Next season with GEOS-S2S: <strong>136–309 mm</strong> (P10–P90)</p>
+      </div>
+      <div class="card">
+        <h3>Satellite AI check</h3>
+        <p>Prithvi matched the USDA crop label on <strong>19 of 20</strong> pilot fields in 2024 (mean pixel agreement 0.883). Mostly uniform fields — not a general accuracy figure.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Relative model indices, not yield promises</span><span>5 / 7</span></div>
+</section>
+
+<!-- 6. Honesty / limits -->
+<section class="slide">
+  <h2>Honest by design — and our limits</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>How we stay honest</h3>
+      <ul>
+        <li>Future shown only as P10–P90 ranges; tested against the real 2012 drought</li>
+        <li>Numbers never generated by the LLM — each one traced to engine JSON</li>
+        <li>Every card: why, evidence, benefits, information gaps, local-review risks</li>
+        <li>Cons on every card; nitrogen needs a field soil test</li>
+        <li>No “Recommended”, no single best answer</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Limits we show on screen</h3>
+      <ul>
+        <li>Weather is one NASA POWER point per county</li>
+        <li>Iowa crop calendar used for all 4 counties</li>
+        <li>No prices yet: revenue left empty, not guessed</li>
+        <li>SMAP / IMERG / NLDAS are coarse context only</li>
+        <li>MATLAB prototype validation: <strong>in progress</strong></li>
+        <li>Planned: 3D field simulation, economics, more counties</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>ART FARM</span><span>6 / 7</span></div>
+</section>
+
+<!-- 7. Team -->
+<section class="slide">
+  <h2>Team Amolra (아몰라)</h2>
+  <div class="grid3">
+    <div class="card"><h3>Hylē</h3><p>Full stack, data pipeline, model API, project lead</p></div>
+    <div class="card"><h3>김윤성</h3><p>MATLAB — climate analysis (2012 drought, climate summaries)</p></div>
+    <div class="card"><h3>김우찬</h3><p>MATLAB — vegetation and scenarios; prototype V8</p></div>
+    <div class="card"><h3>고지은</h3><p>UI/UX — map, field profile, crop selection</p></div>
+    <div class="card"><h3>하지민</h3><p>UI/UX — strategy cards, details, checklist</p></div>
+    <div class="card"><h3>강다은</h3><p>Demo video; 3D simulation (planned)</p></div>
+  </div>
+  <p style="margin-top:28px">ART FARM is a decision-support tool. It does not replace farmer judgment or local agronomic advice.</p>
+  <p class="small muted">Use of AI: coding assistants (development), DeepSeek (explanations), Prithvi-EO-1.0 (inference only). No NASA logos used.</p>
+  <div class="foot"><span>NASA Space Apps Challenge 2026</span><span>7 / 7</span></div>
+</section>
+
+</body>
+</html>
