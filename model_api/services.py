@@ -14,8 +14,62 @@ SEASONS = {"spring": [3, 4, 5], "summer": [6, 7, 8], "fall": [9, 10, 11], "winte
 CONTEXT_SOURCES = [
     {"source_id": "power", "native_resolution": "see API metadata (MERRA-2 ~0.5 x 0.625 deg for met vars)"},
     {"source_id": "smap", "native_resolution": "nominal 36 km L3 (SPL3SMP)"},
-    {"source_id": "imerg", "native_resolution": "nominal 0.1 deg (not loaded)"},
+    {"source_id": "imerg", "native_resolution": "nominal 0.1 deg"},
+    {"source_id": "nldas", "native_resolution": "nominal 0.125 deg (NLDAS-2 Noah monthly)"},
 ]
+
+
+def imerg_rows(repo, fips: str) -> list[dict] | None:
+    """Per-year IMERG summary, or None when the table cannot be read. [] = no rows for this county."""
+    try:
+        return repo.imerg_annual(fips)
+    except Exception:
+        return None
+
+
+def context_sources(repo, fips: str) -> list[dict]:
+    rows = imerg_rows(repo, fips)
+    nl = nldas_rows(repo, fips)
+    out = []
+    for s in CONTEXT_SOURCES:
+        s = dict(s)
+        if s["source_id"] == "imerg":
+            s["loaded"] = bool(rows)
+            s["period"] = f"{rows[0]['year']}-{rows[-1]['year']}" if rows else None
+            if not rows:
+                s["native_resolution"] += " (not loaded)"
+        if s["source_id"] == "nldas":
+            s["loaded"] = bool(nl)
+            s["period"] = f"{nl[0]['month']:%Y-%m}..{nl[-1]['month']:%Y-%m}" if nl else None
+            if not nl:
+                s["native_resolution"] += " (not loaded)"
+        out.append(s)
+    return out
+
+
+def nldas_rows(repo, fips: str) -> list[dict]:
+    try:
+        return [r for r in repo.nldas_monthly(fips) if r.get("rootmoist_kg_m2") is not None]
+    except Exception:
+        return []
+
+
+def nldas_summary(rows: list[dict]) -> dict | None:
+    """Latest-12-month NLDAS-2 root-zone moisture vs the 1995-2024 same-month mean (county context cell)."""
+    if not rows:
+        return None
+    last = rows[-1]["month"]
+    clim: dict[int, list[float]] = defaultdict(list)
+    for r in rows:
+        if config.BASELINE_START_YEAR <= r["month"].year <= config.BASELINE_END_YEAR:
+            clim[r["month"].month].append(r["rootmoist_kg_m2"])
+    recent = rows[-12:]
+    an = [r["rootmoist_kg_m2"] - float(np.mean(clim[r["month"].month])) for r in recent if clim.get(r["month"].month)]
+    return {"source_id": "nldas", "variable": "rootmoist", "unit": "kg/m2 (= mm water), NLDAS-2 Noah root zone",
+            "latest_month": f"{last:%Y-%m}", "latest_rootmoist_kg_m2": _round(rows[-1]["rootmoist_kg_m2"], 1),
+            "anomaly_last_12_months_kg_m2": _round(float(np.mean(an)), 1) if an else None,
+            "baseline": f"{config.BASELINE_START_YEAR}-{config.BASELINE_END_YEAR} same-month mean",
+            "native_resolution": "nominal 0.125 deg", "notes": "County context cell, not field-precise."}
 
 
 def _params(repo) -> Params:
@@ -114,7 +168,7 @@ def profile(repo, field_id: str) -> dict | None:
         if full:
             et_mm_day = float(np.mean(full)) / 365.0
     else:
-        gaps.append("Actual ET (OpenET / NLDAS-2) not loaded for this field")
+        gaps.append("Actual ET (OpenET) not loaded for this field")
     peaks = ndvi_peaks(repo.ndvi(field_id))
     ndvi_peak = float(np.mean(list(peaks.values()))) if peaks else None
     if ndvi_peak is None:
@@ -134,6 +188,17 @@ def profile(repo, field_id: str) -> dict | None:
         gaps.append("Prithvi vision result not loaded yet (CDL is the reference label)")
     hero = hero_state(wt, prm) if wt else "normal"
     county = repo.county(fips)
+    im = imerg_rows(repo, fips)
+    if im:
+        precip_gap = (f"Precipitation normal from POWER (GPM IMERG loaded {im[0]['year']}-{im[-1]['year']} as a cross-check, "
+                      "not the water-balance input)")
+    else:
+        precip_gap = "Precipitation normal from POWER (IMERG not loaded)"
+    if et_rows:
+        precip_gap += "; ET from OpenET Ensemble 2016-2025 (point)"
+    nl = nldas_rows(repo, fips)
+    if not nl:
+        gaps.append("NLDAS-2 monthly soil moisture not loaded for this county")
     return {
         "field_id": f["field_id"],
         "csb_version": f["csb_version"],
@@ -145,7 +210,7 @@ def profile(repo, field_id: str) -> dict | None:
         "geometry": f["geometry"],
         "soil_summary": {"source_id": "gssurgo", "notes": "SSURGO SDA area-dominant mapunit, surface horizon (om_r, kffact, awc_r)"},
         "disclaimer": config.DISCLAIMER_FIELD,
-        "sources": ["CSB", "CDL", "gSSURGO", "POWER", "HLS", "OpenET"],
+        "sources": ["CSB", "CDL", "gSSURGO", "POWER", "HLS", "OpenET"] + (["IMERG"] if im else []) + (["NLDAS"] if nl else []),
         "region_label": f"{county['name']} County, {f['state_alpha']} (Corn Belt)" if county else None,
         "precip_mm_yr": _round(precip, 1),
         "et_mm_day": _round(et_mm_day, 2),
@@ -158,7 +223,8 @@ def profile(repo, field_id: str) -> dict | None:
         "vision": vision,
         "hero_state": hero,
         "period": {"start": f"{config.BASELINE_START_YEAR}-01-01", "end": f"{config.BASELINE_END_YEAR}-12-31"},
-        "info_gaps": gaps + ["Precipitation normal from POWER (IMERG not loaded); ET from OpenET Ensemble 2016-2025 (point)"],
+        "nldas": nldas_summary(nl),
+        "info_gaps": gaps + [precip_gap],
     }
 
 
@@ -252,6 +318,7 @@ def vulnerable_seasons(repo, field_id: str | None = None, county_fips: str | Non
     wx, years, months = wt
     last = int(years.max())
     base = (years >= config.BASELINE_START_YEAR) & (years <= config.BASELINE_END_YEAR)
+    nl = nldas_rows(repo, fips)
     smap = repo.smap(fips)
     sm_dates = np.array([r["date"] for r in smap]) if smap else np.array([])
     sm_vals = np.array([np.nan if r["value"] is None else r["value"] for r in smap]) if smap else np.array([])
@@ -291,6 +358,18 @@ def vulnerable_seasons(repo, field_id: str | None = None, county_fips: str | Non
                 cur = np.nanmean(sm_vals[mm & (syr == ly)])
                 clim = np.nanmean(sm_vals[mm & (syr < ly)])
                 sm_anom = _round(cur - clim, 4) if not np.isnan(clim) else None
+        nl_anom = nl_year = None
+        if nl:
+            nm = np.array([r["month"].month for r in nl])
+            ny = np.array([r["month"].year + (1 if (r["month"].month == 12 and season == "winter") else 0) for r in nl])
+            nv = np.array([r["rootmoist_kg_m2"] for r in nl])
+            mm = np.isin(nm, mons)
+            if mm.any():
+                nl_year = int(ny[mm].max())
+                cur_n = nv[mm & (ny == nl_year)]
+                base_n = nv[mm & (ny >= config.BASELINE_START_YEAR) & (ny <= config.BASELINE_END_YEAR) & (ny != nl_year)]
+                if cur_n.size and base_n.size:
+                    nl_anom = _round(float(cur_n.mean() - base_n.mean()), 1)
         out.append({
             "season": season,
             "hazards": hazards,
@@ -299,17 +378,21 @@ def vulnerable_seasons(repo, field_id: str | None = None, county_fips: str | Non
             "t2m_anomaly_c": _round(tm[last] - bt, 2),
             "smap_sm_anomaly": sm_anom,
             "smap_unit": "cm3/cm3 difference vs SMAP 2015-2024 same-season mean",
+            "nldas_rootmoist_anomaly_kg_m2": nl_anom,
+            "nldas_anomaly_year": nl_year,
+            "nldas_unit": "kg/m2 (mm water) difference vs NLDAS-2 Noah 1995-2024 same-season mean root-zone moisture",
             "climatology": {"precip_mm": _round(bp, 1), "precip_p20_mm": _round(p20, 1), "t2m_c": _round(bt, 2),
                             "heat_days_tmax_gt_32c": _round(heat, 1), "frost_days_tmin_lt_0c": _round(frost, 1),
                             "drought_year_fraction": _round(drought_freq, 2), "wet_year_fraction": _round(wet_freq, 2)},
-            "notes": "SMAP is a context-cell assignment, not a field-precise measurement.",
+            "notes": "SMAP and NLDAS-2 are context-cell assignments, not field-precise measurements.",
         })
     return {
         "field_id": field_id,
         "county_fips": fips,
         "period": {"start": f"{config.BASELINE_START_YEAR}-01-01", "end": f"{config.BASELINE_END_YEAR}-12-31"},
         "seasons": out,
-        "sources": CONTEXT_SOURCES,
+        "sources": context_sources(repo, fips),
+        "info_gaps": [] if nl else ["NLDAS-2 monthly soil moisture not loaded for this county"],
         "notes": "Hazard flags: drought/heavy_rain if >= 15 % of baseline seasons are < 75 % / > 125 % of mean precipitation; "
                  "heat if >= 3 days/season with Tmax > 32 C; frost if >= 5 days with Tmin < 0 C (team defaults).",
     }
@@ -477,8 +560,9 @@ def backtest(repo, field_id: str, year: int, sim_one_year) -> dict | None:
         results.append({
             "strategy_code": code, "year": year, "observed_sequence": observed if code == "A" else None,
             "observed_cdl": hist.get(year) if code == "A" else None,
-            "notes": ("Deterministic water balance driven by the actual POWER weather of this year (previous year as spin-up); "
-                      "observed CDL crop used for A. County yield is context only (NASS bulk file)."
+            "notes": ("Deterministic water balance driven by the actual POWER weather of this year and the 3 years before "
+                      "(spin-up). A = observed CDL crops, B = the same crops + cereal rye cover, C and D = mean over all "
+                      "rotation phases (see metrics.phases). County yield is context only (NASS bulk file)."
                       + (" 2012 is the US drought stress year." if year == 2012 else "")),
             "metrics": m,
         })

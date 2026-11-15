@@ -119,10 +119,17 @@ def member_weather(ym: dict, spec: ScenarioSpec, lat: float, elev: float):
 OPTIONS = ("cover_rye", "small_grain", "alfalfa")
 
 
-def cycle_for(options: tuple[str, ...] | list[str]) -> list[tuple[str, str | None]]:
-    """Rotation cycle (main crop, fall state) per calendar year for a set of added options (TEAM_SPEC 2.3)."""
+def cycle_for(options: tuple[str, ...] | list[str], base: tuple[str, ...] | list[str] | None = None) -> list[tuple[str, str | None]]:
+    """Rotation cycle (main crop, fall state) per calendar year for a set of added options (TEAM_SPEC 2.3).
+
+    ``base`` is the field's own corn/soy cash sequence from CDL (e.g. ("corn", "corn", "soy")). It is used for
+    A (current practice) and B (A + cereal rye after every cash crop). Options that change the cash sequence
+    (small grain, alfalfa) use the fixed C-S-W / C-S-Alf-Alf rotations of PRD 4.
+    """
     o = set(options)
     rye = "rye" if "cover_rye" in o else None
+    if base and not ({"small_grain", "alfalfa"} & o):
+        return [(c, rye) for c in base]
     cyc: list[tuple[str, str | None]] = [("corn", rye)]
     if "small_grain" in o:
         cyc += [("soy", "wheat"), ("wheat", "cover_after_wheat" if rye else None)]
@@ -137,8 +144,11 @@ CROP_DATES_NOTE = (
     "Iowa crop calendar defaults (day of year): corn plant May 1 / harvest Sep 28; soybean May 10 / Sep 22; "
     "winter wheat plant Oct 2 / harvest Jul 15; cereal rye cover planted 7 days after harvest, terminated 10 days "
     "before the next cash crop; post-wheat cover planted Jul 24; alfalfa spring-seeded Apr 15, second year "
-    "terminated Oct 15. Kc stage lengths follow FAO-56 Table 11 style linear curves."
+    "terminated Oct 15. Kc is linear between stage break points (ini/dev/mid/late) in the FAO-56 Table 11 pattern; "
+    "the stage dates are the team Iowa calendar above, not a verified Table 11 row (assumption)."
 )
+# end of the initial (ini) stage per crop; residue mulch acts on soil evaporation until this day
+INI_END = {"corn": 151, "soy": 150, "alfalfa1": 135}
 HARVEST = {"corn": 271, "soy": 265, "wheat": 196, "alfalfa2": 288}
 PLANT = {"corn": 121, "soy": 130, "wheat": 1, "alfalfa1": 105, "alfalfa2": 1}
 
@@ -156,7 +166,8 @@ def _year_arrays(main: str, spring: str | None, fall: str | None, prm: dict) -> 
 
     def put(start, end, kp, zr, cn, main_from=None, p=None):
         sl = (doy >= start) & (doy <= end)
-        a["kc"][sl] = np.interp(doy[sl], [k[0] for k in kp], [k[1] for k in kp])
+        scale = prm.get("kc_field_scale", 1.0) if main_from is not None else 1.0
+        a["kc"][sl] = scale * np.interp(doy[sl], [k[0] for k in kp], [k[1] for k in kp])
         a["zr"][sl] = zr
         a["p"][sl] = prm["p_depletion"] if p is None else p
         a["cn"][sl] = cn
@@ -165,35 +176,46 @@ def _year_arrays(main: str, spring: str | None, fall: str | None, prm: dict) -> 
             a["main"][sl & (doy >= main_from)] = True
 
     # spring carry-over from the previous fall
+    residue = spring in ("rye", "cover_after_wheat") and main in INI_END
+    term = PLANT.get(main, 121) - 10
     if spring in ("rye", "cover_after_wheat"):
-        term = PLANT.get(main, 121) - 10
         put(1, term, [(1, prm["kc_cover_dormant"]), (60, prm["kc_cover_dormant"]), (term, prm["kc_cover_spring"])],
-            prm["zr_cover_m"], prm["cn_small_grain"])
-    # main crop
+            prm["zr_cover_m"], prm["cn_small_grain"], p=prm["p_cover"])
+    # main crop (row crops planted into terminated rye residue get the TR-55 "SR + crop residue" curve number)
+    cn_row = prm["cn_row_crop_residue"] if residue else prm["cn_row_crop"]
     if main == "corn":
         put(121, 271, [(121, prm["kc_corn_ini"]), (151, prm["kc_corn_ini"]), (191, prm["kc_corn_mid"]),
-                       (241, prm["kc_corn_mid"]), (271, prm["kc_corn_end"])], prm["zr_corn_m"], prm["cn_row_crop"], 121)
+                       (241, prm["kc_corn_mid"]), (271, prm["kc_corn_end"])], prm["zr_corn_m"], cn_row, 121, p=prm["p_corn"])
     elif main == "soy":
         put(130, 265, [(130, prm["kc_soy_ini"]), (150, prm["kc_soy_ini"]), (180, prm["kc_soy_mid"]),
-                       (240, prm["kc_soy_mid"]), (265, prm["kc_soy_end"])], prm["zr_soy_m"], prm["cn_row_crop"], 130)
+                       (240, prm["kc_soy_mid"]), (265, prm["kc_soy_end"])], prm["zr_soy_m"], cn_row, 130, p=prm["p_soy"])
     elif main == "wheat":
         put(1, 196, [(1, prm["kc_wheat_ini"]), (60, prm["kc_wheat_ini"]), (121, prm["kc_wheat_mid"]),
-                     (166, prm["kc_wheat_mid"]), (196, prm["kc_wheat_end"])], prm["zr_wheat_m"], prm["cn_small_grain"], 60)
+                     (166, prm["kc_wheat_mid"]), (196, prm["kc_wheat_end"])], prm["zr_wheat_m"], prm["cn_small_grain"], 60,
+            p=prm["p_wheat"])
     elif main == "alfalfa1":
         put(105, 304, [(105, prm["kc_alfalfa_ini"]), (135, prm["kc_alfalfa_mid"]), (280, prm["kc_alfalfa_mid"]),
-                       (304, prm["kc_alfalfa_end"])], prm["zr_alfalfa_m"], prm["cn_legume_meadow"], 105)
+                       (304, prm["kc_alfalfa_end"])], prm["zr_alfalfa_m"], prm["cn_legume_meadow"], 105, p=prm["p_alfalfa"])
     elif main == "alfalfa2":
         put(1, 288, [(1, prm["kc_cover_dormant"]), (90, prm["kc_cover_dormant"]), (121, prm["kc_alfalfa_mid"]),
-                     (258, prm["kc_alfalfa_mid"]), (288, prm["kc_alfalfa_end"])], prm["zr_alfalfa_m"], prm["cn_legume_meadow"], 91)
+                     (258, prm["kc_alfalfa_mid"]), (288, prm["kc_alfalfa_end"])], prm["zr_alfalfa_m"], prm["cn_legume_meadow"], 91,
+            p=prm["p_alfalfa"])
+    if residue:
+        # FAO-56 ch. 7: organic mulch cuts soil evaporation ~5 % per 10 % of surface covered. Applied to the
+        # evaporation-dominated days between rye termination and the end of the crop's initial stage.
+        sl = (doy > term) & (doy <= INI_END[main])
+        a["kc"][sl] *= max(0.0, 1.0 - 0.5 * prm["rye_residue_cover_frac"])
     # fall state
     if fall == "rye":
         start = HARVEST[main] + 7
-        put(start, DAYS, [(start, prm["kc_cover_dormant"]), (DAYS, prm["kc_cover_dormant"])], prm["zr_cover_m"], prm["cn_small_grain"])
+        put(start, DAYS, [(start, prm["kc_cover_dormant"]), (DAYS, prm["kc_cover_dormant"])], prm["zr_cover_m"], prm["cn_small_grain"],
+            p=prm["p_cover"])
     elif fall == "wheat":
-        put(275, DAYS, [(275, prm["kc_wheat_ini"]), (DAYS, prm["kc_wheat_ini"])], prm["zr_cover_m"], prm["cn_small_grain"])
+        put(275, DAYS, [(275, prm["kc_wheat_ini"]), (DAYS, prm["kc_wheat_ini"])], prm["zr_cover_m"], prm["cn_small_grain"],
+            p=prm["p_wheat"])
     elif fall == "cover_after_wheat":
-        put(205, DAYS, [(205, 0.5), (260, prm["kc_cover_spring"]), (305, prm["kc_cover_dormant"]), (DAYS, prm["kc_cover_dormant"])],
-            prm["zr_cover_m"], prm["cn_small_grain"])
+        put(205, DAYS, [(205, prm["kc_cover_dormant"]), (260, prm["kc_cover_spring"]), (305, prm["kc_cover_dormant"]),
+                        (DAYS, prm["kc_cover_dormant"])], prm["zr_cover_m"], prm["cn_small_grain"], p=prm["p_cover"])
     elif fall == "alfalfa":
         put(305, DAYS, [(305, prm["kc_cover_dormant"]), (DAYS, prm["kc_cover_dormant"])], prm["zr_alfalfa_m"], prm["cn_legume_meadow"])
     return a
@@ -228,11 +250,16 @@ METRICS = (
 
 
 def run_mc(ym: dict, specs: list[ScenarioSpec], cycles: list[list[tuple[str, str | None]]], prm: dict, lat: float, n: int, seed: int,
-           year_draws: np.ndarray | None = None, phases: np.ndarray | None = None, n_scored: int = N_YEARS_SCORED) -> dict:
-    """Return {scenario_name: {metric: array (S, N)}} plus draws. Units: mm/yr or days/yr (4-yr mean)."""
+           year_draws: np.ndarray | None = None, phases: np.ndarray | None = None, n_scored: int = N_YEARS_SCORED,
+           n_spinup: int = 1, trace: bool = False) -> dict:
+    """Return {scenario_name: {metric: array (S, N)}} plus draws. Units: mm/yr or days/yr (mean over scored years).
+
+    ``trace=True`` also returns daily ETa and root-zone available water (mm) for every (scenario, strategy, sample);
+    use it only for small deterministic runs (calibration / checks).
+    """
     rng = np.random.default_rng(seed)
     Y = len(ym["years"])
-    total = n_scored + 1
+    total = n_scored + n_spinup
     ys = rng.integers(0, Y, size=(n, total)) if year_draws is None else np.asarray(year_draws)
     n = ys.shape[0]
     tab = calendar_table(cycles, prm, total)
@@ -259,6 +286,7 @@ def run_mc(ym: dict, specs: list[ScenarioSpec], cycles: list[list[tuple[str, str
     Dr = np.zeros((C, S, n))
     acc = {m: np.zeros((C, S, n)) for m in METRICS}
     sidx = np.arange(S)[:, None]
+    tr_eta, tr_aw = [], []
     for d in range(total * DAYS):
         kc = tab["kc"][sidx, phases, d][None]
         zr = tab["zr"][sidx, phases, d][None]
@@ -279,7 +307,10 @@ def run_mc(ym: dict, specs: list[ScenarioSpec], cycles: list[list[tuple[str, str
         etc = kc * E0
         eta = ks * etc
         Dr = np.minimum(Dr + eta, taw_max)
-        if d >= DAYS:
+        if trace:
+            tr_eta.append(eta)
+            tr_aw.append(taw_max - Dr)
+        if d >= n_spinup * DAYS:
             acc["season_water_deficit_mm"] += main * (etc - eta)
             acc["stress_days"] += main & (ks < 0.99)
             acc["season_etc_mm"] += main * etc
@@ -292,7 +323,10 @@ def run_mc(ym: dict, specs: list[ScenarioSpec], cycles: list[list[tuple[str, str
             acc["veg_index_days"] += liv * ks
             acc["precip_mm"] += P
     out = {spec.name: {m: acc[m][ci] / n_scored for m in METRICS} for ci, spec in enumerate(specs)}
-    return {"results": out, "year_draws": ys, "phases": phases, "years": ym["years"]}
+    res = {"results": out, "year_draws": ys, "phases": phases, "years": ym["years"]}
+    if trace:
+        res["trace"] = {"eta_mm": np.stack(tr_eta, axis=-1), "soil_water_mm": np.stack(tr_aw, axis=-1)}  # (C, S, N, D)
+    return res
 
 
 def quantiles(x: np.ndarray, higher_is_better: bool) -> dict:
