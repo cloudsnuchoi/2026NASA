@@ -30,7 +30,7 @@ Method: `grep -rnE` over the code we ship (`model_api/`, `data_pipeline/`, `fron
 | Esri World Imagery (basemap) | `frontend/app.js:180` = `docs/demo/app.js:180` (`L.tileLayer` World_Imagery) | used |
 | US Census cartographic boundaries | `data_pipeline/load_counties.py:1,29` (cb_2023_us_county_500k into `county`); `model_api/repo.py:168` (point-in-county `ST_Contains`), `model_api/repo.py:70` | used (data shipped in DB) |
 | FAO-56 (Allen et al. 1998) | `model_api/quick.py:1-5` (Kc from Table 12, Penman–Monteith eq. 6); `model_api/cards.py:26` (cited) | used (method) |
-| DeepSeek API | `model_api/config.py:123` (`LLM_BASE_URL` default `https://api.deepseek.com`); `model_api/explain.py` | used |
+| OpenAI gpt-4o-miniAPI | `model_api/config.py:123` (`LLM_BASE_URL` default `https://api.openai.com`); `model_api/explain.py` | used |
 
 ## Not used, removed
 

@@ -145,7 +145,7 @@ With only four counties, these are consistency checks, not statistical proof. **
 - **Languages and tools:** Python (FastAPI, NumPy, pandas, psycopg, rasterio, earthaccess, PyTorch CPU), PostgreSQL + PostGIS + pgvector, MATLAB (offline prototype and analysis), JavaScript/HTML (Leaflet, Chart.js, Tailwind CSS).
 - **NASA data:** NASA POWER, HLS (Landsat/Sentinel-2) v2.0, SMAP L3, GPM IMERG Final V07, NLDAS-2 Noah, GEOS-S2S-3, NEX-GDDP-CMIP6, Prithvi-EO-1.0 crop classification model.
 - **Other data:** USDA NASS Cropland Data Layer, Crop Sequence Boundaries, Quick Stats bulk county yields; USDA NRCS SSURGO (Soil Data Access); USGS 3DEP elevation; OpenET; US Census county boundaries; NOAA NWS API, Open-Meteo climate API and Esri World Imagery (Quick Screen). Full list with links: `data-links.md`.
-- **AI:** Prithvi-EO-1.0 (inference only); DeepSeek API for the explainer; coding assistants for software development. Details: `si-use.md`.
+- **AI:** Prithvi-EO-1.0 (inference only); OpenAI gpt-4o-miniAPI for the explainer; coding assistants for software development. Details: `si-use.md`.
 
 **Planned, not built for this submission:** a three.js voxel 3D field simulation, economic (revenue) comparison with cited prices, more pilot counties, and an evidence library with DOI citations in explanations (the explainer currently returns `insufficient_evidence` when no citation exists).
 
@@ -157,7 +157,7 @@ With only four counties, these are consistency checks, not statistical proof. **
 Tick (match to the form's labels):
 - [x] Yes, our team used SI
 - [x] Code / software development (coding assistant: Claude Code; Codex/Gemini use by members not confirmed — leave out unless confirmed)
-- [x] Text generation inside the product (DeepSeek explainer, numbers only from engine JSON)
+- [x] Text generation inside the product (OpenAI gpt-4o-miniexplainer, numbers only from engine JSON)
 - [x] Images (all site photos and the "ART FARM" logo are AI-generated, watermarked on the site)
 - [x] Data analysis / modelling (Prithvi-EO-1.0 inference only)
 - [ ] Video — not used
@@ -166,7 +166,7 @@ Tick (match to the form's labels):
 Text:
 
 ```
-We used SI in four places. (1) Software development: a coding assistant (Claude Code) wrote and tested code and documents from team-written specs; every change went through a branch and a human-merged pull request. It did not choose the problem, strategies or data sources, and did not create data values. (2) Explanations: the DeepSeek API writes plain-language explanations of strategy cards. It calls our model API as a tool and may only use numbers in the returned JSON; every number is matched to a JSON path and unmatched numbers are flagged as unverified. If no citation is found it returns "insufficient evidence". (3) Satellite crop check: NASA/IBM Prithvi-EO-1.0 crop classification, inference only (no fine-tuning), compared with the USDA Cropland Data Layer, which stays the label of record. (4) Images: all site photos and the ART FARM logo were generated with AI image tools; each photo carries a visible "AI-generated image" watermark and the footer says so. No SI-generated video or voice, no reinforcement learning, no fine-tuning. No NASA logos, flags or mission insignia are used.
+We used SI in four places. (1) Software development: a coding assistant (Claude Code) wrote and tested code and documents from team-written specs; every change went through a branch and a human-merged pull request. It did not choose the problem, strategies or data sources, and did not create data values. (2) Explanations: the OpenAI gpt-4o-miniAPI writes plain-language explanations of strategy cards. It calls our model API as a tool and may only use numbers in the returned JSON; every number is matched to a JSON path and unmatched numbers are flagged as unverified. If no citation is found it returns "insufficient evidence". (3) Satellite crop check: NASA/IBM Prithvi-EO-1.0 crop classification, inference only (no fine-tuning), compared with the USDA Cropland Data Layer, which stays the label of record. (4) Images: all site photos and the ART FARM logo were generated with AI image tools; each photo carries a visible "AI-generated image" watermark and the footer says so. No SI-generated video or voice, no reinforcement learning, no fine-tuning. No NASA logos, flags or mission insignia are used.
 ```
 
 ## 7. NASA Data
@@ -199,4 +199,4 @@ No space agency partner data used. Other data and services:
 | Esri World Imagery (basemap) | https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9 |
 | US Census cartographic boundary files | https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html |
 | FAO-56 Crop Evapotranspiration (Allen et al. 1998) | https://www.fao.org/3/x0490e/x0490e00.htm |
-| DeepSeek API (explainer LLM) | https://api-docs.deepseek.com/ |
+| OpenAI gpt-4o-miniAPI (explainer LLM) | https://api-docs.OpenAI.com/ |

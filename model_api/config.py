@@ -119,7 +119,6 @@ DATA_SOURCE_URLS = {
 
 def llm_settings() -> dict:
     return {
-        "api_key": os.environ.get("LLM_API_KEY"),
-        "base_url": os.environ.get("LLM_BASE_URL", "https://api.deepseek.com"),
-        "model": os.environ.get("LLM_MODEL", "deepseek-flash"),
+        "api_key": os.environ.get("OPENAI_API_KEY"),
+        "model": os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
     }

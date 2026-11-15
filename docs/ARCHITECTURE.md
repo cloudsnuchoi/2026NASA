@@ -32,7 +32,7 @@
 | Prithvi-EO-1.0 crop classification 추론 → `vision_result` 20개 필지 | 구현됨 |
 | MC 물수지·P10/P50/P90·CVaR (`/strategies/compare`, `/simulate`) | 구현됨 |
 | 2012 가뭄 백테스트 (`/validation/backtest?field_id=`) | 구현됨 |
-| `/explain` (DeepSeek, tool 응답 숫자만) | 구현됨 |
+| `/explain` (OpenAI gpt-4o-mini, tool 응답 숫자만) | 구현됨 |
 | `POST /quick` (Tier 1) | 계획 |
 | frontend (ART FARM UI), 공개 배포 | 계획 (진행 중) |
 | `sim/` 복셀 시뮬, `GET /sim/{field_id}/scene` | 계획 |

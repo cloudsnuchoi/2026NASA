@@ -367,7 +367,7 @@ def build() -> dict:
         {"name": "GEOS-S2S 다음 시즌 분포", "status": "done" if a.get("s2s_members") else "progress", "detail": f"앙상블 멤버 {a.get('s2s_members')}"},
         {"name": "NEX-GDDP 2030년대", "status": "done" if (a.get("nex_models") or 0) >= 2 else "progress", "detail": f"모델 {a.get('nex_models')}개"},
         {"name": "Monte Carlo·CVaR", "status": "done" if a.get("mc_ok") else "progress", "detail": f"전략별 P50 {a.get('p50')}"},
-        {"name": "/explain (DeepSeek)", "status": "done" if ex.get("ok") else "progress", "detail": f"{ex.get('secs')} s, {ex.get('model')}"},
+        {"name": "/explain (OpenAI)", "status": "done" if ex.get("ok") else "progress", "detail": f"{ex.get('secs')} s, {ex.get('model')}"},
     ]
     ai_items = [item(x["name"], x["status"] == "done", x["detail"]) for x in ai]
     mfiles = {p.name for p in MATLAB_DIR.glob("*.csv")} if MATLAB_DIR.exists() else set()

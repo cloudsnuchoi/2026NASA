@@ -7,8 +7,8 @@ Draft 2026-11-15 20:00 KST. Ledger: [docs/si-log.md](../si-log.md). Space Apps c
 | Area | Tool | What it did | What it did NOT do |
 | --- | --- | --- | --- |
 | Software development | Coding assistants: Claude Code (Anthropic) — recorded in si-log. Codex CLI / Gemini agents are allowed by AGENTS.md; whether team members used them is **not confirmed** (ask before 22:00) | Wrote and tested code in `model_api/`, `data_pipeline/`, `model_api/vision/`, QA tests, site pages and these submission documents, from team-written specs (PRD, SOT, issues). Every change went through a branch and PR merged by a human | Did not choose the problem, the strategies or the data sources. Did not make up data values: all numbers come from public datasets and our engine |
-| Runtime explanations (`POST /explain`) | DeepSeek API (OpenAI-compatible, `deepseek-flash`) | Writes a plain-language explanation of strategy cards. It calls our model API as a tool and may only use numbers in the tool JSON; each number is matched to a JSON path, unmatched numbers are returned in `unverified_numbers`. Citations only from our evidence search; if none, `insufficient_evidence: true` | Does not compute any metric, rank strategies or invent citations |
-| Team chat bot (orchestration) | DeepSeek API | Summarised task status and routed tasks in the team chat during the hackathon | Not part of the product a farmer sees |
+| Runtime explanations (`POST /explain`) | OpenAI gpt-4o-miniAPI (OpenAI-compatible, `gpt-4o-mini`) | Writes a plain-language explanation of strategy cards. It calls our model API as a tool and may only use numbers in the tool JSON; each number is matched to a JSON path, unmatched numbers are returned in `unverified_numbers`. Citations only from our evidence search; if none, `insufficient_evidence: true` | Does not compute any metric, rank strategies or invent citations |
+| Team chat bot (orchestration) | OpenAI gpt-4o-miniAPI | Summarised task status and routed tasks in the team chat during the hackathon | Not part of the product a farmer sees |
 | Satellite crop classification | Prithvi-EO-1.0-100M crop classification (NASA/IBM foundation model) | Inference only on HLS chips for 20 pilot fields (2024), compared with USDA CDL | No fine-tuning, no reinforcement learning. Supporting layer only; CDL is the label of record |
 | Images / logo | **SI-generated (confirmed by Hylē, 2026-11-15)** | All frontend photos `frontend/assets/img01–img12` and the "ART FARM" logo were generated with AI image tools | Each photo carries a visible "AI-generated image" watermark on the site; the page footer states that all photos and the logo are AI-generated |
 
@@ -20,10 +20,10 @@ Checked on 2026-11-15 ~19:30 KST against the L1 frontend in progress (`frontend/
 
 | Place | Required label | Current state |
 | --- | --- | --- |
-| `/explain` output in the UI | "AI-generated explanation (DeepSeek). Numbers come from the ART FARM engine; check with a local adviser." | **Missing**: no explainer panel or SI label found in the frontend yet |
-| Footer / About | "This site uses AI: Prithvi (satellite crop check, inference only), DeepSeek (explanations), coding assistants (development)." | **Missing** |
+| `/explain` output in the UI | "AI-generated explanation (OpenAI gpt-4o-mini). Numbers come from the ART FARM engine; check with a local adviser." | **Missing**: no explainer panel or SI label found in the frontend yet |
+| Footer / About | "This site uses AI: Prithvi (satellite crop check, inference only), OpenAI gpt-4o-mini(explanations), coding assistants (development)." | **Missing** |
 | Prithvi result | "Satellite AI crop estimate (Prithvi-EO-1.0); USDA CDL is the reference" | **Missing** in frontend (API returns `vision` fields) |
-| Docs site (`docs/architecture.html`, `docs/models.html`) | Mentions DeepSeek as the LLM provider | Present (Korean text) |
+| Docs site (`docs/architecture.html`, `docs/models.html`) | Mentions OpenAI gpt-4o-minias the LLM provider | Present (Korean text) |
 | Generated images | Visible "AI-generated image" watermark on each photo + footer note for photos and logo | **Done** (frontend/index.html) |
 
 ## Gaps for L1 (frontend) before final submission

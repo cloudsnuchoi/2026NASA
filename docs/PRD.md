@@ -118,7 +118,7 @@
 | Prithvi-EO-1.0-100M multi-temporal crop classification **추론**(미세조정 없음, CPU) → `vision_result`, 20개 필지 전부 | **[구현됨]** | `GET /field/{id}/profile` |
 | 몬테카를로 물수지 + P10/P50/P90 + CVaR(하위 10 %), 전략 A–D | **[구현됨]** | `POST /strategies/compare`, `POST /simulate` |
 | 2012 가뭄 백테스트 (전략별 물 부족 차이) | **[구현됨]** | `GET /validation/backtest?field_id=` |
-| `/explain` (DeepSeek, tool 응답 숫자만) | **[구현됨]** | `POST /explain` |
+| `/explain` (OpenAI gpt-4o-mini, tool 응답 숫자만) | **[구현됨]** | `POST /explain` |
 | model_api 상시 실행 (FastAPI, 읽기 전용 DB) | **[구현됨]** VPS 내부 | `GET /health` |
 | Tier 1 `POST /quick` | **[계획]** | SOT 6.0 계약만 |
 | 프론트엔드(ART FARM UI, 위성 베이스맵, 프리셋) | **[계획]** 진행 중 | 이슈 #12–#14 |

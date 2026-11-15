@@ -173,7 +173,7 @@ class FakeRepo:
 @pytest.fixture(autouse=True)
 def _no_matlab(tmp_path, monkeypatch):
     monkeypatch.setenv("FS_MATLAB_DIR", str(tmp_path / "matlab_missing"))
-    monkeypatch.delenv("LLM_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
 
 
 @pytest.fixture

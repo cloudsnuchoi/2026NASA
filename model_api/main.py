@@ -321,9 +321,15 @@ def explain(req: ExplainRequest, request: Request):
         return explain_mod.explain(req.model_dump(), tools, client=client, model=model or config.llm_settings()["model"])
     except explain_mod.LLMUnavailable as exc:
         raise APIError(503, "llm_unavailable", str(exc))
-    except Exception as exc:  # provider errors after retries
+    except Exception as exc:  # OpenAI errors after retries: engine numbers only, no other provider
         log.warning("explain failed: %s", type(exc).__name__)
-        raise APIError(502, "llm_error", f"LLM provider error ({type(exc).__name__})")
+        try:
+            engine = trimmed_compare({"field_id": req.field_id})
+        except Exception:
+            engine = {"error": {"code": "engine_error", "message": "compare unavailable"}}
+        return {"answer": "explanation unavailable", "tool_calls": [], "citations": [],
+                "insufficient_evidence": True, "unverified_numbers": [],
+                "model": model or config.llm_settings()["model"], "engine": engine}
 
 
 class QuickRequest(BaseModel):
