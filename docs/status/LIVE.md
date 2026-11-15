@@ -1,13 +1,13 @@
-# 아몰라 실시간 현황 · 20:22 KST
+# 아몰라 실시간 현황 · 20:27 KST
 
-제출 목표 22:00 KST까지 **1시간 37분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **1시간 32분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
 | 데이터 | 100% | 11/11 |
 | 엔진·API | 100% | 6/6 |
 | AI 모델 | 100% | 5/5 |
-| MATLAB | 71% | 5/7 |
+| MATLAB | 86% | 6/7 |
 | UI | 100% | 7/7 |
 | 인프라·봇 | 83% | 5/6 |
 
@@ -39,14 +39,14 @@
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
 - ✅ /explain (DeepSeek) — 7.7 s, deepseek-flash
 
-## MATLAB 71%
+## MATLAB 86%
 - ✅ 윤성 1차 CSV: drought_2012_county.csv
 - ✅ 윤성 1차 CSV: climate_annual.csv
 - ✅ 윤성 1차 CSV: calibration_params.csv
 - 🟡 woochan: v8_cards_20fields.csv + coefficients_sources.csv — 🟡 접속함·작업 중
 - ✅ yoonsung: drought_compare_2012.png + drought_compare_2012_summary.csv — ✅ 결과 파일 있음
 - ✅ jimin: baresoil_days_20fields.csv — ✅ 결과 파일 있음
-- 🟡 jieun: fig_p10p90.png + fig_backtest2012.png — 🟡 접속함·작업 중
+- ✅ jieun: fig_p10p90.png + fig_backtest2012.png — ✅ 결과 파일 있음
 
 ## UI 100%
 - ✅ frontend/ 코드 (main)
@@ -70,8 +70,7 @@
 
 ## 다음 할 일
 1. MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv
-2. MATLAB: jieun: fig_p10p90.png + fig_backtest2012.png
-3. 인프라·봇: main CI 최근 성공
+2. 인프라·봇: main CI 최근 성공
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
@@ -90,7 +89,6 @@
 | mfixq | ? | ? | 19:53 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | 12:11 |
 | runner | — | GitHub Actions 러너 | 13:09 |
-| static | ? | ? | 20:17 |
 | sub2 | ? | ? | 20:17 |
 | ux | ? | ? | 20:17 |
 | web | — | 프론트+API 프록시 (:8095) | 20:09 |
@@ -99,9 +97,9 @@
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 20:22 | — |
+| 김우찬 | 20:26 | — |
 | 김윤성 | 20:15 | — |
-| 고지은 | 20:20 | — |
+| 고지은 | 20:22 | — |
 | 하지민 | 19:58 | — |
 | 강다은 | 17:18 | — |
 | Hylē | 16:01 | 20:10 |

@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T20:22:19+09:00",
+ "generated_at": "2026-11-15T20:27:29+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 97,
+ "remaining_min": 92,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -139,7 +139,7 @@
   {
    "id": "matlab",
    "name": "MATLAB",
-   "pct": 71,
+   "pct": 86,
    "items": [
     {
      "label": "윤성 1차 CSV: drought_2012_county.csv",
@@ -173,8 +173,8 @@
     },
     {
      "label": "jieun: fig_p10p90.png + fig_backtest2012.png",
-     "status": "progress",
-     "detail": "🟡 접속함·작업 중"
+     "status": "done",
+     "detail": "✅ 결과 파일 있음"
     }
    ]
   },
@@ -302,12 +302,6 @@
    "last_activity": "13:09"
   },
   {
-   "name": "static",
-   "model": "?",
-   "task": "?",
-   "last_activity": "20:17"
-  },
-  {
    "name": "sub2",
    "model": "?",
    "task": "?",
@@ -336,7 +330,7 @@
   {
    "name": "김우찬",
    "user": "woochan",
-   "mattermost_last": "20:22",
+   "mattermost_last": "20:26",
    "repo_last": null
   },
   {
@@ -348,7 +342,7 @@
   {
    "name": "고지은",
    "user": "jieun",
-   "mattermost_last": "20:20",
+   "mattermost_last": "20:22",
    "repo_last": null
   },
   {
@@ -373,7 +367,6 @@
  "blockers": [],
  "next": [
   "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv",
-  "MATLAB: jieun: fig_p10p90.png + fig_backtest2012.png",
   "인프라·봇: main CI 최근 성공"
  ],
  "merged_prs": [
