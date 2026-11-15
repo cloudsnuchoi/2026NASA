@@ -93,8 +93,8 @@ def test_hyle_mention_in_1on1_gets_reply(orch):
 
 
 def test_team_channel_requires_mention(orch):
-    assert orch.handle(inc("jimin", "uiux-design", "안녕")) == []
-    outs = orch.handle(inc("jimin", "uiux-design", "카드 디자인 질문", mentioned=True))
+    assert orch.handle(inc("jimin", "backend", "안녕")) == []
+    outs = orch.handle(inc("jimin", "backend", "카드 디자인 질문", mentioned=True))
     assert len(outs) == 1 and outs[0].root_id == "p1"  # replies in thread
 
 
