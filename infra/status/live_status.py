@@ -16,6 +16,7 @@ import json
 import os
 import subprocess
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -199,6 +200,31 @@ def tmux_sessions() -> list[dict]:
     return out
 
 
+def public_checks(base: str) -> dict:
+    """Hit the public demo through the tunnel/proxy (same path a judge uses)."""
+    def code(path, body=None):
+        try:
+            req = urllib.request.Request(base + path, method="POST" if body is not None else "GET",
+                                         data=json.dumps(body).encode() if body is not None else None,
+                                         headers={"Content-Type": "application/json", "User-Agent": "amolla-status"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return r.status
+        except urllib.error.HTTPError as e:
+            return e.code
+        except Exception:
+            return None
+    out = {"home": code("/"), "fields": code("/api/fields")}
+    poly = [[-93.6375, 42.0308], [-93.6319, 42.0353], [-93.6263, 42.0308], [-93.6319, 42.0263]]
+    out["quick"] = code("/api/quick", {"polygon": poly, "crops": ["corn", "soybean"]})
+    try:
+        f = json.loads(urllib.request.urlopen(urllib.request.Request(base + "/api/fields", headers={"User-Agent": "amolla-status"}),
+                                              timeout=30).read())["fields"][0]["field_id"]
+        out["compare"] = code("/api/strategies/compare", {"field_id": f})
+    except Exception:
+        out["compare"] = None
+    return out
+
+
 def demo_url() -> str | None:
     p = Path("/srv/hackathon/state/status/demo_url.txt")
     try:
@@ -217,6 +243,8 @@ def lane_done(name: str) -> bool:
 def build() -> dict:
     cache = load_cache()
     g = gh(cache)
+    demo = demo_url()
+    pub = cached(cache, "public", 300, lambda: public_checks(demo)) if demo else {}
     a = api_checks(cache)
     issues = g.get("issues", {}) if isinstance(g, dict) else {}
     paths = set(g.get("paths", [])) if isinstance(g, dict) else set()
@@ -245,7 +273,7 @@ def build() -> dict:
         item("2012 백테스트 전략별 차이", (a.get("backtest_distinct") or 0) >= 3, f"서로 다른 물 부족 값 {a.get('backtest_distinct')}개"),
         item("필지별 결과 차이 (A P50 범위 > 0.02)",
              bool(a.get("a_p50_range")) and (a["a_p50_range"][1] - a["a_p50_range"][0]) > 0.02, f"A P50 범위 {a.get('a_p50_range')}"),
-        item("공개 데모 배포 (#15)", closed(15)),
+        item("공개 데모 배포", pub.get("home") == 200, f"{demo or '데모 URL 없음'}"),
     ]
     ex = a.get("explain") or {}
     ai = [
@@ -261,8 +289,13 @@ def build() -> dict:
     matlab = [item(f, f in mfiles) for f in
               ("coefficients.csv", "field_dekad.csv", "field_season.csv", "drought_2012_county.csv", "climate_annual.csv", "calibration_params.csv")]
     ui = [
-        item("frontend/package.json", "frontend/package.json" in paths),
-        item("S0–S3 (#12)", closed(12)), item("S4 전략 탭 (#13)", closed(13)), item("S5–S7 (#14)", closed(14)), item("공개 배포 (#15)", closed(15)),
+        item("frontend/ 코드 (main)", "frontend/index.html" in paths),
+        item("공개 데모 접속 200 (로그인 없음)", pub.get("home") == 200, f"{demo or '데모 URL 없음'}"),
+        item("공개 API /fields (20필지)", pub.get("fields") == 200),
+        item("1층 /quick (screening estimate)", pub.get("quick") == 200, f"HTTP {pub.get('quick')}"),
+        item("2층 전략 비교 /strategies/compare", pub.get("compare") == 200, f"HTTP {pub.get('compare')}"),
+        item("화면 캡처 docs/screens", any(p_.startswith("docs/screens/") for p_ in paths)),
+        item("공개 URL QA (docs/QA-FINAL.md)", "docs/QA-FINAL.md" in paths),
     ]
     sim = [item("sim/ 코드", any(p.startswith("sim/") and not p.endswith(".gitkeep") for p in paths)), item("복셀 시뮬 (#30)", closed(30))]
     tmux = tmux_sessions()
