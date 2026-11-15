@@ -95,7 +95,8 @@
 
 - **결정 (오케스트레이터·중앙 LLM).** 제공자는 **DeepSeek**이다. API는 **OpenAI 호환**이다.
   - 베이스 URL: `https://api.deepseek.com`
-  - 사용할 모델 이름: `deepseek-v4.1-flash`. **정확한 모델 id는 아직 검증하지 않았다.** DeepSeek 콘솔·문서에서 확인한 뒤 `.env`의 `ORCH_MODEL`만 고친다.
-  - 키: DeepSeek API 키 1개 (`OPENAI_API_KEY`, git에 올리지 않음).
-  - 베이스 URL과 모델은 `infra/orchestrator/.env`의 `OPENAI_BASE_URL`, `ORCH_MODEL`로 **설정에서 바꾸며**, 코드에 고정하지 않는다. `bridge.py`가 이미 이 변수를 읽는다.
+  - 모델 id: **`deepseek-flash`** (현재 DeepSeek-V4.1-Flash. 2026-11-15 api-docs.deepseek.com Models & Pricing에서 확인). `deepseek-v4-flash`는 레거시 이름이라 쓰지 않는다.
+  - 키: DeepSeek API 키 1개 (`LLM_API_KEY`, git에 올리지 않음. VPS에서는 `setup-bot-key`로 입력).
+  - 베이스 URL과 모델은 `infra/orchestrator/.env`의 `LLM_BASE_URL`, `LLM_MODEL`로 **설정에서 바꾼다**(예전 `OPENAI_API_KEY`·`OPENAI_BASE_URL`·`ORCH_MODEL`도 대체값으로 읽는다).
+  - thinking: 일상 대화와 `!assign` 문구는 끔(`thinking.type=disabled`), `!review`만 켬(`reasoning_effort=high`). `reasoning_content`는 채팅에 게시하지 않는다. 429·5xx는 2번 재시도 후 "LLM 응답 지연".
 - 이 결정은 중앙 오케스트레이터(`infra/orchestrator/bridge.py`)에 해당한다. 제품 L4 `/explain`도 OpenAI 호환 키 1개가 필요하며, 따로 가르지 않는 한 같은 제공자(DeepSeek)를 전제로 한다. 제품 쪽 모델 id를 이 값으로 동결했다고 보지는 않는다.

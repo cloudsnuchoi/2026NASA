@@ -746,6 +746,7 @@ GEOS-S2S가 스파이크에서 실패하면 `next_season`은 `null`이고 `info_
 - 숫자는 위 엔드포인트 응답에 있는 것만 사용한다.
 - RAG는 인용 문장과 DOI/URL 전용이다.
 - 없는 값은 “정보 공백”이다. 추정 숫자를 채우지 않는다.
+- 제공자 DeepSeek(OpenAI 호환, `https://api.deepseek.com`), 모델 id **`deepseek-flash`**(DeepSeek-V4.1-Flash, 2026-11-15 공식 문서 확인). 설정 변수 `LLM_API_KEY`·`LLM_BASE_URL`·`LLM_MODEL`.
 
 ---
 

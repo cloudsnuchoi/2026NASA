@@ -93,8 +93,8 @@ sleep 10 && ./tunnel-url.sh             # https://xxxx-xxxx.trycloudflare.com
 
 ```bash
 cd /srv/hackathon/projects/2026NASA/infra/orchestrator
-nano .env      # OPENAI_API_KEY=… , ORCH_MODEL=<계정에서 쓸 수 있는 모델>, (선택) GITHUB_TOKEN=읽기전용 fine-grained
-grep -E '^(MM_BOT_TOKEN|OPENAI_API_KEY|ORCH_MODEL)=.+' .env | cut -d= -f1    # 세 줄 나와야 함
+setup-bot-key  # (없으면 infra/orchestrator/setup-bot-key.sh) DeepSeek API 키(숨김 입력), 모델(기본 deepseek-flash), base URL(기본 https://api.deepseek.com). (선택) GITHUB_TOKEN은 .env에 직접
+grep -E '^(MM_BOT_TOKEN|LLM_API_KEY|LLM_MODEL)=.+' .env | cut -d= -f1    # 세 줄 나와야 함
 
 # 6a. 오프라인 시험 (키 없이 30초)
 python3 -m venv .venv && .venv/bin/pip install -q -r requirements-dev.txt
