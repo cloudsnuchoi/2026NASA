@@ -7,8 +7,11 @@ MATLAB은 서비스 실행 중에 돌지 않습니다. 미리 계산·검증하�
 | 포트 | **8888** → 브라우저 http://localhost:8888 |
 | 접속 | 기존 방식 그대로 접속 (이 방 위쪽 "공개키를 등록했어요" 글의 `ssh ... -L 8888:...` 명령) |
 | 로그인 | 본인 MathWorks 계정 (대신 로그인해 드리지 않아요) |
-| 열 스크립트 | `~/Documents/MATLAB/projects/2026NASA-main/matlab/FieldShift_V8_batch.m` |
+| 열 스크립트 | `~/Documents/MATLAB/work/FieldShift_V8_batch.m` |
 | 예상 소요 | 약 10분 (20필지 × 외부 API 호출) |
+
+## 원칙
+스크립트는 서버 에이전트가 고칩니다. **work/의 파일을 열고 Run ▶만** 누르세요. 에러가 나면 고치지 말고 빨간 에러 문구나 캡처를 1:1 방에 올리면 봇이 고쳐서 work/에 다시 넣어 드립니다(직접 고친 파일은 덮어쓰지 않고 `_fixed` 이름으로 넣어요).
 
 ## 입력 (읽기 전용)
 - `/data/processed/v1/matlab/inputs/fields_20.csv` (20필지 꼭짓점 4개)
@@ -18,7 +21,7 @@ MATLAB은 서비스 실행 중에 돌지 않습니다. 미리 계산·검증하�
 - `/data/processed/v1/matlab/outputs/woochan/coefficients_sources.csv` (계수 출처 표, 직접 작성)
 
 ## 실행 순서
-1. 왼쪽 Current Folder에서 `~/Documents/MATLAB/projects/2026NASA-main/matlab/` 로 이동 → `FieldShift_V8_batch.m` 더블클릭해 열기
+1. 왼쪽 Current Folder에서 `~/Documents/MATLAB/work/` 로 이동 → `FieldShift_V8_batch.m` 더블클릭해 열기
 2. 위쪽 **EDITOR → Run ▶** 클릭 (F5 대신 Run 버튼)
 3. 명령 창에 `Saved ...` 줄이 나오면 끝. 결과 확인: `v8_cards_20fields.csv`에 20필지 × 카드 행이 있는지, `v8_failures_20fields.csv`가 비었는지
 

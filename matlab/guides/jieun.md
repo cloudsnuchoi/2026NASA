@@ -7,8 +7,11 @@ MATLAB은 서비스 실행 중에 돌지 않습니다. 미리 계산·검증하�
 | 포트 | **8891** → 브라우저 http://localhost:8891 |
 | 접속 | 새로 접속: SSH 키를 만들고 공개키(.pub 한 줄)를 이 방에 올리면 자동 등록되고, 서버 주소가 든 `ssh ... -L 8891:...` 명령이 이 방에 와요 |
 | 로그인 | 본인 MathWorks 계정 (대신 로그인해 드리지 않아요) |
-| 열 스크립트 | `~/Documents/MATLAB/projects/2026NASA-main/matlab/slide_figures.m` |
+| 열 스크립트 | `~/Documents/MATLAB/work/slide_figures.m` |
 | 예상 소요 | 1분 이내 |
+
+## 원칙
+스크립트는 서버 에이전트가 고칩니다. **work/의 파일을 열고 Run ▶만** 누르세요. 에러가 나면 고치지 말고 빨간 에러 문구나 캡처를 1:1 방에 올리면 봇이 고쳐서 work/에 다시 넣어 드립니다(직접 고친 파일은 덮어쓰지 않고 `_fixed` 이름으로 넣어요).
 
 ## 입력 (읽기 전용)
 - `/data/processed/v1/matlab/inputs/engine_p10p90_20fields.csv` (전략별 P10–P90)
@@ -19,7 +22,7 @@ MATLAB은 서비스 실행 중에 돌지 않습니다. 미리 계산·검증하�
 - `/data/processed/v1/matlab/outputs/jieun/fig_backtest2012.png`
 
 ## 실행 순서
-1. 왼쪽 Current Folder에서 `~/Documents/MATLAB/projects/2026NASA-main/matlab/` 로 이동 → `slide_figures.m` 더블클릭해 열기
+1. 왼쪽 Current Folder에서 `~/Documents/MATLAB/work/` 로 이동 → `slide_figures.m` 더블클릭해 열기
 2. 위쪽 **EDITOR → Run ▶** 클릭 (F5 대신 Run 버튼)
 3. 명령 창에 `Saved ...` 줄이 나오면 끝. 결과 확인: PNG 2장이 열리고, 전략 A–D가 모두 보이는지
 
