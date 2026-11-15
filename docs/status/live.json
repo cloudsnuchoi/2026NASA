@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T15:55:04+09:00",
+ "generated_at": "2026-11-15T16:00:26+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 364,
+ "remaining_min": 359,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "lanes": [
   {
@@ -47,7 +47,7 @@
     {
      "label": "IMERG 일별 2010–2025 (16개 연도)",
      "status": "done",
-     "detail": "18개 연도 적재"
+     "detail": "19개 연도 적재"
     },
     {
      "label": "NEX-GDDP 2개 모델 이상 (API)",
@@ -106,12 +106,12 @@
   {
    "id": "ai",
    "name": "AI 모델",
-   "pct": 80,
+   "pct": 100,
    "items": [
     {
      "label": "Prithvi 작물 분류",
-     "status": "progress",
-     "detail": "crop_pred=None, agreement_with_cdl=None"
+     "status": "done",
+     "detail": "crop_pred=Soybeans, agreement_with_cdl=0.95"
     },
     {
      "label": "GEOS-S2S 다음 시즌 분포",
@@ -138,7 +138,7 @@
   {
    "id": "matlab",
    "name": "MATLAB",
-   "pct": 17,
+   "pct": 50,
    "items": [
     {
      "label": "coefficients.csv",
@@ -162,12 +162,12 @@
     },
     {
      "label": "climate_annual.csv",
-     "status": "progress",
+     "status": "done",
      "detail": ""
     },
     {
      "label": "calibration_params.csv",
-     "status": "progress",
+     "status": "done",
      "detail": ""
     }
    ]
@@ -398,8 +398,8 @@
  "ai_models": [
   {
    "name": "Prithvi 작물 분류",
-   "status": "progress",
-   "detail": "crop_pred=None, agreement_with_cdl=None"
+   "status": "done",
+   "detail": "crop_pred=Soybeans, agreement_with_cdl=0.95"
   },
   {
    "name": "GEOS-S2S 다음 시즌 분포",

@@ -1,13 +1,13 @@
-# 아몰라 실시간 현황 · 15:55 KST
+# 아몰라 실시간 현황 · 16:00 KST
 
-제출 목표 22:00 KST까지 **6시간 4분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **5시간 59분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
 | 데이터 | 100% | 11/11 |
 | 엔진·API | 83% | 5/6 |
-| AI 모델 | 80% | 4/5 |
-| MATLAB | 17% | 1/6 |
+| AI 모델 | 100% | 5/5 |
+| MATLAB | 50% | 3/6 |
 | UI | 0% | 0/5 |
 | 시뮬 | 0% | 0/2 |
 | 인프라·봇 | 100% | 6/6 |
@@ -20,7 +20,7 @@
 - ✅ HLS NDVI 데모 필지
 - ✅ SMAP L3 (맥락)
 - ✅ NLDAS-2 월별
-- ✅ IMERG 일별 2010–2025 (16개 연도) — 18개 연도 적재
+- ✅ IMERG 일별 2010–2025 (16개 연도) — 19개 연도 적재
 - ✅ NEX-GDDP 2개 모델 이상 (API) — 2개 모델
 - ✅ GEOS-S2S 다음 시즌 (API) — 멤버 10
 - ✅ 대비 데모 필지 (3개 카운티 이상) — 데모 필지 20개, 4개 카운티
@@ -33,20 +33,20 @@
 - ✅ 필지별 결과 차이 (A P50 범위 > 0.02) — A P50 범위 [0.447, 0.504]
 - 🟡 공개 데모 배포 (#15)
 
-## AI 모델 80%
-- 🟡 Prithvi 작물 분류 — crop_pred=None, agreement_with_cdl=None
+## AI 모델 100%
+- ✅ Prithvi 작물 분류 — crop_pred=Soybeans, agreement_with_cdl=0.95
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.584, 'C': 0.569, 'D': 0.533, 'A': 0.484}
 - ✅ /explain (DeepSeek) — 6.1 s, deepseek-flash
 
-## MATLAB 17%
+## MATLAB 50%
 - 🟡 coefficients.csv
 - 🟡 field_dekad.csv
 - 🟡 field_season.csv
 - ✅ drought_2012_county.csv
-- 🟡 climate_annual.csv
-- 🟡 calibration_params.csv
+- ✅ climate_annual.csv
+- ✅ calibration_params.csv
 
 ## UI 0%
 - 🟡 frontend/package.json
@@ -76,7 +76,7 @@
 3. MATLAB: field_season.csv
 
 ## AI 모델
-- 🟡 Prithvi 작물 분류 — crop_pred=None, agreement_with_cdl=None
+- ✅ Prithvi 작물 분류 — crop_pred=Soybeans, agreement_with_cdl=0.95
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.584, 'C': 0.569, 'D': 0.533, 'A': 0.484}
