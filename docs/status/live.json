@@ -1,24 +1,24 @@
 {
- "generated_at": "2026-11-15T20:37:44+09:00",
+ "generated_at": "2026-11-15T20:42:53+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
    "name": "1차 제출",
    "at": "2026-11-15T21:00:00+09:00",
-   "remaining_min": 22
+   "remaining_min": 17
   },
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 142
+   "remaining_min": 137
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 172
+   "remaining_min": 167
   }
  ],
- "remaining_min": 172,
+ "remaining_min": 167,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -240,7 +240,7 @@
   {
    "id": "infra",
    "name": "인프라·봇",
-   "pct": 83,
+   "pct": 100,
    "items": [
     {
      "label": "Mattermost",
@@ -264,8 +264,8 @@
     },
     {
      "label": "main CI 최근 성공",
-     "status": "progress",
-     "detail": null
+     "status": "done",
+     "detail": "success"
     },
     {
      "label": "live 현황 (tmux live)",
@@ -295,12 +295,6 @@
    "last_activity": "15:54"
   },
   {
-   "name": "mauto",
-   "model": "?",
-   "task": "?",
-   "last_activity": "20:37"
-  },
-  {
    "name": "mfixq",
    "model": "?",
    "task": "?",
@@ -311,6 +305,12 @@
    "model": "—",
    "task": "Mattermost Cloudflare 터널",
    "last_activity": "12:11"
+  },
+  {
+   "name": "mwatch",
+   "model": "?",
+   "task": "?",
+   "last_activity": "20:40"
   },
   {
    "name": "runner",
@@ -365,13 +365,13 @@
   {
    "name": "고지은",
    "user": "jieun",
-   "mattermost_last": "20:37",
+   "mattermost_last": "20:40",
    "repo_last": null
   },
   {
    "name": "하지민",
    "user": "jimin",
-   "mattermost_last": "20:37",
+   "mattermost_last": "20:42",
    "repo_last": null
   },
   {
@@ -384,15 +384,24 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "20:10"
+   "repo_last": "20:36"
   }
  ],
  "blockers": [],
  "next": [
-  "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv",
-  "인프라·봇: main CI 최근 성공"
+  "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv"
  ],
  "merged_prs": [
+  {
+   "number": 63,
+   "title": "feat(matlab): 윤성·지민 추가 세트 스크립트 6개 + 입력 + 가이드",
+   "merged_at": "2026-11-15T11:36:30Z"
+  },
+  {
+   "number": 62,
+   "title": "fix(status): 일정 21:00 1차 · 23:00 동결 · 23:30 최종",
+   "merged_at": "2026-11-15T11:33:28Z"
+  },
   {
    "number": 61,
    "title": "docs(matlab): 가이드 경로를 work/로 + 실행만 하는 원칙",
@@ -422,16 +431,6 @@
    "number": 56,
    "title": "feat(orchestrator,matlab): MATLAB 오류 → 에이전트 자동 수정 큐 + 오늘 저녁 역할표",
    "merged_at": "2026-11-15T10:48:37Z"
-  },
-  {
-   "number": 55,
-   "title": "fix(status): UI 레인 진행률을 공개 데모 실동작 점검으로",
-   "merged_at": "2026-11-15T10:31:12Z"
-  },
-  {
-   "number": 53,
-   "title": "docs(submission): 제출 초안 — 문구·데이터 링크·SI·슬라이드 7장·영상 대본",
-   "merged_at": "2026-11-15T10:26:46Z"
   }
  ],
  "ai_models": [
