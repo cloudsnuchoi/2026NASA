@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T19:10:11+09:00",
+ "generated_at": "2026-11-15T19:15:18+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 169,
+ "remaining_min": 164,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -274,12 +274,6 @@
    "last_activity": "16:01"
   },
   {
-   "name": "l1",
-   "model": "claude-opus-5-5",
-   "task": "L1 프론트·/quick·배포",
-   "last_activity": "18:59"
-  },
-  {
    "name": "live",
    "model": "—",
    "task": "이 현황 생성기 (5분)",
@@ -424,7 +418,7 @@
   }
  ],
  "lane_agents_done": {
-  "l1": false,
+  "l1": true,
   "l2": true,
   "prd": true,
   "l4": true,
