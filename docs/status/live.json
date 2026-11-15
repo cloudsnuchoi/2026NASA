@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T23:58:49+09:00",
+ "generated_at": "2026-11-16T00:03:59+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -420,7 +420,7 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "23:41"
+   "repo_last": "23:54"
   }
  ],
  "blockers": [],
@@ -428,6 +428,16 @@
   "MATLAB: jieun 추가: jieun_slide_fig3"
  ],
  "merged_prs": [
+  {
+   "number": 89,
+   "title": "i18n: 메인 앱, /demo/, Data & Sources 영어화(표시 문자열만)",
+   "merged_at": "2026-11-15T14:54:18Z"
+  },
+  {
+   "number": 88,
+   "title": "docs(readme): 배너, 버튼, 히어로, 논문 썸네일, 파이프라인, 영어화",
+   "merged_at": "2026-11-15T14:50:50Z"
+  },
   {
    "number": 87,
    "title": "docs: 라이브 진입점(README 배지, /demo/ 배너), Project 칸 순서, USDA ERS 재추가",
@@ -457,16 +467,6 @@
    "number": 82,
    "title": "docs(matlab): 우찬 Kc ±10% 민감도 결과와 제출 문장 스니펫",
    "merged_at": "2026-11-15T14:08:25Z"
-  },
-  {
-   "number": 81,
-   "title": "docs(validation): 윤성 NASS 2008–2023 다년 비교, 지민 NDVI·부족량 (22:50 전 run_log OK)",
-   "merged_at": "2026-11-15T14:07:58Z"
-  },
-  {
-   "number": 80,
-   "title": "docs(submission): 제출 양식 v3, 데이터 사용 확인, /demo/ Live 링크, 재부팅 점검",
-   "merged_at": "2026-11-15T14:01:30Z"
   }
  ],
  "ai_models": [
