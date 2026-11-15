@@ -59,7 +59,7 @@ def test_members_loaded():
     m = load_members(MEMBERS_TSV)
     assert set(m) == {"hyle", "yoonsung", "woochan", "jieun", "jimin", "daeun"}
     assert m["hyle"].is_admin and not m["jieun"].is_admin
-    assert not m["yoonsung"].uses_git and m["jieun"].uses_git
+    assert not m["yoonsung"].uses_git and m["daeun"].uses_git and not m["jieun"].uses_git  # jieun/jimin: MATLAB tonight
     assert find_member(m, "지은").username == "jieun"
     assert find_member(m, "@woochan").name == "김우찬"
 
@@ -69,7 +69,7 @@ def test_member_message_in_1on1_gets_reply(orch):
     assert len(outs) == 1 and outs[0].channel == "cid-1on1-jieun"
     sys_prompt = full(orch.llm.calls[-1])
     assert "고지은" in sys_prompt and "UI/UX A" in sys_prompt
-    assert "Codex/agy가 마무리 블록" in sys_prompt  # git members get git rule
+    assert "MATLAB 담당은 git을 쓰지 않는다" in sys_prompt  # jieun has MATLAB work tonight (Hylē 18:57)
 
 
 def test_matlab_member_gets_no_git_rule(orch):
@@ -191,10 +191,10 @@ def test_dry_run_repl(orch, capsys):
 
 # ---- laptop agent-loop integration (infra/agent-loop)
 def test_assign_dispatches_task_to_laptop_agent(orch):
-    outs = orch.handle(inc("hyle", "backend", "!assign 지은 #12 지도부터"))
+    outs = orch.handle(inc("hyle", "backend", "!assign 다은 #30 복셀부터"))
     tasks = [o for o in outs if o.message.startswith("!task")]
-    assert len(tasks) == 1 and tasks[0].channel == "name:1on1-jieun"
-    assert tasks[0].message.startswith("!task #12 ") and "(mock prompt)" in tasks[0].message
+    assert len(tasks) == 1 and tasks[0].channel == "name:1on1-daeun"
+    assert tasks[0].message.startswith("!task #30 ") and "(mock prompt)" in tasks[0].message
     assert "heartbeat 없음" in outs[-1].message
 
 
@@ -694,3 +694,14 @@ def test_note_extra_updates_placeholder(orch):
     orch.active["c"] = {"pid": "ph1", "label": "Codex gpt-6.1-sol", "stop": threading.Event(), "extra": 0}
     orch.note_extra("c", 2)
     assert orch.notifier.events[-1][0] == "edit" and "추가 메시지 2개 받음, 이어서 답할게요" in orch.notifier.events[-1][2]
+
+
+def test_matlab_error_in_matlab_room_enqueues_fix_job(tmp_path, orch):
+    orch.cfg.fix_queue = tmp_path / "fixq"
+    out = orch.handle(inc("woochan", "1on1-woochan", "[1/20] FAILED (USGS): timed out 고쳐"))[0].message
+    jobs = list((tmp_path / "fixq").glob("*_woochan.json"))
+    assert len(jobs) == 1 and "서버 에이전트가 **스크립트를 직접 고쳐**" in out
+    job = json.loads(jobs[0].read_text(encoding="utf-8"))
+    assert job["user"] == "woochan" and "FAILED" in job["message"]
+    orch.handle(inc("jieun", "1on1-jieun", "안녕"))
+    assert len(list((tmp_path / "fixq").glob("*.json"))) == 1  # greetings are not fix jobs

@@ -1,15 +1,14 @@
-# 아몰라 실시간 현황 · 19:25 KST
+# 아몰라 실시간 현황 · 19:56 KST
 
-제출 목표 22:00 KST까지 **2시간 34분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **2시간 3분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
 | 데이터 | 100% | 11/11 |
-| 엔진·API | 83% | 5/6 |
+| 엔진·API | 100% | 6/6 |
 | AI 모델 | 100% | 5/5 |
-| MATLAB | 50% | 3/6 |
-| UI | 0% | 0/5 |
-| 시뮬 | 0% | 0/2 |
+| MATLAB | 71% | 5/7 |
+| UI | 86% | 6/7 |
 | 인프라·봇 | 83% | 5/6 |
 
 ## 데이터 100%
@@ -25,39 +24,38 @@
 - ✅ GEOS-S2S 다음 시즌 (API) — 멤버 10
 - ✅ 대비 데모 필지 (3개 카운티 이상) — 데모 필지 20개, 4개 카운티
 
-## 엔진·API 83%
+## 엔진·API 100%
 - ✅ model_api 상시 실행
 - ✅ Story 데모 필지 목록 /fields
 - ✅ 전략 비교 MC·CVaR
 - ✅ 2012 백테스트 전략별 차이 — 서로 다른 물 부족 값 4개
 - ✅ 필지별 결과 차이 (A P50 범위 > 0.02) — A P50 범위 [0.447, 0.504]
-- 🟡 공개 데모 배포 (#15)
+- ✅ 공개 데모 배포 — https://watts-astrology-asus-blessed.trycloudflare.com
 
 ## AI 모델 100%
-- ✅ Prithvi 작물 분류 — crop_pred=Soybeans, agreement_with_cdl=0.95
+- ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
-- ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.584, 'C': 0.569, 'D': 0.533, 'A': 0.484}
-- ✅ /explain (DeepSeek) — 6.6 s, deepseek-flash
+- ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
+- ✅ /explain (DeepSeek) — 7.7 s, deepseek-flash
 
-## MATLAB 50%
-- 🟡 coefficients.csv
-- 🟡 field_dekad.csv
-- 🟡 field_season.csv
-- ✅ drought_2012_county.csv
-- ✅ climate_annual.csv
-- ✅ calibration_params.csv
+## MATLAB 71%
+- ✅ 윤성 1차 CSV: drought_2012_county.csv
+- ✅ 윤성 1차 CSV: climate_annual.csv
+- ✅ 윤성 1차 CSV: calibration_params.csv
+- 🟡 woochan: v8_cards_20fields.csv + coefficients_sources.csv — 🟡 접속함·작업 중
+- ✅ yoonsung: drought_compare_2012.png + drought_compare_2012_summary.csv — ✅ 결과 파일 있음
+- ✅ jimin: baresoil_days_20fields.csv — ✅ 결과 파일 있음
+- 🟡 jieun: fig_p10p90.png + fig_backtest2012.png — 🟡 접속함·작업 중
 
-## UI 0%
-- 🟡 frontend/package.json
-- 🟡 S0–S3 (#12)
-- 🟡 S4 전략 탭 (#13)
-- 🟡 S5–S7 (#14)
-- 🟡 공개 배포 (#15)
-
-## 시뮬 0%
-- 🟡 sim/ 코드
-- 🟡 복셀 시뮬 (#30)
+## UI 86%
+- ✅ frontend/ 코드 (main)
+- ✅ 공개 데모 접속 200 (로그인 없음) — https://watts-astrology-asus-blessed.trycloudflare.com
+- ✅ 공개 API /fields (20필지)
+- ✅ 1층 /quick (screening estimate) — HTTP 200
+- ✅ 2층 전략 비교 /strategies/compare — HTTP 200
+- ✅ 화면 캡처 docs/screens
+- 🟡 공개 URL QA (docs/QA-FINAL.md)
 
 ## 인프라·봇 83%
 - ✅ Mattermost
@@ -71,44 +69,46 @@
 - 없음
 
 ## 다음 할 일
-1. MATLAB: coefficients.csv
-2. MATLAB: field_dekad.csv
-3. MATLAB: field_season.csv
+1. MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv
+2. MATLAB: jieun: fig_p10p90.png + fig_backtest2012.png
+3. UI: 공개 URL QA (docs/QA-FINAL.md)
 
 ## AI 모델
-- ✅ Prithvi 작물 분류 — crop_pred=Soybeans, agreement_with_cdl=0.95
+- ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
-- ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.584, 'C': 0.569, 'D': 0.533, 'A': 0.484}
-- ✅ /explain (DeepSeek) — 6.6 s, deepseek-flash
+- ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
+- ✅ /explain (DeepSeek) — 7.7 s, deepseek-flash
 
 ## 에이전트 레인 (tmux)
 | 세션 | 모델 | 하는 일 | 마지막 활동 |
 | --- | --- | --- | --- |
-| api | — | model_api 상시 실행 (:8090) | 15:50 |
-| bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | 16:01 |
+| api | — | model_api 상시 실행 (:8090) | 19:27 |
+| bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | 19:52 |
 | live | — | 이 현황 생성기 (5분) | 15:54 |
+| mfix | ? | ? | 19:43 |
+| mfixq | ? | ? | 19:53 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | 12:11 |
 | runner | — | GitHub Actions 러너 | 13:09 |
-| web | — | 프론트+API 프록시 (:8095) | 19:08 |
+| web | — | 프론트+API 프록시 (:8095) | 19:55 |
 | web-tunnel | — | 공개 데모 터널 | 19:00 |
 
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 19:23 | — |
-| 김윤성 | 16:35 | — |
-| 고지은 | 15:50 | — |
-| 하지민 | 19:20 | — |
+| 김우찬 | 19:55 | — |
+| 김윤성 | 19:55 | — |
+| 고지은 | 19:49 | — |
+| 하지민 | 19:54 | — |
 | 강다은 | 17:18 | — |
-| Hylē | 16:01 | 19:24 |
+| Hylē | 16:01 | 19:55 |
 
 ## 최근 머지된 PR
+- #58 feat(web): AI 생성 이미지 표시(사진 워터마크 + 로고 푸터) · SI 내역 확정
+- #57 fix: 테스트가 실제 수정 큐에 쓰던 문제 + live.json MATLAB 사람별 3단계 + 시뮬 Stretch
+- #56 feat(orchestrator,matlab): MATLAB 오류 → 에이전트 자동 수정 큐 + 오늘 저녁 역할표
+- #55 fix(status): UI 레인 진행률을 공개 데모 실동작 점검으로
+- #53 docs(submission): 제출 초안 — 문구·데이터 링크·SI·슬라이드 7장·영상 대본
 - #54 docs: DECISIONS·si-log 충돌 표시 제거
 - #52 feat(web): ART FARM 프론트(1층 Quick Screen /quick + 2층 Deep Analysis) + 공개 배포
 - #51 feat(matlab): L2 사전계산 파이프라인 + 사람별 가이드 (우찬·윤성·지민·지은)
-- #50 docs(prd): PRD 확정 — ART FARM, 2층 구조(Quick Screen / Deep Analysis), 정직성 규칙
-- #49 feat(status,site): live.json demo_url + 사이트 '라이브 데모' 버튼 + 최종 레인 추적
-- #47 feat(model): Prithvi-EO 작물 분류 추론(CPU, 미세조정 없음) → vision_result
-- #48 data(imerg,nldas): IMERG 일별 2001–2025 + NLDAS-2 월별 1995–2025 (12주 카운티)
-- #46 data(fields): 대비 데모 필지 8개 추가 (IL·NE·OH) — 필지별 결과 차이 확대

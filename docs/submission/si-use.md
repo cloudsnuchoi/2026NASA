@@ -10,7 +10,7 @@ Draft 2026-11-15 20:00 KST. Ledger: [docs/si-log.md](../si-log.md). Space Apps c
 | Runtime explanations (`POST /explain`) | DeepSeek API (OpenAI-compatible, `deepseek-flash`) | Writes a plain-language explanation of strategy cards. It calls our model API as a tool and may only use numbers in the tool JSON; each number is matched to a JSON path, unmatched numbers are returned in `unverified_numbers`. Citations only from our evidence search; if none, `insufficient_evidence: true` | Does not compute any metric, rank strategies or invent citations |
 | Team chat bot (orchestration) | DeepSeek API | Summarised task status and routed tasks in the team chat during the hackathon | Not part of the product a farmer sees |
 | Satellite crop classification | Prithvi-EO-1.0-100M crop classification (NASA/IBM foundation model) | Inference only on HLS chips for 20 pilot fields (2024), compared with USDA CDL | No fine-tuning, no reinforcement learning. Supporting layer only; CDL is the label of record |
-| Images / logo | **Not confirmed (미확인)** | Frontend assets `frontend/assets/img01–img12` and the "ART FARM" logo come from the team mockup and design team. Whether any were SI-generated is not recorded | — Owner (design team / L1) must confirm before 22:00 |
+| Images / logo | **SI-generated (confirmed by Hylē, 2026-11-15)** | All frontend photos `frontend/assets/img01–img12` and the "ART FARM" logo were generated with AI image tools | Each photo carries a visible "AI-generated image" watermark on the site; the page footer states that all photos and the logo are AI-generated |
 
 Not used: SI-generated video or voice (planned 30-second video uses screen capture; see `video-script.md`), RL, fine-tuning of any model.
 
@@ -24,7 +24,7 @@ Checked on 2026-11-15 ~19:30 KST against the L1 frontend in progress (`frontend/
 | Footer / About | "This site uses AI: Prithvi (satellite crop check, inference only), DeepSeek (explanations), coding assistants (development)." | **Missing** |
 | Prithvi result | "Satellite AI crop estimate (Prithvi-EO-1.0); USDA CDL is the reference" | **Missing** in frontend (API returns `vision` fields) |
 | Docs site (`docs/architecture.html`, `docs/models.html`) | Mentions DeepSeek as the LLM provider | Present (Korean text) |
-| Generated images (if any) | Visible "AI-generated" caption | Unknown — see images row above |
+| Generated images | Visible "AI-generated image" watermark on each photo + footer note for photos and logo | **Done** (frontend/index.html) |
 
 ## Gaps for L1 (frontend) before final submission
 
@@ -38,4 +38,4 @@ Checked on 2026-11-15 ~19:30 KST against the L1 frontend in progress (`frontend/
 8. The Open-Meteo source note says "climate model 60 % + past 10-year trend 40 %" for 2026–2039 daily values. Show this only as a range or scenario, never as a deterministic multi-year forecast (AGENTS.md rule), or drop it.
 9. Map has `attributionControl: false`. Esri World Imagery and Leaflet attribution must be visible on the map.
 10. Translate remaining Korean UI text to English (design request).
-11. Confirm image/logo provenance (SI or not) and caption accordingly. No NASA logos.
+11. ~~Confirm image/logo provenance~~ — confirmed SI-generated; watermark + footer added. No NASA logos.
