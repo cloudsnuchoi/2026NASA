@@ -67,7 +67,7 @@
     nav.innerHTML =
       '<div class="nav-inner">' +
         '<a class="site-brand" href="' + root + 'overview.html">' +
-          "<strong>팀 아몰라</strong><span>Field Shift · 2026NASA</span>" +
+          "<strong>ART FARM</strong><span>Field Shift: Adapting Farms with NASA Data · 팀 아몰라</span>" +
         "</a>" +
         '<button type="button" class="icon-btn nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-links">메뉴</button>' +
         '<div class="site-links" id="site-links">' + links + "</div>" +

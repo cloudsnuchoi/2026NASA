@@ -1,10 +1,22 @@
-# PRD · Field Shift 윤작 의사결정 지원 도구
+# PRD · ART FARM
+
+**ART FARM** — *Field Shift: Adapting Farms with NASA Data*
 
 팀 **아몰라** · NASA Space Apps Challenge 2026 · 챌린지 07 *Field Shift: Adapting Farms with NASA Data*  
-동결: **2026-11-15 08:00–10:00 Asia/Seoul (KST)**. 이 문서를 바꾸려면 이슈와 PR이 필요하다.  
-데이터·스키마·API의 단일 원본은 [SOT.md](./SOT.md)다. 화면 흐름·역할·인계 계약은 [TEAM_SPEC.md](./TEAM_SPEC.md). 구조·파이프라인 그림은 [ARCHITECTURE.md](./ARCHITECTURE.md).
+**최종 동결: 2026-11-15 18:57 Asia/Seoul (KST)** (Hylē 최종 지시). 이전 동결 08:00–10:00, 갱신 11:10. 이 문서를 바꾸려면 이슈와 PR이 필요하다.  
+데이터·스키마·API의 단일 원본은 [SOT.md](./SOT.md)다. 화면 흐름·역할·인계 계약은 [TEAM_SPEC.md](./TEAM_SPEC.md). 구조는 [ARCHITECTURE.md](./ARCHITECTURE.md). 결정 기록은 [DECISIONS.md](./DECISIONS.md).
 
-> **2026-11-15 11:10 KST 갱신.** 잠긴 대상은 콘벨트 옥수수–대두 농가, 공간은 **두 층**(1층 콘벨트 12주 카운티 집계, 2층 아이오와 **Story County** `19169` 필지 30 m). 돕는 결정은 토양 건강과 날씨·물 회복력을 위해 윤작에 무엇을 추가·변경할지. 수량(QuickStats)은 옆축이며 **선택**이다. 구조는 [ARCHITECTURE.md](./ARCHITECTURE.md).
+> **18:57 KST 최종 동결 요약.** 제품 이름은 **ART FARM**, 부제 *Field Shift: Adapting Farms with NASA Data*. 화면은 **두 단계(Tier)** 다. **Tier 1 Quick Screen**은 콘벨트 어디서나 네 꼭짓점을 찍어 FAO-56 식으로 **선별 추정(screening estimate)** 을 보여 주고, **Tier 2 Deep Analysis**는 그 다각형이 우리 데모 필지 20개 중 하나와 겹칠 때 엔진(model_api)의 전략 A–D 카드를 보여 준다. 순위·「추천」·보장 문구는 쓰지 않는다. 출처 없는 숫자는 지운다.
+
+표기 규칙: **[구현됨]** = 2026-11-15 18:57 KST 기준 저장소·VPS에서 동작 확인. **[계획]** = 계약은 정했으나 아직 동작하지 않음. 표시가 없으면 원칙·규칙이다.
+
+---
+
+## 0. 이름
+
+- 제품 이름: **ART FARM** (로고·사이트·프론트·제출·슬라이드 모두 같은 이름).
+- 부제: **"Field Shift: Adapting Farms with NASA Data"**.
+- 챌린지 이름 *Field Shift*는 부제와 챌린지 표기로만 쓴다. NASA 로고·깃발·미션 표식은 쓰지 않는다.
 
 ---
 
@@ -18,13 +30,18 @@
 
 ---
 
-## 2. 사용자
+## 2. 사용자와 공간
 
-**본편 사용자.** 미국 콘벨트 옥수수–대두 농가, 그리고 그 판단을 돕는 현지 농업 전문가.
+**사용자.** 미국 콘벨트 옥수수–대두 농가, 그리고 그 판단을 돕는 현지 농업 전문가.
 
-**공간.** **두 층.** 1층은 콘벨트 12개 주(`IA, IL, IN, OH, NE, MN, SD, WI, MO, KS, MI, KY`)를 카운티 집계로 다룬다. 2층 본편은 아이오와 **Story County** (`county_fips=19169`, 빗물 농업)의 **필지 1개**(및 검증용 예비 필지)다.
+**공간 = 두 단계.**
 
-**선택 확장.** 네브래스카 카운티 1곳(물 제약·관개 대비). 컷 순서 2순위이며, 본편을 대체하지 않는다.
+| 단계 | 어디서 | 무엇으로 |
+| --- | --- | --- |
+| **Tier 1 Quick Screen** | 콘벨트 어디서나 (12개 주 `IA, IL, IN, OH, NE, MN, SD, WI, MO, KS, MI, KY`) | 사용자가 그린 네 꼭짓점 다각형 + NASA POWER 10년 + USGS 3DEP 고도 + FAO-56/FAO-33 식 |
+| **Tier 2 Deep Analysis** | 데모 필지 **20개, 4개 카운티**: Story IA(`19169`) 12, McLean IL(`17113`) 3, Lancaster NE(`31109`) 3, Union OH(`39159`) 2 | model_api 엔진: MC 물수지·CVaR, 2012 가뭄 백테스트, Prithvi/CDL, `/explain` |
+
+다각형이 데모 필지와 겹치지 않으면 Tier 1 결과만 보여 주고 “**Deep analysis available in 4 pilot counties**”를 띄운다. 목업의 원형 구역 대신 4개 카운티 데모 필지 위치(Iowa, Illinois, Nebraska, Ohio) **프리셋**을 둔다.
 
 **비사용자.** 한국 필지, 스마트팜·온실·자율 수확 운영자, 시비량을 자동 확정하려는 시스템. 이 제품의 화면은 농부 판단을 **대체하지 않는다**.
 
@@ -36,144 +53,133 @@
 
 도구는 패턴과 가능성을 보여 준다. 단일 최적 수익해나 “이 작물을 심으라”는 명령을 내지 않는다. 카드마다 정보 공백과 **현지 검토가 필요한 위험**을 남긴다.
 
-우선할 결정의 조건(이미 충족하도록 설계함):
+---
 
-1. 되돌리기 어렵거나 이해관계가 큼
-2. 불확실성이 선택을 바꿀 수 있음 (분포·CVaR)
-3. 위성이 정보 공백을 메움
-4. 백테스트로 검증 가능 (CDL/CSB. 카운티 수량은 선택)
-5. 결정권자가 쓸 수 있음 (슬라이더, 카드, 로그인 없는 웹)
+## 4. 정직성 규칙 (동결)
+
+1. **보장·추천 문구 금지.** “Recommended”, “best”, “guaranteed”, 1위 배지, 순위 정렬을 쓰지 않는다. 카드 순서는 열거 순서일 뿐이다.
+2. **출처 없는 숫자 금지.** 화면의 숫자는 (a) 이름 있는 데이터셋, (b) 공개 문헌 표(FAO-56, FAO-33 등), (c) 출처·연도를 단 **assumption** 중 하나여야 한다. 셋 다 아니면 지우고 “information gap”으로 둔다. 가짜 대체값(fallback)을 채우지 않는다.
+3. **Tier 1 라벨.** Tier 1의 모든 결과에 “**screening estimate**” 라벨을 붙인다. 엔진 표기는 “**FAO-56 engine (ported from team MATLAB prototype V8)**”이다. 결과 화면에 “MATLAB engine”이라고 쓰지 않는다.
+4. **경제 가정.** 목업 `CROP_DB`의 가격·수량·비용은 **assumption** 라벨과 USDA ERS/NASS 출처·연도를 함께 표시한다. 출처·연도를 확인하지 못한 값은 표시하지 않고 정보 공백으로 둔다.
+5. **작물계수.** Kc는 FAO-56 Table 12 값으로 바꾼다(옥수수 Kc_mid 1.20, 대두 1.15, 밀 1.15. ini/end도 같은 표). 목업 값(예: 옥수수 1.08)을 남기면 툴팁에 FAO-56 표 값과의 차이를 보인다. Ky는 FAO-33 표를 출처로 단다. 표와 대조하지 못한 값은 “unverified” 표시.
+6. **상대 지수.** “Water saving %”, “soil organic matter index” 등 %·지수에는 “relative index — vs. baseline, not a guarantee” 툴팁을 단다. Tier 2의 %에는 P10–P90을 함께 보인다.
+7. **미래는 분포만.** 결정론적 다년 예보 값을 만들지 않는다. 미래 분포는 Tier 2(GEOS-S2S, NEX-GDDP-CMIP6)에서만 보인다.
+8. **해상도.** SMAP·GRACE 등 거친 자료를 필지 정밀 값처럼 보이지 않는다.
+9. **판단 대체 안 함.** “This tool does not replace farmer judgment.” 문구와 현지 검토 체크리스트를 숨기지 않는다.
+10. **MATLAB V8에서 옮기지 않는 것.** 작물 배분 최적화(단일 최적해), 수익 하한값 고정(`max(40, …)` 류), NDVI 상한 고정처럼 출처 없는 보정은 Tier 1에 옮기지 않는다. V8의 NOAA/NWS·Open-Meteo 미래 호출은 Tier 1에 쓰지 않는다(비 NASA 단일 모델 → 분포 규칙 위반).
 
 ---
 
-## 4. 비교 전략 (4개)
+## 5. Tier 1 · Quick Screen
+
+**[계획]** 계약은 [SOT.md](./SOT.md) 6.0절 `POST /quick`. 구현은 진행 중이며, 이 문서 동결 시점에 model_api에는 아직 없다.
+
+1. 사용자가 콘벨트 지도(위성 베이스맵)에서 **네 꼭짓점**을 클릭한다(또는 4개 카운티 프리셋을 고른다).
+2. 작물 **2–3개**를 고른다: Corn, Soybean, Wheat. 같은 작물이 연속하는 윤작은 만들지 않는다.
+3. 계산: 다각형 면적·둘레(WGS84), USGS 3DEP 꼭짓점 고도, NASA POWER 과거 10년(2016–2025) 일별 기후, FAO-56 작물 물수요(Kc × ET0)와 FAO-33 수량 반응(Ky). 팀 MATLAB V8 수식을 JS/Python으로 옮긴 것이다.
+4. 출력: 윤작 카드마다 `screening estimate` 라벨, 지표(상대 지수 표시), **info_gaps**, 출처를 단 **assumptions**. **순위 없음.**
+5. 다각형이 데모 필지와 겹치면 Tier 2로 들어가는 버튼을, 아니면 “Deep analysis available in 4 pilot counties”를 보인다.
+
+---
+
+## 6. Tier 2 · Deep Analysis
+
+### 6.1 비교 전략 (4개)
 
 | 코드 | 윤작 | 역할 |
 | --- | --- | --- |
 | `A` | 기준 옥수수–대두 (`C-S`) | 현재/관행 |
 | `B` | `C-S` + 겨울 호밀(cereal rye) 피복 | 맨땅 단축, 침식·피복. 본작 순서는 유지 |
 | `C` | `C-S`–밀 또는 귀리 + 피복 | 주작 다양화, 병해충 순환 차단 후보 |
-| `D` | `C-S`–알팔파 | 사료 가치, 질소 고정, 심근. **서부·관개 지역에서는 물 사용 위험이 큼** → 카드에 명시 |
+| `D` | `C-S`–알팔파 | **참고(reference) 카드.** 사료 가치, 질소 고정, 심근. 서부·관개 지역에서는 물 사용 위험이 큼 → 카드에 명시 |
 
-최소 산출은 현재 윤작을 포함한 **3장**. 기본 구현은 4장 모두다.
+**선택 작물과 강조.** Corn+Soy → `A`, `B` 강조. Wheat를 더하면 `C`도 강조. `D`(알팔파)는 항상 참고 카드. 강조는 “선택과 맞음” 표시일 뿐 추천이 아니다.
 
-**팀 UI 흐름 반영(기본안).** 농부가 지도에 핀을 찍으면 필지 프로필(위치, 면적, 기온, 강수, 증발산, 식생지수, CDL 이전 작물)이 나오고, 추가 후보(호밀 피복, 밀/귀리, 알팔파) 중 최대 2개(확장 3)를 고르면 부분집합 2ⁿ개 후보를 계산해 탭 4개로 보여 준다(n=2면 A 포함 4개). 탭마다 기준 A 대비 식생·물·수익 %(P10–P90), 서로 겹치지 않는 장점 3개와 단점, 이 선택만의 특징을 보여 주고, 아래에 과거 1–5년과 미래 분포를 붙인다. 상세: TEAM_SPEC 2절. A–D와의 대응은 SOT `candidate_id` 규칙.
+### 6.2 카드 내용
 
----
+- 카드 다섯 항목: **why, evidence, benefits, info_gaps, local_review_risks** (생략 금지).
+- 기준 A 대비 상대 지수와 **P10 / P50 / P90**, 하위 10 % **CVaR**.
+- 맨땅 기간, 취약 계절, 과거 연도별 기후, 미래 분포(다음 시즌 GEOS-S2S, 2030년대 NEX-GDDP-CMIP6).
+- 2012 가뭄 백테스트(전략별 물 부족 차이).
+- Prithvi 작물 분류 결과와 CDL 일치도.
+- `/explain`: LLM이 엔진 응답의 숫자만 인용해 설명.
 
-## 5. 산출 (필지 단위)
-
-- 맨땅이 주로 비어 있는 기간과 일수
-- 현재 작물이 취약한 계절 (가뭄·고온·서리·극한강수 등)
-- 전략 간 비교 축: 질소 순환, 침식, 유기물, 병해충 차단, 물 사용, 사료, 시장 적합성
-- 전략마다: **왜** 제안됐는지, **근거**, **이점**, **정보 공백**, 농부·전문가가 현지에서 검토해야 할 **위험**
-- 농가 우선순위·제약 슬라이더 (물, 토양 건강, 안정/회복력, 소득/시장)
-- 필지 지도 (침식·수분 스트레스·서리·식생 구역 등, 있는 레이어만)
-- 과거 1–5년 연도별 강수·ET·NDVI·기온·작물(CDL)·NAIP 썸네일
-- 미래는 **분포만**: 다음 시즌 = NASA **GEOS-S2S** 계절 예보 앙상블, 2030년대 = NASA **NEX-GDDP-CMIP6** 다모델 × SSP. 3년 결정론적 예보는 보여 주지 않는다
-- 과학 용어 설명 카드(증발산, 토양수분 아노말리, NDVI, 서리 위험, 물수지 등)
-- 불확실성: 몬테카를로 요약(P10 / P50 / P90)과 **CVaR** (회복력). 단일 점수로 순위를 강제하지 않음
-- 검증: CDL / Crop Sequence Boundaries(CSB) 이력 백테스트, 가능하면 2012 가뭄 해와 카운티 수량(NASS 일괄 파일, QuickStats는 선택) 대조
-
-유기물·질소의 **확정 kg**, 병해충 **손실액**은 자동 수치화하지 않는다. 질소는 문헌 범위 + 화면 문구 **「현장 토양검정 후 확정」**.
+유기물·질소의 **확정 kg**, 병해충 **손실액**은 자동 수치화하지 않는다. 질소는 문헌 범위 + 「현장 토양검정 후 확정」.
 
 ---
 
-## 6. 범위
+## 7. 오늘 구현된 것 (2026-11-15 18:57 KST)
 
-### 6.1 한다 (In)
+| 항목 | 상태 | 근거 |
+| --- | --- | --- |
+| 데모 필지 20개, 4개 카운티 (Story IA 12, McLean IL 3, Lancaster NE 3, Union OH 2), CSB 2018–2025 경계 | **[구현됨]** | `GET /fields` total=20 |
+| NASA POWER 일별 12주 1995–2025, GPM IMERG 일별, NLDAS-2 월별, SMAP L3(맥락), HLS NDVI(데모 필지), CDL, SSURGO | **[구현됨]** 적재 | `docs/status/live.json` 데이터 레인 |
+| GEOS-S2S 다음 시즌 앙상블(멤버 10), NEX-GDDP-CMIP6 2030년대(모델 2개) | **[구현됨]** 적재 | live.json |
+| Prithvi-EO-1.0-100M multi-temporal crop classification **추론**(미세조정 없음, CPU) → `vision_result`, 20개 필지 전부 | **[구현됨]** | `GET /field/{id}/profile` |
+| 몬테카를로 물수지 + P10/P50/P90 + CVaR(하위 10 %), 전략 A–D | **[구현됨]** | `POST /strategies/compare`, `POST /simulate` |
+| 2012 가뭄 백테스트 (전략별 물 부족 차이) | **[구현됨]** | `GET /validation/backtest?field_id=` |
+| `/explain` (DeepSeek, tool 응답 숫자만) | **[구현됨]** | `POST /explain` |
+| model_api 상시 실행 (FastAPI, 읽기 전용 DB) | **[구현됨]** VPS 내부 | `GET /health` |
+| Tier 1 `POST /quick` | **[계획]** | SOT 6.0 계약만 |
+| 프론트엔드(ART FARM UI, 위성 베이스맵, 프리셋) | **[계획]** 진행 중 | 이슈 #12–#14 |
+| 공개 데모 배포 | **[계획]** 진행 중 | 이슈 #15 |
+| 복셀 시뮬(three.js) | **[계획]** | 이슈 #30 |
+| MATLAB 오프라인 산출 중 `field_dekad`, `field_season` | **[계획]** 진행 중 | live.json MATLAB 레인 |
+| RAG(pgvector) 근거 검색 | 엔드포인트 `GET /evidence/search`는 있음. 말뭉치 범위 **미확인** | — |
 
-- 콘벨트 카운티 1층 + Story County 필지 2층 의사결정 지원 웹 프로토타입 (로그인 없음)
-- **AI 4층**: (1) 비전 — Prithvi 작물 분류 체크포인트 **추론만**(실패 시 CDL) (2) 예측·시나리오 — GEOS-S2S, NEX-GDDP-CMIP6 (3) 시뮬레이션 — 몬테카를로 물수지 + CVaR + 규칙·지수 스코어링 (4) LLM 설명 — tool-call + RAG(인용 전용)
-- 규칙·지수 스코어링 + 몬테카를로 + CVaR 엔진
-- three.js 복셀 시뮬레이션(데모 영상용, NAIP·SRTM·필지 데이터 연동)
-- FastAPI 모델 서비스 ([SOT.md](./SOT.md) 계약)
-- Postgres + PostGIS, 근거 카드용 pgvector (실패 시 키워드+DOI 테이블)
-- LLM은 모델 API를 tool-call 하여 받은 숫자만 설명. RAG는 인용·DOI 전용
-- NASA 지구관측을 계산의 핵심 입력으로 사용
-- 오프라인 MATLAB 분석·캘리브레이션 (산출 테이블만 DB로)
+---
+
+## 8. 범위
+
+### 8.1 한다 (In)
+
+- 로그인 없는 웹: Tier 1 Quick Screen + Tier 2 Deep Analysis
+- **AI 4층**: (1) 비전 — Prithvi 추론만(실패 시 CDL) (2) 예측·시나리오 — GEOS-S2S, NEX-GDDP-CMIP6 (3) 시뮬레이션 — MC 물수지 + CVaR + 규칙·지수 (4) LLM 설명 — tool-call + RAG(인용 전용)
+- FastAPI 모델 서비스([SOT.md](./SOT.md) 계약), Postgres + PostGIS + pgvector
+- 오프라인 MATLAB 분석·캘리브레이션(산출 테이블만 DB로). MATLAB V8 수식은 Tier 1 엔진으로 **이식**하며, MATLAB 런타임은 요청 경로에 없다
 - 영어 데모·제출 페이지, SI 고지, References·라이선스
 
-### 6.2 하지 않는다 (Out)
+### 8.2 하지 않는다 (Out)
 
-- 강화학습, 기반 모델 미세조정, Prithvi(EO-1.0/2.0 모두) 미세조정
-- 3년 결정론적 기후 예보 표시
-- WeatherNext를 본편 의존성으로 두기 (접근 승인 5–7 영업일, 선택 애드온만)
+- 강화학습, 기반 모델 미세조정, Prithvi 미세조정
+- 결정론적 다년 기후 예보 표시
+- 순위, 「추천」, 단일 최적해, 수익 극대화 목적함수
 - MATLAB / WOFOST를 요청 경로의 라이브 계산으로 삽입
-- 별도 벡터 DB (Pinecone, Milvus 등)
-- 수익 극대화를 본편 목적함수로 사용
-- 드론 변량시비 질소 처방 지도를 **본편 결정**으로 승격 (애드온만, P1·컷 가능)
-- 스마트팜, 온실, 자율 수확, 한국 필지
+- 별도 벡터 DB, WeatherNext 본편 의존
 - SMAP·GRACE를 필지 정밀 관측처럼 표시
 - SI가 작물 지식이나 숫자를 지어내는 것
 - NASA 로고·깃발·미션 표식 사용
 
-### 6.3 여유 시 (P1, 컷 가능)
+---
 
-- 네브래스카 물 제약 대비
-- WeatherNext 15일 작업 창(파종·수확·살포 시기) 애드온
-- 강수·기온 시나리오 슬라이더(GEOS-S2S/NEX 분위 선택)
-- 경제·RMA·가격 심화 (옆축 lite는 본편에 남겨도 됨)
-- OpenET 교차검증 (없으면 FAO-56 문헌 계수만)
-- 광학 전 시계열, k-means 구역, 파레토 시각화
-- 선택 영문 짧은 논문
+## 9. 성공 기준
+
+1. 공개 URL이 **로그인 없이** 열린다.
+2. Tier 1: 콘벨트 임의 위치에서 네 꼭짓점 → 작물 2–3개 → `screening estimate` 카드(정보 공백·출처 단 가정 포함). 순위 없음.
+3. Tier 2: 데모 필지 하나에서 전략 A–D 카드(다섯 항목), P10–P90·CVaR, 2012 백테스트, Prithvi/CDL, `/explain`이 끝까지 동작한다.
+4. 비교에 쓰인 핵심 숫자가 **이름 있는 NASA 산출물**에서 온다(POWER, IMERG, NLDAS-2, HLS, GEOS-S2S, NEX-GDDP-CMIP6).
+5. 도구가 판단을 대체하지 않는다고 명시된다.
+6. 제출 목표 **22:00 KST**.
 
 ---
 
-## 7. 성공 기준
+## 10. 데모 시나리오 (영어 발표 뼈대)
 
-데모가 아래를 모두 만족하면 이번 주말 제품은 성공이다.
-
-1. 공개 URL이 **로그인 없이** 열리고, Story County 필지 1개에 대해 전략 **3–4장**이 비교된다. 가능하면 콘벨트 카운티 1층 지도에서 그 필지로 들어간다.
-2. 각 카드에 이유, 근거(DOI 또는 데이터 출처), 이점, 정보 공백, 현지 검토 위험이 있다.
-3. 맨땅 기간과 취약 계절이 보이고, 불확실성(분포 또는 CVaR)이 보인다.
-4. 비교에 쓰인 숫자 중 핵심이 **이름 있는 NASA 산출물**에서 온다 (최소 1개, 권장 2개 이상).
-4-1. 핀 → 프로필 → 작물 선택 → 탭 4개 → 상세(과거·미래 분포) 흐름이 한 필지에서 끝까지 동작한다.
-5. 백테스트가 완전히 깊지 않아도, CDL/CSB 이력과의 대조가 한 화면 또는 한 엔드포인트로 존재한다.
-6. 도구가 판단을 대체하지 않는다고 명시된다.
-7. 23:30 KST까지 제출 초안이 모이고, 23:55 전에 공식 페이지에 한도·링크·SI·데이터가 채워진다.
-
----
-
-## 8. 데모 시나리오 (영어 발표 뼈대)
-
-1. 한 장의 지도: 아이오와 Story County의 옥수수–대두 필지(콘벨트 카운티 지도에서 들어옴). “This is a decision-support tool. It does not replace farmer judgment.”
-2. 현재 윤작(`A`)에서 겨울 **맨땅** 구간과, 가뭄·고온 등 **취약 계절**을 보여 준다. 입력은 NASA POWER / IMERG / SMAP(맥락) / 광학 등이다.
-3. 슬라이더를 움직인다 (예: 토양 건강과 회복력을 높임). 순위가 하나의 “정답”으로 굳지 않고, 트레이드오프가 바뀐다.
-4. 전략 `B`·`C`·`D` 카드를 나란히 연다. 각 카드: why, evidence, benefits, gaps, local-review risks. `D`(알팔파)는 물 사용 위험을 숨기지 않는다.
-5. P10/P50/P90 또는 CVaR로 **불확실성**을 보여 준다. 2012년 같은 과거 해의 백테스트가 있으면 한 장으로 타당성을 말한다.
+1. ART FARM 첫 화면: “This is a decision-support tool. It does not replace farmer judgment.”
+2. **Tier 1**: 콘벨트 아무 곳에 네 꼭짓점 → Corn+Soy(+Wheat) → screening estimate 카드. 가정의 출처와 정보 공백을 보인다.
+3. Iowa 프리셋(Story County 데모 필지) → **Tier 2**: 전략 A–D 카드, A·B(·C) 강조, D는 참고 카드이며 물 사용 위험을 숨기지 않는다.
+4. P10/P50/P90·CVaR로 불확실성, 2012 가뭄 백테스트로 타당성.
+5. `/explain`으로 엔진 숫자만 인용한 설명.
 6. 닫는 문장: 농가가 현지 전문가와 함께 고를 수 있게, 빈칸과 위험을 남긴다.
 
-영상은 30초 이내, 슬라이드는 표지 포함 7장 이내. 세부 대본은 `pitch` 이슈에서 영어 확정.
-
 ---
 
-## 9. 엔진과 AI의 역할 (AI 4층)
+## 11. 컷 순서
 
-| 층 | 내용 | 라이브 경로 여부 |
-| --- | --- | --- |
-| L1 비전 | `ibm-nasa-geospatial/Prithvi-EO-1.0-100M-multi-temporal-crop-classification`(HLS+CDL 미세조정 공개본, Apache-2.0) **추론만**으로 작물·맨땅 인식. Prithvi-EO-2.0은 작물용 공개 미세조정본이 없어 쓰지 않는다. 실패 시 CDL 라벨 | 아니오 (배치 → `vision_result`) |
-| L2 예측·시나리오 | 다음 시즌 GEOS-S2S 앙상블 아노말리 분포, 2030년대 NEX-GDDP-CMIP6 다모델 delta. WeatherNext는 선택 | 아니오 (사전 계산 → `scenario_climate`) |
-| L3 시뮬레이션 | 과거 기후 재표본 + 시나리오 이동 몬테카를로 물수지, P10/P50/P90·CVaR, 규칙·지수 7축 점수, 2ⁿ 후보 | 예 (FastAPI, 사전 계산 + 재가중) |
-| L4 설명 | LLM이 모델 API를 tool-call 해서 받은 숫자만 설명. RAG(pgvector)는 인용·DOI 전용 | 예 |
+1. 복셀 시뮬 → 데모 영상에서 빼기
+2. RAG 근거 → 키워드 + DOI 테이블
+3. Tier 1 미래 패널 (이미 없음, 유지)
+4. Tier 1 경제 가정 → 출처 확인 안 되면 카드에서 경제 줄을 빼고 정보 공백
+5. Tier 2 프리셋 중 IL·OH (Iowa·Nebraska 유지)
 
-**검증.** CDL/CSB 백테스트. 경제 지표는 시장 적합성의 **옆축**이다.
-
-**MATLAB.** 오프라인 2명. 평활(Savitzky–Golay), 아노말리, 계절 분해, 시나리오 칸 추출, 보정. 산출은 고정 스키마 Parquet/CSV(TEAM_SPEC 7.4)로 Postgres에 적재. 요청 시점 라이브 경로에 MATLAB 런타임이 있으면 안 된다.
-
-**WOFOST 7.2 물제한**은 이전 설계의 후보였으나, 16시간 제약에서는 라이브 경로의 전제가 아니다.
-
----
-
-## 10. 컷 순서
-
-1. Prithvi 미세조정 (이미 하지 않음) → Prithvi 추론도 실패하면 CDL 라벨로 대체
-1-1. WeatherNext 애드온
-1-2. GEOS-S2S 다음 시즌 패널 (실패 시 과거 30년 분포로 대체, NEX-GDDP 2030년대는 유지)
-2. 네브래스카 비교
-3. 경제 심화
-4. OpenET (FAO-56만 유지)
-5. 광학 전 시계열 (CDL 연 라벨로 맨땅 근사)
-6. pgvector (키워드 + DOI 테이블로 대체)
-
-앞에 있는 것부터 포기하고, 섹션 7의 최소 성공 기준은 포기하지 않는다.
+섹션 4 정직성 규칙과 섹션 9의 1·3·5번은 포기하지 않는다.
