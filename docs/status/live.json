@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T22:56:48+09:00",
+ "generated_at": "2026-11-15T23:01:58+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -10,15 +10,15 @@
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 3
+   "remaining_min": 0
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 33
+   "remaining_min": 28
   }
  ],
- "remaining_min": 33,
+ "remaining_min": 28,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -270,7 +270,7 @@
   {
    "id": "infra",
    "name": "인프라·봇",
-   "pct": 100,
+   "pct": 83,
    "items": [
     {
      "label": "Mattermost",
@@ -294,8 +294,8 @@
     },
     {
      "label": "main CI 최근 성공",
-     "status": "done",
-     "detail": "success"
+     "status": "progress",
+     "detail": null
     },
     {
      "label": "live 현황 (tmux live)",
@@ -345,6 +345,22 @@
    "model": "?",
    "task": "?",
    "last_activity": "20:40",
+   "state": "running",
+   "waits_on": ""
+  },
+  {
+   "name": "paper",
+   "model": "?",
+   "task": "?",
+   "last_activity": "22:58",
+   "state": "running",
+   "waits_on": ""
+  },
+  {
+   "name": "port",
+   "model": "?",
+   "task": "?",
+   "last_activity": "22:58",
    "state": "running",
    "waits_on": ""
   },
@@ -410,12 +426,19 @@
    "name": "Hylē",
    "user": "hyle",
    "mattermost_last": "16:01",
-   "repo_last": "22:34"
+   "repo_last": "23:01"
   }
  ],
  "blockers": [],
- "next": [],
+ "next": [
+  "인프라·봇: main CI 최근 성공"
+ ],
  "merged_prs": [
+  {
+   "number": 80,
+   "title": "docs(submission): 제출 양식 v3, 데이터 사용 확인, /demo/ Live 링크, 재부팅 점검",
+   "merged_at": "2026-11-15T14:01:30Z"
+  },
   {
    "number": 78,
    "title": "feat(matlab): 윤성 NASS 2012 비교 결과 반영(슬라이드, S5), 새 스크립트 2개",
@@ -450,11 +473,6 @@
    "number": 71,
    "title": "feat(matlab): 서버 봇 직접 안내(notify.log), 레인 상태, MATLAB 결과 30분 배치",
    "merged_at": "2026-11-15T12:06:25Z"
-  },
-  {
-   "number": 72,
-   "title": "fix(ui): 모바일 360/390/768 점검과 UX-AUDIT 수정",
-   "merged_at": "2026-11-15T12:04:07Z"
   }
  ],
  "ai_models": [
@@ -542,6 +560,14 @@
   "nudge": {
    "state": "blocked",
    "waits_on": "프로세스 없음·완료 표시 없음"
+  },
+  "paper": {
+   "state": "running",
+   "waits_on": ""
+  },
+  "port": {
+   "state": "running",
+   "waits_on": ""
   },
   "prd": {
    "state": "waiting-merge",
