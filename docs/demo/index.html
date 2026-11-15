@@ -196,6 +196,10 @@
 </style>
 </head>
 <body>
+<div id="live-banner" style="position:sticky;top:0;z-index:9999;padding:10px 16px;font:600 15px system-ui,sans-serif;text-align:center;background:#5b6b60;color:#fff">Static backup mode — checking the live engine…</div>
+<script>
+(function(){var b=document.getElementById('live-banner');fetch('live_url.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){if(!j||!j.url)throw 0;var u=j.url.replace(/\/$/,'');var img=new Image();var done=false;var t=setTimeout(function(){if(!done){b.textContent='Static backup mode (live engine not reachable right now)';}},6000);img.onload=function(){done=true;clearTimeout(t);b.style.background='#1b5e20';b.innerHTML='Live engine online — <a href="'+u+'" target="_blank" rel="noopener" style="display:inline-block;margin-left:8px;padding:6px 14px;border-radius:10px;background:#82c341;color:#0f291e;text-decoration:none;font-weight:800">Open live engine →</a>';};img.onerror=function(){done=true;clearTimeout(t);b.textContent='Static backup mode (live engine not reachable right now)';};img.src=u+'/assets/paper/page-1.png?t='+Date.now();}).catch(function(){b.textContent='Static backup mode';});})();
+</script>
 
 <!-- ===================================================================== -->
 <!-- PAGE 1: HERO + PATTERNED GREEN SCROLL STORY + OFFICIAL DATA SOURCES   -->
