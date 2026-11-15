@@ -1,14 +1,14 @@
-# 아몰라 실시간 현황 · 22:25 KST
+# 아몰라 실시간 현황 · 22:31 KST
 
-일정: 1차 제출 21:00 (지남) · 동결 23:00 (0시간 34분 남음) · 최종 제출 23:30 (1시간 4분 남음)
-최종 제출 23:30 KST까지 **1시간 4분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
+일정: 1차 제출 21:00 (지남) · 동결 23:00 (0시간 28분 남음) · 최종 제출 23:30 (0시간 58분 남음)
+최종 제출 23:30 KST까지 **0시간 58분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
 | 데이터 | 100% | 11/11 |
 | 엔진·API | 100% | 6/6 |
 | AI 모델 | 100% | 5/5 |
-| MATLAB | 92% | 12/13 |
+| MATLAB | 100% | 13/13 |
 | UI | 100% | 7/7 |
 | 인프라·봇 | 100% | 6/6 |
 
@@ -40,11 +40,11 @@
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
 - ✅ /explain (DeepSeek) — 6.7 s, deepseek-flash
 
-## MATLAB 92%
+## MATLAB 100%
 - ✅ 윤성 1차 CSV: drought_2012_county.csv
 - ✅ 윤성 1차 CSV: climate_annual.csv
 - ✅ 윤성 1차 CSV: calibration_params.csv
-- 🟡 woochan: v8_cards_20fields.csv + coefficients_sources.csv — 🟡 접속함·작업 중
+- ✅ woochan: v8_cards_20fields.csv + coefficients_sources.csv — ✅ 결과 파일 있음
 - ✅ yoonsung: drought_compare_2012.png + drought_compare_2012_summary.csv — ✅ 결과 파일 있음
 - ✅ jimin: baresoil_days_20fields.csv — ✅ 결과 파일 있음
 - ✅ jieun: fig_p10p90.png + fig_backtest2012.png — ✅ 결과 파일 있음
@@ -76,7 +76,6 @@
 - 없음
 
 ## 다음 할 일
-1. MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
@@ -93,6 +92,7 @@
 | final | ? | ? | running | — | 21:56 |
 | live | — | 이 현황 생성기 (5분) | — | — | 15:54 |
 | mat3 | ? | ? | running | — | 21:58 |
+| mat4 | ? | ? | running | — | 22:29 |
 | mfixq | ? | ? | running | — | 19:53 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | — | — | 12:11 |
 | mwatch | ? | ? | running | — | 20:40 |
@@ -122,10 +122,10 @@
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 22:15 | — |
+| 김우찬 | 22:27 | — |
 | 김윤성 | 21:55 | — |
 | 고지은 | 21:04 | — |
-| 하지민 | 22:25 | — |
+| 하지민 | 22:28 | — |
 | 강다은 | 17:18 | — |
 | Hylē | 16:01 | 22:01 |
 

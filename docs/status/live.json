@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T22:25:51+09:00",
+ "generated_at": "2026-11-15T22:31:01+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -10,15 +10,15 @@
   {
    "name": "동결",
    "at": "2026-11-15T23:00:00+09:00",
-   "remaining_min": 34
+   "remaining_min": 28
   },
   {
    "name": "최종 제출",
    "at": "2026-11-15T23:30:00+09:00",
-   "remaining_min": 64
+   "remaining_min": 58
   }
  ],
- "remaining_min": 64,
+ "remaining_min": 58,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -156,7 +156,7 @@
   {
    "id": "matlab",
    "name": "MATLAB",
-   "pct": 92,
+   "pct": 100,
    "items": [
     {
      "label": "윤성 1차 CSV: drought_2012_county.csv",
@@ -175,8 +175,8 @@
     },
     {
      "label": "woochan: v8_cards_20fields.csv + coefficients_sources.csv",
-     "status": "progress",
-     "detail": "🟡 접속함·작업 중"
+     "status": "done",
+     "detail": "✅ 결과 파일 있음"
     },
     {
      "label": "yoonsung: drought_compare_2012.png + drought_compare_2012_summary.csv",
@@ -343,6 +343,14 @@
    "waits_on": ""
   },
   {
+   "name": "mat4",
+   "model": "?",
+   "task": "?",
+   "last_activity": "22:29",
+   "state": "running",
+   "waits_on": ""
+  },
+  {
    "name": "mfixq",
    "model": "?",
    "task": "?",
@@ -411,7 +419,7 @@
   {
    "name": "김우찬",
    "user": "woochan",
-   "mattermost_last": "22:15",
+   "mattermost_last": "22:27",
    "repo_last": null
   },
   {
@@ -429,7 +437,7 @@
   {
    "name": "하지민",
    "user": "jimin",
-   "mattermost_last": "22:25",
+   "mattermost_last": "22:28",
    "repo_last": null
   },
   {
@@ -446,9 +454,7 @@
   }
  ],
  "blockers": [],
- "next": [
-  "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv"
- ],
+ "next": [],
  "merged_prs": [
   {
    "number": 77,
@@ -570,6 +576,10 @@
    "waits_on": ""
   },
   "mat3": {
+   "state": "running",
+   "waits_on": ""
+  },
+  "mat4": {
    "state": "running",
    "waits_on": ""
   },
