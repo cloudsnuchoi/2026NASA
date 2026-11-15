@@ -9,10 +9,11 @@ BASE="https://ds.nccs.nasa.gov/thredds/ncss/grid/AMES/NEX/GDDP-CMIP6"
 with psycopg.connect("") as c:
     pts=c.execute("select county_fips,ST_X(centroid),ST_Y(centroid) from county order by 1").fetchall()
 fips=[p[0] for p in pts]; plon=np.array([p[1] for p in pts])%360; plat=np.array([p[2] for p in pts])
+GRID={"GFDL-ESM4":"gr1"}  # grid label differs per model in file names
 NCLOCK=threading.Lock()  # netCDF4/HDF5 not thread-safe
 def job(a):
     model,scn,var,yr=a
-    url=f"{BASE}/{model}/{scn}/r1i1p1f1/{var}/{var}_day_{model}_{scn}_r1i1p1f1_gn_{yr}_v2.0.nc"
+    url=f"{BASE}/{model}/{scn}/r1i1p1f1/{var}/{var}_day_{model}_{scn}_r1i1p1f1_{GRID.get(model,'gn')}_{yr}_v2.0.nc"
     q=f"{TMP}/{model}_{scn}_{var}_{yr}.nc"; ok=False
     for t in range(4):
         try:

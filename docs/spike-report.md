@@ -3,7 +3,8 @@
 Branch `feat/26-data-spike`. Scripts: `data_pipeline/`, DDL: `sql/`. DB: `fieldshift` (Postgres+PostGIS+pgvector, 127.0.0.1:5433). Raw: `/srv/hackathon/data/raw/<dataset>/`.
 No secrets in repo. No data files committed.
 
-## Overall: see bottom line (updated at each dataset)
+## Overall verdict: **GO for P0 with two caveats** (2026-11-15, data lane)
+P0 flow (items 1-4) is Go: CSB fields + CDL history + pin->field + POWER + HLS NDVI all work on Story County and tier-1 county layers cover all 12 states. Caveats: (a) **GPM IMERG / NLDAS-2 (GES DISC) are blocked by a 403 until the Earthdata app "NASA GESDISC DATA ARCHIVE" is approved on the account** (POWER precipitation is the fallback); (b) the GEOS-S2S next-season panel is only 10 raw members, MAM 2027 and Jun-Jul (no August), no hindcast anomaly -> prefer the historical-distribution fallback for JJA. Prithvi (item 8) not attempted. NEX-GDDP has 2 of 3 models.
 
 ## Schema notes
 - `sql/001_sot_schema.sql` = SOT §5 DDL verbatim except `vector(1536)` -> `vector(384)` (e5-small, per fieldshift-data brief). No DDL bug blocked us.
@@ -77,7 +78,55 @@ No secrets in repo. No data files committed.
 
 ### NEX-GDDP-CMIP6 (item 7) — Go
 - Public CC0 dataset (AWS Open Data `s3://nex-gddp-cmip6`, us-west-2; file attributes say `cmip6_license: CC-BY-SA 4.0` -> cite both; tech note + access date 2026-11-15). Direct S3 download of the global 0.25 deg files (180-245 MB per var-year) ran at ~0.5 MB/s here (one anonymous s3fs `get` was fast, threaded gets hung / returned zero-filled files). **Used NCCS THREDDS NCSS server-side bbox subset** (lat 36-49.5, lon 255-281 E; 4.6 MB/file, ~20-27 s) — `data_pipeline/nex_gddp_tier1.py` (4 threads).
-- Models x scenarios: ACCESS-CM2, MPI-ESM1-2-HR, GFDL-ESM4 (member r1i1p1f1, v2.0 files) x historical 1985-2014, ssp245 and ssp585 2031-2040 x pr, tasmax, tasmin. 450 files requested.
-- `county_scenario_year`: per county (nearest 0.25 deg cell to the representative point; not field-specific), per year, season ANN/MAM/JJA mean: `504900` rows total. Rows by model: ACCESS-CM2:504900. Units: tas* degC, pr mm/day (mean daily). Delta method (future window mean minus 1985-2014 mean, per model) is computed downstream from this table; no bias correction beyond what NEX-GDDP applies.
-- Sanity (Story 19169): ACCESS-CM2 hist JJA tasmax 28.8 degC vs POWER 1995-2014 28.5 degC. JJA tasmax 2031-2040 minus 1985-2014: ACCESS-CM2 ssp245 +2.1; ACCESS-CM2 ssp585 +3.4. Annual precip change: ACCESS-CM2 ssp245 6.5%; ACCESS-CM2 ssp585 3.1%.
+- Models x scenarios loaded: **ACCESS-CM2 and MPI-ESM1-2-HR** (2 of the 3 planned; member r1i1p1f1, v2.0 files; 150 files each) x historical 1985-2014, ssp245 and ssp585 2031-2040 x pr, tasmax, tasmin. **GFDL-ESM4 not loaded**: file names use grid label `gr1` (script patched), but NCSS then returned HTTP 504 (60 s gateway timeout) for most requests (also MRI-ESM2-0 when tried); the 18 partial GFDL files were deleted from the DB so no incomplete model is exposed. Retry later with 1 thread (`nex_gddp_tier1.py GFDL-ESM4`), or direct S3.
+- `county_scenario_year`: per county (nearest 0.25 deg cell to the representative point; not field-specific), per year, season ANN/MAM/JJA mean: `1009800` rows total. Rows by model: ACCESS-CM2:504900; MPI-ESM1-2-HR:504900. Units: tas* degC, pr mm/day (mean daily). Delta method (future window mean minus 1985-2014 mean, per model) is computed downstream from this table; no bias correction beyond what NEX-GDDP applies.
+- Sanity (Story 19169): ACCESS-CM2 hist JJA tasmax 28.8 degC vs POWER 1995-2014 28.5 degC. JJA tasmax 2031-2040 minus 1985-2014: ACCESS-CM2 ssp245 +2.1; ACCESS-CM2 ssp585 +3.4; MPI-ESM1-2-HR ssp245 +1.6; MPI-ESM1-2-HR ssp585 +1.6. Annual precip change: ACCESS-CM2 ssp245 6.5%; ACCESS-CM2 ssp585 3.1%; MPI-ESM1-2-HR ssp245 -1.4%; MPI-ESM1-2-HR ssp585 -2.2%.
 - Windows are 10-yr means from single realisation r1i1p1f1 per model: internal variability is large; show as range across models/scenarios, never as a point forecast.
+
+## TEAM_SPEC §6 item table (11 spike items)
+| # | Item | Status | Evidence / note |
+| --- | --- | --- | --- |
+| 1 | CSB + CDL sequence, IA+IL candidate counties | **Go (partial)** | Story IA: 6,027 CSB fields in DB, strict C-S alternation 2018-25 = 28.5 % (72 % corn/soy all years); IL stats only (McLean 49.2 %, Champaign 44.8 %), IL polygons not loaded. 12 demo `field_id`s with 8 yrs corn/soy exist (`field_et_openet` ids). C-S share: Story is lower than IL candidates; **if the demo needs a high C-S share, McLean IL 17113 is better** (not loaded: another ~3 min with `csb_story.py` pointed at 17/113). |
+| 2 | Pin -> field | **Go** | `ST_Contains` on GiST, 0.27 ms, returns `field_id`, `area_ha`. |
+| 3 | POWER daily | **Go** | 1995-2025 (task spec; item says 1991) 1,122 counties, 0 % missing for T/P/RH; srad 0.0004 %. Resolution: source-native (MERRA-2 etc.), see response header. |
+| 4 | HLS NDVI one field-year | **Go** | 36-68 clear scenes/field-year (>=8 needed); bare->peak->harvest visible. |
+| 5 | SMAP + NLDAS-2 | **partial** | SMAP L3 36 km: Go (context). NLDAS-2: **No-go** — GES DISC 403 (Earthdata app not authorised). Fallback: SMAP sentence + OpenET/POWER. |
+| 6 | GEOS-S2S precip/at | **partial** | Files read; 10 members have MAM 2027 and Jun-Jul only (no Aug); 40 members only cover Nov-Dec. No hindcast anomaly. Fallback panel (historical distribution) recommended for JJA. |
+| 7 | NEX-GDDP 3 models x 2 SSP | **Go (partial: 2 of 3 models)** | ACCESS-CM2 + MPI-ESM1-2-HR via NCSS; GFDL-ESM4 NCSS 504s. Table `county_scenario_year`. |
+| 8 | Prithvi inference | **not attempted** | Outside the data-lane brief (GPU/CPU model run, backend lane). HLS inputs exist for 12 fields only; chips for 224x224x3-date would need new HLS reads. |
+| 9 | NAIP >=3 vintages | **Go (search)** | 6 vintages 2015-2025 at Story; no tiles downloaded. |
+| 10 | SSURGO OM/K/AWC | **Go** | `field_soil` 6,027 fields. |
+| 11 | County yield 2008-2025 | **Go** | `county_yield` 30,183 rows. |
+
+## Data-source status summary (task order)
+| Dataset | Tier | Status | DB table(s) |
+| --- | --- | --- | --- |
+| POWER daily | 1 | Go | `county_weather_daily` |
+| CDL county shares 2008-2025 | 1 | Go | `county_crop_share` |
+| CDL 30 m Story 2008-2025 | 2 | Go | files + `field_crop_history` |
+| CSB Story | 2 | Go | `fields` |
+| SSURGO | 2 | Go | `field_soil` |
+| OpenET | 2 | partial (12 fields, 2016+) | `field_et_openet` |
+| IMERG | 1 | **No-go** (403) | `county_imerg_daily` (empty) |
+| SMAP | 1 | Go (5-day sample, QA flag not applied) | `county_smap` |
+| HLS | 2 | Go (12 fields x 3 yrs) | `field_ndvi_hls` |
+| NEX-GDDP | 1 | Go (2 models) | `county_scenario_year` |
+| GEOS-S2S | 2 | partial | `county_scenario_year` (source_id geos_s2s) |
+| QuickStats bulk | opt | Go | `county_yield` |
+
+Not loaded into SOT tables: `scenario_climate` (field_id-keyed), `climate_annual`, `field_dekad`, `field_season`, `climate_daily`, `vision_result`, `strategy_score`, `backtest_result`, `evidence_chunk` exist (empty) — MATLAB/backend lanes. Spike tables are county-keyed; a field-level `scenario_climate` can be derived by assigning each field the cell value (context cell rule, SOT §2).
+
+## Storage and runtime
+- `/srv/hackathon/data`: see `du` at the end of this file. Disk free was >300 GB throughout (cap 190 GB for /srv/hackathon/data never approached).
+- DB size ~see end. Big raw items kept: CSB national zip + extracted gdb (9 GB; extracted copy `raw/csb/ext` can be deleted), POWER json.gz (373 MB), QuickStats gz (1.1 GB), SSURGO json (107 MB), GEOS-S2S tarballs + extracted nc4 (~0.4 GB), OpenET json.
+- Not committed: any data file. Secrets: none printed (OpenET key read from env, Earthdata from ~/.netrc).
+- Rate: POWER 2 req/s; NCSS ~1 req / 5 s per thread (4 threads); earthaccess <=6 threads (not a rate-limited host, but within the 8-worker cap).
+
+## Lessons / gotchas for whoever re-runs
+- NASS CDL/QuickStats servers return empty/broken bodies for plain GET; use ranged downloads (`rangedl.py`).
+- Do not use `pkill -f`/`pgrep -f` patterns that appear in your own shell command line.
+- netCDF4 inside multiple threads deadlocks; serialise opens (lock).
+- GES DISC data (IMERG, NLDAS, GLDAS, MERRA-2) needs the "NASA GESDISC DATA ARCHIVE" app approved on the Earthdata profile.
+
+## Final disk / DB figures
+- `du -sh /srv/hackathon/data` = 15G; `fieldshift` DB = 2036 MB.
