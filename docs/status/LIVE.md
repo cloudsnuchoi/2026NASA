@@ -1,15 +1,14 @@
-# 아몰라 실시간 현황 · 19:46 KST
+# 아몰라 실시간 현황 · 19:53 KST
 
-제출 목표 22:00 KST까지 **2시간 13분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
+제출 목표 22:00 KST까지 **2시간 6분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/
 
 | 레인 | 진행 | 완료/전체 |
 | --- | --- | --- |
 | 데이터 | 100% | 11/11 |
 | 엔진·API | 100% | 6/6 |
 | AI 모델 | 100% | 5/5 |
-| MATLAB | 50% | 3/6 |
+| MATLAB | 57% | 4/7 |
 | UI | 86% | 6/7 |
-| 시뮬 | 0% | 0/2 |
 | 인프라·봇 | 100% | 6/6 |
 
 ## 데이터 100%
@@ -38,15 +37,16 @@
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
-- ✅ /explain (DeepSeek) — 6.6 s, deepseek-flash
+- ✅ /explain (DeepSeek) — 7.7 s, deepseek-flash
 
-## MATLAB 50%
-- 🟡 coefficients.csv
-- 🟡 field_dekad.csv
-- 🟡 field_season.csv
-- ✅ drought_2012_county.csv
-- ✅ climate_annual.csv
-- ✅ calibration_params.csv
+## MATLAB 57%
+- ✅ 윤성 1차 CSV: drought_2012_county.csv
+- ✅ 윤성 1차 CSV: climate_annual.csv
+- ✅ 윤성 1차 CSV: calibration_params.csv
+- 🟡 woochan: v8_cards_20fields.csv + coefficients_sources.csv — 🟡 접속함·작업 중
+- ✅ yoonsung: drought_compare_2012.png + drought_compare_2012_summary.csv — ✅ 결과 파일 있음
+- 🟡 jimin: baresoil_days_20fields.csv — 🟡 접속함·작업 중
+- 🟡 jieun: fig_p10p90.png + fig_backtest2012.png — 🔑 접속 전
 
 ## UI 86%
 - ✅ frontend/ 코드 (main)
@@ -56,10 +56,6 @@
 - ✅ 2층 전략 비교 /strategies/compare — HTTP 200
 - ✅ 화면 캡처 docs/screens
 - 🟡 공개 URL QA (docs/QA-FINAL.md)
-
-## 시뮬 0%
-- 🟡 sim/ 코드
-- 🟡 복셀 시뮬 (#30)
 
 ## 인프라·봇 100%
 - ✅ Mattermost
@@ -73,24 +69,25 @@
 - 없음
 
 ## 다음 할 일
-1. MATLAB: coefficients.csv
-2. MATLAB: field_dekad.csv
-3. MATLAB: field_season.csv
+1. MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv
+2. MATLAB: jimin: baresoil_days_20fields.csv
+3. MATLAB: jieun: fig_p10p90.png + fig_backtest2012.png
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
-- ✅ /explain (DeepSeek) — 6.6 s, deepseek-flash
+- ✅ /explain (DeepSeek) — 7.7 s, deepseek-flash
 
 ## 에이전트 레인 (tmux)
 | 세션 | 모델 | 하는 일 | 마지막 활동 |
 | --- | --- | --- | --- |
 | api | — | model_api 상시 실행 (:8090) | 19:27 |
-| bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | 16:01 |
+| bot | DeepSeek Flash + Codex sol/terra + Claude | Mattermost 오케스트레이터 봇 | 19:52 |
 | live | — | 이 현황 생성기 (5분) | 15:54 |
 | mfix | ? | ? | 19:43 |
+| mfixq | ? | ? | 19:53 |
 | mm-tunnel | — | Mattermost Cloudflare 터널 | 12:11 |
 | runner | — | GitHub Actions 러너 | 13:09 |
 | web | — | 프론트+API 프록시 (:8095) | 19:08 |
@@ -101,8 +98,8 @@
 | --- | --- | --- |
 | 김우찬 | 19:38 | — |
 | 김윤성 | 19:44 | — |
-| 고지은 | 19:43 | — |
-| 하지민 | 19:45 | — |
+| 고지은 | 19:49 | — |
+| 하지민 | 19:51 | — |
 | 강다은 | 17:18 | — |
 | Hylē | 16:01 | 19:31 |
 

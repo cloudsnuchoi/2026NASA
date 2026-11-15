@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-15T19:46:15+09:00",
+ "generated_at": "2026-11-15T19:53:09+09:00",
  "deadline": "2026-11-15T22:00:00+09:00",
- "remaining_min": 133,
+ "remaining_min": 126,
  "chat_url": "https://process-investigators-dean-unified.trycloudflare.com/",
  "demo_url": "https://watts-astrology-asus-blessed.trycloudflare.com",
  "lanes": [
@@ -132,44 +132,49 @@
     {
      "label": "/explain (DeepSeek)",
      "status": "done",
-     "detail": "6.6 s, deepseek-flash"
+     "detail": "7.7 s, deepseek-flash"
     }
    ]
   },
   {
    "id": "matlab",
    "name": "MATLAB",
-   "pct": 50,
+   "pct": 57,
    "items": [
     {
-     "label": "coefficients.csv",
-     "status": "progress",
-     "detail": ""
-    },
-    {
-     "label": "field_dekad.csv",
-     "status": "progress",
-     "detail": ""
-    },
-    {
-     "label": "field_season.csv",
-     "status": "progress",
-     "detail": ""
-    },
-    {
-     "label": "drought_2012_county.csv",
+     "label": "윤성 1차 CSV: drought_2012_county.csv",
      "status": "done",
      "detail": ""
     },
     {
-     "label": "climate_annual.csv",
+     "label": "윤성 1차 CSV: climate_annual.csv",
      "status": "done",
      "detail": ""
     },
     {
-     "label": "calibration_params.csv",
+     "label": "윤성 1차 CSV: calibration_params.csv",
      "status": "done",
      "detail": ""
+    },
+    {
+     "label": "woochan: v8_cards_20fields.csv + coefficients_sources.csv",
+     "status": "progress",
+     "detail": "🟡 접속함·작업 중"
+    },
+    {
+     "label": "yoonsung: drought_compare_2012.png + drought_compare_2012_summary.csv",
+     "status": "done",
+     "detail": "✅ 결과 파일 있음"
+    },
+    {
+     "label": "jimin: baresoil_days_20fields.csv",
+     "status": "progress",
+     "detail": "🟡 접속함·작업 중"
+    },
+    {
+     "label": "jieun: fig_p10p90.png + fig_backtest2012.png",
+     "status": "progress",
+     "detail": "🔑 접속 전"
     }
    ]
   },
@@ -210,23 +215,6 @@
     },
     {
      "label": "공개 URL QA (docs/QA-FINAL.md)",
-     "status": "progress",
-     "detail": ""
-    }
-   ]
-  },
-  {
-   "id": "sim",
-   "name": "시뮬",
-   "pct": 0,
-   "items": [
-    {
-     "label": "sim/ 코드",
-     "status": "progress",
-     "detail": ""
-    },
-    {
-     "label": "복셀 시뮬 (#30)",
      "status": "progress",
      "detail": ""
     }
@@ -281,7 +269,7 @@
    "name": "bot",
    "model": "DeepSeek Flash + Codex sol/terra + Claude",
    "task": "Mattermost 오케스트레이터 봇",
-   "last_activity": "16:01"
+   "last_activity": "19:52"
   },
   {
    "name": "live",
@@ -294,6 +282,12 @@
    "model": "?",
    "task": "?",
    "last_activity": "19:43"
+  },
+  {
+   "name": "mfixq",
+   "model": "?",
+   "task": "?",
+   "last_activity": "19:53"
   },
   {
    "name": "mm-tunnel",
@@ -336,13 +330,13 @@
   {
    "name": "고지은",
    "user": "jieun",
-   "mattermost_last": "19:43",
+   "mattermost_last": "19:49",
    "repo_last": null
   },
   {
    "name": "하지민",
    "user": "jimin",
-   "mattermost_last": "19:45",
+   "mattermost_last": "19:51",
    "repo_last": null
   },
   {
@@ -360,9 +354,9 @@
  ],
  "blockers": [],
  "next": [
-  "MATLAB: coefficients.csv",
-  "MATLAB: field_dekad.csv",
-  "MATLAB: field_season.csv"
+  "MATLAB: woochan: v8_cards_20fields.csv + coefficients_sources.csv",
+  "MATLAB: jimin: baresoil_days_20fields.csv",
+  "MATLAB: jieun: fig_p10p90.png + fig_backtest2012.png"
  ],
  "merged_prs": [
   {
@@ -430,7 +424,14 @@
   {
    "name": "/explain (DeepSeek)",
    "status": "done",
-   "detail": "6.6 s, deepseek-flash"
+   "detail": "7.7 s, deepseek-flash"
+  }
+ ],
+ "stretch": [
+  {
+   "name": "복셀 시뮬 (다은)",
+   "status": "stretch",
+   "detail": "19:30까지 공개 링크 없음 → Stretch, 진행률 계산 제외"
   }
  ],
  "lane_agents_done": {
