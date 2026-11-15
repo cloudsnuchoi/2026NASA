@@ -33,3 +33,4 @@ CREATE TABLE IF NOT EXISTS county_imerg_daily (
   PRIMARY KEY (county_fips, date));
 CREATE TABLE IF NOT EXISTS spike_log (
   id serial PRIMARY KEY, item text, status text, rows_loaded bigint, note text, ts timestamptz DEFAULT now());
+create table if not exists county_scenario_year(county_fips char(5) not null, source_id text not null default 'nex_gddp', model text not null, scenario text not null, member text not null default 'r1i1p1f1', variable text not null, season text not null, year int not null, value real, unit text, primary key(county_fips,source_id,model,scenario,member,variable,season,year));  -- seasonal/annual means per year from NEX-GDDP-CMIP6 daily at county rep point (nearest 0.25deg cell); tas* in C, pr in mm/day
