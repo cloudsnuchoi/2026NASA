@@ -1,0 +1,10 @@
+{
+ "in_service_area": false,
+ "service_tier": null,
+ "field_id": null,
+ "county_fips": null,
+ "state_alpha": null,
+ "area_ha": null,
+ "geometry": null,
+ "message": "Outside the service area."
+}

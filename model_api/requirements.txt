@@ -1,0 +1,12 @@
+# model_api runtime + test deps. Licences: fastapi MIT, uvicorn BSD-3, pydantic MIT, numpy BSD-3,
+# pg8000 BSD-3 (pure-Python Postgres driver, chosen over LGPL psycopg), openai Apache-2.0, httpx BSD-3,
+# pytest MIT, ruff MIT.
+fastapi>=0.110
+uvicorn>=0.29
+pydantic>=2.6
+numpy>=1.26
+pg8000>=1.30
+openai>=1.30
+httpx>=0.27
+pytest>=8.0
+ruff>=0.4

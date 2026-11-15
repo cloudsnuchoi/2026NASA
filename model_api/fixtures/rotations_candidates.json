@@ -1,0 +1,45 @@
+{
+ "field_id": "191825003869023",
+ "n_options": 2,
+ "candidates": [
+  {
+   "candidate_id": "C-S",
+   "strategy_code": "A",
+   "sequence": "C-S",
+   "options": [],
+   "feasible": true,
+   "warnings": []
+  },
+  {
+   "candidate_id": "C-S+cover_rye",
+   "strategy_code": "B",
+   "sequence": "C-S",
+   "options": [
+    "cover_rye"
+   ],
+   "feasible": true,
+   "warnings": []
+  },
+  {
+   "candidate_id": "C-S-W",
+   "strategy_code": null,
+   "sequence": "C-S-W",
+   "options": [
+    "small_grain"
+   ],
+   "feasible": true,
+   "warnings": []
+  },
+  {
+   "candidate_id": "C-S-W+cover_rye",
+   "strategy_code": "C",
+   "sequence": "C-S-W",
+   "options": [
+    "cover_rye",
+    "small_grain"
+   ],
+   "feasible": true,
+   "warnings": []
+  }
+ ]
+}

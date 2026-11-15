@@ -1,0 +1,115 @@
+{
+ "field_id": "191825003869023",
+ "periods": [
+  {
+   "start": "2023-04-01",
+   "end": "2023-05-29",
+   "bare_days": 59,
+   "evidence": {
+    "optical_dates": [
+     "2023-04-01",
+     "2023-04-06",
+     "2023-04-09",
+     "2023-04-11",
+     "2023-04-13",
+     "2023-04-14",
+     "2023-04-26",
+     "2023-05-01"
+    ],
+    "cdl_year_label": {
+     "2023": "Soybeans"
+    },
+    "method": "ndvi_and_cdl",
+    "ndvi_threshold": 0.35,
+    "gaps": [
+     "cloud-masked / low-valid-fraction dates omitted"
+    ]
+   }
+  },
+  {
+   "start": "2023-10-16",
+   "end": "2024-04-24",
+   "bare_days": 192,
+   "evidence": {
+    "optical_dates": [
+     "2023-10-16",
+     "2023-10-18",
+     "2023-10-21",
+     "2023-10-23",
+     "2023-11-10",
+     "2023-11-15",
+     "2023-11-22",
+     "2023-11-23"
+    ],
+    "cdl_year_label": {
+     "2023": "Soybeans",
+     "2024": "Corn"
+    },
+    "method": "ndvi_and_cdl",
+    "ndvi_threshold": 0.35,
+    "gaps": [
+     "cloud-masked / low-valid-fraction dates omitted",
+     "no valid optical observation 2023-11-23 to 2024-04-05 (snow/cloud); assumed bare"
+    ]
+   }
+  },
+  {
+   "start": "2024-10-22",
+   "end": "2025-06-02",
+   "bare_days": 224,
+   "evidence": {
+    "optical_dates": [
+     "2024-10-22",
+     "2024-10-25",
+     "2024-11-01",
+     "2024-11-29",
+     "2025-04-07",
+     "2025-04-15",
+     "2025-04-26",
+     "2025-05-10"
+    ],
+    "cdl_year_label": {
+     "2024": "Corn",
+     "2025": "Soybeans"
+    },
+    "method": "ndvi_and_cdl",
+    "ndvi_threshold": 0.35,
+    "gaps": [
+     "cloud-masked / low-valid-fraction dates omitted",
+     "no valid optical observation 2024-11-29 to 2025-04-02 (snow/cloud); assumed bare"
+    ]
+   }
+  },
+  {
+   "start": "2025-10-04",
+   "end": "2025-11-23",
+   "bare_days": 51,
+   "evidence": {
+    "optical_dates": [
+     "2025-10-04",
+     "2025-10-07",
+     "2025-10-10",
+     "2025-10-17",
+     "2025-10-19",
+     "2025-10-20",
+     "2025-11-03",
+     "2025-11-04"
+    ],
+    "cdl_year_label": {
+     "2025": "Soybeans"
+    },
+    "method": "ndvi_and_cdl",
+    "ndvi_threshold": 0.35,
+    "gaps": [
+     "cloud-masked / low-valid-fraction dates omitted",
+     "period still open at the end of the loaded HLS series"
+    ]
+   }
+  }
+ ],
+ "sources": [
+  "HLS",
+  "CDL"
+ ],
+ "notes": "Bare = HLS NDVI below 0.35 (team default threshold) between valid observations; CDL labels give the crop on either side."
+}
