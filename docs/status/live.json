@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-16T12:09:28+09:00",
+ "generated_at": "2026-11-16T12:19:48+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -149,7 +149,7 @@
     {
      "label": "/explain (OpenAI)",
      "status": "done",
-     "detail": "4.3 s, gpt-4o-mini"
+     "detail": "5.4 s, gpt-4o-mini"
     }
    ]
   },
@@ -493,7 +493,7 @@
   {
    "name": "/explain (OpenAI)",
    "status": "done",
-   "detail": "4.3 s, gpt-4o-mini"
+   "detail": "5.4 s, gpt-4o-mini"
   }
  ],
  "stretch": [
