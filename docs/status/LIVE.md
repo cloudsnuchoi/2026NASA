@@ -1,4 +1,4 @@
-# 아몰라 실시간 현황 · 17:12 KST
+# 아몰라 실시간 현황 · 17:23 KST
 
 일정: 1차 제출 21:00 (지남) · 동결 23:00 (지남) · 최종 제출 23:30 (지남)
 최종 제출 23:30 KST까지 **0시간 0분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
@@ -124,7 +124,7 @@
 | 김윤성 | 21:55 | — |
 | 고지은 | 21:04 | — |
 | 하지민 | 22:38 | — |
-| 강다은 | 17:18 | — |
+| 강다은 | — | — |
 | Hylē | — | 23:54 |
 
 ## 최근 머지된 PR
