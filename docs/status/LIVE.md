@@ -1,4 +1,4 @@
-# 아몰라 실시간 현황 · 22:37 KST
+# 아몰라 실시간 현황 · 22:42 KST
 
 일정: 1차 제출 21:00 (지남) · 동결 23:00 (지남) · 최종 제출 23:30 (지남)
 최종 제출 23:30 KST까지 **0시간 0분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
@@ -120,10 +120,10 @@
 ## 사람 (마지막 활동, KST)
 | 이름 | Mattermost | 레포 |
 | --- | --- | --- |
-| 김우찬 | 22:40 | — |
+| 김우찬 | — | — |
 | 김윤성 | — | — |
 | 고지은 | — | — |
-| 하지민 | 22:38 | — |
+| 하지민 | — | — |
 | 강다은 | — | — |
 | Hylē | — | 23:54 |
 

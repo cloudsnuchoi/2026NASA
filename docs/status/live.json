@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-16T22:37:23+09:00",
+ "generated_at": "2026-11-16T22:42:33+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -389,7 +389,7 @@
   {
    "name": "김우찬",
    "user": "woochan",
-   "mattermost_last": "22:40",
+   "mattermost_last": null,
    "repo_last": null
   },
   {
@@ -407,7 +407,7 @@
   {
    "name": "하지민",
    "user": "jimin",
-   "mattermost_last": "22:38",
+   "mattermost_last": null,
    "repo_last": null
   },
   {
