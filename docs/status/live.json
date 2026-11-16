@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-16T21:51:00+09:00",
+ "generated_at": "2026-11-16T21:56:10+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -395,7 +395,7 @@
   {
    "name": "김윤성",
    "user": "yoonsung",
-   "mattermost_last": "21:55",
+   "mattermost_last": null,
    "repo_last": null
   },
   {
