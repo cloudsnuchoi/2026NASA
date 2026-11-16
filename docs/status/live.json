@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-16T11:18:05+09:00",
+ "generated_at": "2026-11-16T11:23:15+09:00",
  "deadline": "2026-11-15T23:30:00+09:00",
  "schedule": [
   {
@@ -280,7 +280,7 @@
   {
    "id": "infra",
    "name": "인프라·봇",
-   "pct": 100,
+   "pct": 83,
    "items": [
     {
      "label": "Mattermost",
@@ -304,8 +304,8 @@
     },
     {
      "label": "main CI 최근 성공",
-     "status": "done",
-     "detail": "success"
+     "status": "progress",
+     "detail": null
     },
     {
      "label": "live 현황 (tmux live)",
@@ -425,7 +425,8 @@
  ],
  "blockers": [],
  "next": [
-  "MATLAB: jieun 추가: jieun_slide_fig3"
+  "MATLAB: jieun 추가: jieun_slide_fig3",
+  "인프라·봇: main CI 최근 성공"
  ],
  "merged_prs": [
   {
