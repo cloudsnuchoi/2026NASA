@@ -1,4 +1,4 @@
-# 아몰라 실시간 현황 · 21:25 KST
+# 아몰라 실시간 현황 · 21:35 KST
 
 일정: 1차 제출 21:00 (지남) · 동결 23:00 (지남) · 최종 제출 23:30 (지남)
 최종 제출 23:30 KST까지 **0시간 0분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
@@ -38,7 +38,7 @@
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
-- ✅ /explain (OpenAI) — 4.8 s, gpt-4o-mini
+- ✅ /explain (OpenAI) — 6.2 s, gpt-4o-mini
 
 ## MATLAB 93%
 - ✅ 윤성 1차 CSV: drought_2012_county.csv
@@ -85,7 +85,7 @@
 - ✅ GEOS-S2S 다음 시즌 분포 — 앙상블 멤버 10
 - ✅ NEX-GDDP 2030년대 — 모델 2개
 - ✅ Monte Carlo·CVaR — 전략별 P50 {'B': 0.574, 'C': 0.556, 'D': 0.535, 'A': 0.494}
-- ✅ /explain (OpenAI) — 4.8 s, gpt-4o-mini
+- ✅ /explain (OpenAI) — 6.2 s, gpt-4o-mini
 
 ## 에이전트 레인 (tmux)
 | 세션 | 모델 | 하는 일 | 상태 | 기다리는 것 | 마지막 활동 |
