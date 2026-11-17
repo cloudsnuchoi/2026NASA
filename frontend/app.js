@@ -109,7 +109,15 @@
     }).catch(() => {});
   }
 
+  // Client-side response timing per returned JSON object (engine-evidence strip; display only).
+  const TIMING = new WeakMap();
   async function api(path, opts = {}) {
+    const t0 = performance.now();
+    const j = await apiRaw(path, opts);
+    if (j && typeof j === "object") TIMING.set(j, { ms: performance.now() - t0, path });
+    return j;
+  }
+  async function apiRaw(path, opts = {}) {
     if (STATIC) return snapshot(path, opts);
     const r = await fetch(API + path, {
       method: opts.body ? "POST" : "GET",
@@ -412,7 +420,91 @@
     show("page-results");
     renderTier1(q, d);
     renderTier2(d, fid);
+    renderEvidence(q, d, fid, reuse);
   }
+
+  // ------------------------------------------------------------------ engine-evidence strip (display only: fields the API already returns)
+  const secs = (t) => (t ? `${(t.ms / 1000).toFixed(2)} s` : "—");
+  function renderEvidence(q, d, fid, reused) {
+    const el = $("#engine-evidence");
+    if (!el) return;
+    const okQ = q && !q.__error, sim = Array.isArray(d) ? d[0] : null, prof = Array.isArray(d) ? d[1] : null, bt = Array.isArray(d) ? d[2] : null;
+    if (!okQ && !sim && fid) { el.innerHTML = ""; return; }
+    const tQ = okQ ? TIMING.get(q) : null, tS = sim ? TIMING.get(sim) : null;
+    const how = STATIC ? "Static snapshot from the ART FARM engine" : "Computed live by ART FARM engine";
+    const tier = sim ? "Quick screen + Deep analysis" : "Quick screen";
+    // The API does not report cache state; sub-second Quick responses come from the server's disk cache of upstream calls.
+    const qCached = STATIC ? "snapshot" : reused ? "Y* (fetched on the map step)" : tQ ? (tQ.ms < 1000 ? "Y*" : "N*") : "—";
+    const head = [
+      `<strong class="text-amber-300">${how}</strong>`,
+      `tier: <strong>${tier}</strong>`,
+      okQ ? `generated ${esc(q.generated_utc || "—")}` : "",
+      okQ ? `Quick ${secs(tQ)}${STATIC ? " (snapshot load)" : reused ? " (map step)" : ""}` : "",
+      sim ? `Deep ${secs(tS)}${STATIC ? " (snapshot load)" : sim.latency_ms != null ? ` (server ${fmt(sim.latency_ms, 1)} ms)` : ""}` : "",
+      okQ ? `cached ${qCached}` : "Quick screen result unavailable (see below)",
+    ].filter(Boolean).join(" · ");
+    const subs = [];
+    if (okQ) subs.push(`Quick screen: FAO-56 screening from NASA POWER daily ${esc(q.climate_history?.period?.replace("-", "–") || "")} + USGS 3DEP at your field centroid (not Monte Carlo)`);
+    if (sim) subs.push(`Deep analysis (pilot field ${esc(fid)}): ${fmt(sim.n)} resampled seasons Monte Carlo · P10–P90 · CVaR10 · seed ${esc(sim.seed)} · run ${esc(sim.run_id)}`);
+    const rows = [];
+    const add = (call, source, detail) => rows.push(`<tr class="border-t border-emerald-400/15 align-top"><td class="py-1 pr-3 font-bold whitespace-nowrap">${esc(call)}</td><td class="py-1 pr-3">${esc(source || "information gap")}</td><td class="py-1 text-emerald-100/75">${esc(detail || "")}</td></tr>`);
+    if (okQ) {
+      add("POST /quick · geometry", q.geometry?.method, q.geometry ? `${fmt(q.geometry.area_ha, 2)} ha · ${q.geometry.vertex_count ?? "—"} vertices` : "");
+      add("POST /quick · elevation", q.elevation?.source, q.elevation ? `${fmt(q.elevation.value_m, 1)} m · ${q.elevation.point || ""}` : "");
+      add("POST /quick · climate history", q.climate_history?.source, q.climate_history ? `${q.climate_history.period} · ET₀ ${q.climate_history.et0_method || ""} · days missing inputs ${q.climate_history.days_missing_inputs ?? "—"}` : "");
+      add("POST /quick · forecast", q.forecast_anomaly?.source, q.forecast_anomaly ? `${q.forecast_anomaly.n_periods ?? "—"} periods · baseline ${q.forecast_anomaly.baseline || ""}` : "");
+      add("POST /quick · projection", q.climate_projection?.source, Object.keys(q.climate_projection?.periods || {}).join(", "));
+      (q.sources || []).forEach((s) => add("POST /quick · reference", s, ""));
+    }
+    if (sim) {
+      add("POST /simulate", `Monte Carlo water balance n=${sim.n}, seed=${sim.seed}`, `${sim.run_id} · seasons ${sim.period?.start || ""} → ${sim.period?.end || ""} · ${sim.cvar_definition || ""}`);
+      if (sim.inputs?.baseline_rotation_source) add("POST /simulate · baseline rotation", sim.inputs.baseline_rotation_source, sim.inputs.baseline_rotation || "");
+      if (sim.inputs?.openet_calibration) add("POST /simulate · ET calibration", "OpenET", `${sim.inputs.openet_calibration.years || ""} · ${sim.inputs.openet_calibration.precip_for_calibration || ""}`);
+      if (sim.inputs?.nldas_check) add("POST /simulate · soil-water check", "NLDAS-2", sim.inputs.nldas_check.variable);
+      (sim.assumptions || []).forEach((a) => add("POST /simulate · assumption", a.source, a.value == null ? a.item : `${a.item}: ${typeof a.value === "object" ? JSON.stringify(a.value) : a.value}${a.unit && a.unit !== "-" ? " " + a.unit : ""}`));
+      if (prof) add(`GET /field/${fid}/profile`, "USDA CSB / CDL / gSSURGO / HLS via model_api", prof.region_label || "");
+      add(`GET /validation/backtest`, bt ? "2012 drought backtest" : "information gap", bt ? `${(bt.results || []).length} strategies` : "");
+    }
+    const deepBtn = !fid
+      ? `<button type="button" data-run-nearest-pilot class="min-h-[36px] px-3.5 rounded-xl bg-amber-300 hover:bg-amber-200 text-[#173a2b] text-xs font-extrabold whitespace-nowrap">Run Deep analysis on a pilot field →</button>`
+      : "";
+    el.innerHTML = `<div class="bg-[#0f291e] text-emerald-50 rounded-2xl px-5 py-3 shadow-lg border border-amber-300/40" data-panel="engine-evidence">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="text-xs sm:text-sm leading-snug" title="* cached is inferred client-side: the API does not report cache state; sub-second Quick responses come from the server's disk cache of upstream calls. Response times are measured in your browser with performance.now().">${head}</div>
+        ${deepBtn}
+      </div>
+      ${subs.map((s) => `<div class="text-[11px] text-emerald-200/85 mt-1">${s}</div>`).join("")}
+      <details class="mt-2 text-[11px]"><summary class="cursor-pointer font-bold text-amber-200 select-none">Data calls for this result (${rows.length})</summary>
+        <div class="overflow-x-auto mt-1.5"><table class="w-full text-left"><thead><tr class="text-emerald-300"><th class="py-1 pr-3">Call</th><th class="py-1 pr-3">Source</th><th class="py-1">Detail</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>
+        <p class="mt-1 text-emerald-200/70">Times measured in the browser (performance.now()); * cached is inferred, the API does not report it.</p>
+      </details>
+    </div>`;
+  }
+  async function runNearestPilot(btn) {
+    btn.disabled = true; btn.textContent = "Finding the nearest pilot field…";
+    try {
+      const c = centroid(state.vertices);
+      let cands = state.fields;
+      if (STATIC) cands = Object.keys(COUNTY).map((fips) => state.fields.find((x) => x.county_fips === fips)).filter(Boolean); // snapshot covers presets only
+      let pts = [];
+      try {
+        const fl = await api("/fields");
+        const byId = Object.fromEntries((fl.fields || []).map((f) => [f.field_id, f]));
+        pts = cands.map((f) => [f, byId[f.field_id]?.lon ?? centroid(f.ring)[0], byId[f.field_id]?.lat ?? centroid(f.ring)[1]]);
+      } catch { pts = cands.map((f) => [f, ...centroid(f.ring)]); }
+      const R = Math.PI / 180, hav = (lo1, la1, lo2, la2) => { const a = Math.sin(((la2 - la1) * R) / 2) ** 2 + Math.cos(la1 * R) * Math.cos(la2 * R) * Math.sin(((lo2 - lo1) * R) / 2) ** 2; return 12742 * Math.asin(Math.sqrt(a)); };
+      const best = pts.map(([f, lo, la]) => [f, hav(c[0], c[1], lo, la)]).sort((a, b) => a[1] - b[1])[0];
+      if (!best) throw new Error("pilot fields not loaded");
+      toast(`Nearest pilot field: ${COUNTY[best[0].county_fips] || best[0].county_fips} · ${fmt(best[1])} km away`, 3500);
+      state.vertices = best[0].ring.slice(); state.preset = best[0]; state.hitField = best[0];
+      if (map) redraw();
+      run();
+    } catch (e) {
+      btn.disabled = false; btn.textContent = "Run Deep analysis on a pilot field →";
+      toast("Pilot fields unavailable — " + friendly(e.message), 5000);
+    }
+  }
+  document.addEventListener("click", (e) => { const b = e.target.closest("[data-run-nearest-pilot]"); if (b) runNearestPilot(b); });
   function simplify(pts, n) { const s = Math.ceil(pts.length / n); return pts.filter((_, i) => i % s === 0); }
 
   // ------------------------------------------------------------------ Tier 1 → mockup results dashboard
