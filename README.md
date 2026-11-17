@@ -11,6 +11,9 @@
 <a href="https://cloudsnuchoi.github.io/2026NASA/demo/"><img src="https://img.shields.io/badge/Static%20backup-455a64?style=for-the-badge" alt="Static backup"/></a>
 </p>
 
+<p><b>Live engine:</b> <a href="https://watts-astrology-asus-blessed.trycloudflare.com">https://watts-astrology-asus-blessed.trycloudflare.com</a><br/>
+<sub>If the live URL is down, use the <a href="https://cloudsnuchoi.github.io/2026NASA/demo/">Static backup</a> (auto-detects the current live URL).</sub></p>
+
 <a href="https://watts-astrology-asus-blessed.trycloudflare.com"><img src="docs/assets/hero.png" width="90%" alt="ART FARM results dashboard (live engine, Story County IA pilot field)"/></a>
 
 </div>
