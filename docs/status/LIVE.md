@@ -1,4 +1,4 @@
-# 아몰라 실시간 현황 · 09:10 KST
+# 아몰라 실시간 현황 · 09:15 KST
 
 일정: 1차 제출 21:00 (지남) · 동결 23:00 (지남) · 최종 제출 23:30 (지남)
 최종 제출 23:30 KST까지 **0시간 0분** 남음. 팀 채팅: https://process-investigators-dean-unified.trycloudflare.com/ · 데모: https://watts-astrology-asus-blessed.trycloudflare.com
@@ -10,7 +10,7 @@
 | AI 모델 | 100% | 5/5 |
 | MATLAB | 93% | 14/15 |
 | UI | 100% | 7/7 |
-| 인프라·봇 | 100% | 6/6 |
+| 인프라·봇 | 83% | 5/6 |
 
 ## 데이터 100%
 - ✅ POWER 일별 12주 1995–2025
@@ -66,12 +66,12 @@
 - ✅ 화면 캡처 docs/screens
 - ✅ 공개 URL QA (docs/QA-FINAL.md)
 
-## 인프라·봇 100%
+## 인프라·봇 83%
 - ✅ Mattermost
 - ✅ 봇 (tmux bot)
 - ✅ 러너 (tmux runner)
 - ✅ SSH 공개키 자동 등록 (keywatch) — root 프로세스로 확인
-- ✅ main CI 최근 성공 — success
+- 🟡 main CI 최근 성공
 - ✅ live 현황 (tmux live)
 
 ## 막힌 점
@@ -79,6 +79,7 @@
 
 ## 다음 할 일
 1. MATLAB: jieun 추가: jieun_slide_fig3
+2. 인프라·봇: main CI 최근 성공
 
 ## AI 모델
 - ✅ Prithvi 작물 분류 — crop_pred=Corn, agreement_with_cdl=0.19
