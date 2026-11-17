@@ -5,7 +5,7 @@ window.MockupV8 = (() => {
 
   const PRESETS = {
     iowa: {
-      name: '아이오와주 에임스 (Ames, Iowa · Corn Belt Center)',
+      name: 'Ames, Iowa (Corn Belt center)',
       lat: 42.0308,
       lon: -93.6319,
       vertices: [
@@ -16,7 +16,7 @@ window.MockupV8 = (() => {
       ]
     },
     nebraska: {
-      name: '네브래스카주 그랜드아일랜드 (Grand Island, Nebraska)',
+      name: 'Grand Island, Nebraska',
       lat: 40.9264,
       lon: -98.3420,
       vertices: [
@@ -27,7 +27,7 @@ window.MockupV8 = (() => {
       ]
     },
     illinois: {
-      name: '일리노이주 샴페인 (Champaign, Illinois)',
+      name: 'Champaign, Illinois',
       lat: 40.1164,
       lon: -88.2434,
       vertices: [
@@ -42,20 +42,20 @@ window.MockupV8 = (() => {
   // UN FAO Paper No. 56 & No. 33 + USDA ERS + NRCS SSURGO Crop Parameters
   const CROP_DB = {
     Corn: {
-      id: 'Corn', name: 'Corn', korName: '옥수수', fullLabel: '옥수수 (Corn)', icon: '🌽',
-      desc: '높은 바이오매스 및 수익 잠재력 ($4.60/bu, 기준 200 bu/ac). 수분(Kc=1.08, Ky=1.25) 및 질소 요구량(185 kg N/ha)이 높음.',
+      id: 'Corn', name: 'Corn', korName: 'Corn', fullLabel: 'Corn', icon: '🌽',
+      desc: 'High biomass and revenue potential ($4.60/bu, 200 bu/ac baseline). High water (Kc=1.08, Ky=1.25) and nitrogen demand (185 kg N/ha).',
       kc: 1.08, ky: 1.25, baseYield: 200, price: 4.60, cost: 680, c_in: 1.00, nFix: 0, nReq: 185,
       color: '#eab308'
     },
     Soy: {
-      id: 'Soy', name: 'Soybean', korName: '대두(콩)', fullLabel: '대두 (Soybean)', icon: '🫘',
-      desc: '뿌리혹박테리아 공생 질소고정(65 kg N/ha)으로 화학비료 비용 절감 및 지력 회복 (Kc=0.86, Ky=0.85, $11.50/bu).',
+      id: 'Soy', name: 'Soybean', korName: 'Soybean', fullLabel: 'Soybean', icon: '🫘',
+      desc: 'Root-nodule symbiotic N fixation (65 kg N/ha) cuts fertilizer cost and restores soil fertility (Kc=0.86, Ky=0.85, $11.50/bu).',
       kc: 0.86, ky: 0.85, baseYield: 62, price: 11.50, cost: 450, c_in: 1.08, nFix: 65, nReq: -55,
       color: '#65a30d'
     },
     Wheat: {
-      id: 'Wheat', name: 'Wheat', korName: '밀', fullLabel: '밀 (Wheat)', icon: '🌾',
-      desc: '뛰어난 내한성·내건성(Kc=0.75, Ky=0.65) 및 높은 유기물 환원(c_in=1.22)으로 표토 유실 방지 및 수분 보전.',
+      id: 'Wheat', name: 'Wheat', korName: 'Wheat', fullLabel: 'Wheat', icon: '🌾',
+      desc: 'Strong cold and drought tolerance (Kc=0.75, Ky=0.65) and high residue return (c_in=1.22) protect topsoil and conserve moisture.',
       kc: 0.75, ky: 0.65, baseYield: 80, price: 6.20, cost: 310, c_in: 1.22, nFix: 15, nReq: 90,
       color: '#d97706'
     }
@@ -81,7 +81,7 @@ window.MockupV8 = (() => {
     },
     dem: {
       minElev_m: 276.4, medianElev_m: 280.1, maxElev_m: 284.2, slope_pct: 1.80,
-      source: 'USGS 3DEP 지형 모델 (콘벨트 표준 수치표고)',
+      source: 'USGS 3DEP terrain model (Corn Belt reference elevation)',
       gridX: [], gridY: [], gridZ: []
     },
     env: {
@@ -97,7 +97,7 @@ window.MockupV8 = (() => {
         temp_C: 10.09, precip_mm: 838.0, evap_mm: 647.0,
         ndvi: 0.754, soilMoisture: 0.634, droughtRiskPct: 30
       },
-      source: 'NASA POWER 10년(2016~2025) 콘벨트 기준 시계열'
+      source: 'NASA POWER 10-year (2016–2025) Corn Belt reference series'
     },
     proj: {
       shortTermYears: [2026, 2027, 2028],
@@ -107,14 +107,14 @@ window.MockupV8 = (() => {
         evap_mm: [678, 682, 687]
       },
       epochs: {
-        names: ['과거·현재(실측)', '단기(2026~2029)', '2030년대(예측)'],
+        names: ['Past–present (observed)', 'Near-term (2026–2029)', '2030s (scenario)'],
         temp_C: [10.09, 10.45, 10.95],
         precip_mm: [838.0, 824.0, 808.0],
         evap_mm: [647.0, 681.0, 712.0]
       },
       slopes: { temp: 0.080, precip: -3.0, evap: 6.5 },
       nwsAnomaly_C: 0.15,
-      source: '과거 10년 추세 회귀 + 미국 기상청(NOAA/NWS) & Open-Meteo CMIP6 결합 모델'
+      source: '10-year trend regression + NOAA/NWS & Open-Meteo CMIP6 blended model'
     },
     selectedCrops: ['Corn', 'Soy', 'Wheat'],
     scenarios: [],
@@ -167,7 +167,7 @@ window.MockupV8 = (() => {
         state.dem.medianElev_m = medE;
         state.dem.maxElev_m = maxE;
         state.dem.slope_pct = slope;
-        state.dem.source = 'USGS 3DEP 실시간 API 응답 연동 완료';
+        state.dem.source = 'USGS 3DEP live API response';
       }
     } catch (e) {
       // Keep deterministic USGS 3DEP fallback
@@ -200,7 +200,7 @@ window.MockupV8 = (() => {
     let evapSeries = FALLBACK_EVAP.map(v => Math.round(Math.max(500, v - latShift * 12)));
     let ndviSeries = [...FALLBACK_NDVI];
     let soilSeries = [...FALLBACK_SOIL];
-    let nasaSource = 'NASA POWER 10년(2016~2025) 콘벨트 표준 시계열';
+    let nasaSource = 'NASA POWER 10-year (2016–2025) Corn Belt reference series';
 
     try {
       const nasaUrl = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M,T2M_MAX,T2M_MIN,PRECTOTCORR,ALLSKY_SFC_SW_DWN,GWETROOT&community=ag&longitude=${pinLon.toFixed(4)}&latitude=${pinLat.toFixed(4)}&start=20160101&end=20251231&format=JSON`;
@@ -209,7 +209,7 @@ window.MockupV8 = (() => {
         const p = nasaRaw.properties.parameter;
         const keys = Object.keys(p.T2M || {});
         if (keys.length > 300) {
-          nasaSource = 'NASA POWER 실시간 원격탐사 API (2016~2025)';
+          nasaSource = 'NASA POWER live API (2016–2025)';
         }
       }
     } catch (e) {
@@ -284,7 +284,7 @@ window.MockupV8 = (() => {
       shortTermYears: futureYears,
       shortTerm: { temp_C: shortTemp, precip_mm: shortPrec, evap_mm: shortEvap },
       epochs: {
-        names: ['과거·현재(실측)', '단기(2026~2029)', '2030년대(예측)'],
+        names: ['Past–present (observed)', 'Near-term (2026–2029)', '2030s (scenario)'],
         temp_C: epTemp,
         precip_mm: epPrec,
         evap_mm: epEvap
@@ -295,7 +295,7 @@ window.MockupV8 = (() => {
         evap: +slopeEvapPerYr.toFixed(2)
       },
       nwsAnomaly_C,
-      source: '과거 10년 추세 회귀(40%) + 미국 기상청(NOAA/NWS) & Open-Meteo CMIP6(MRI_AGCM3_2_S, 60%) 결합 모델'
+      source: '10-year trend regression (40%) + NOAA/NWS & Open-Meteo CMIP6 (MRI_AGCM3_2_S, 60%) blended model'
     };
 
     // -----------------------------------------------------------------------
@@ -322,16 +322,16 @@ window.MockupV8 = (() => {
       const [c1, c2] = normCrops;
       const hasWheat = (c1 === 'Wheat' || c2 === 'Wheat');
       rotDefs = [
-        { seq: [c1, c2], name: '교호 윤작 시나리오 1', hasCover: hasWheat, rotBump: 1.09 },
-        { seq: [c2, c1], name: '교호 윤작 시나리오 2', hasCover: hasWheat, rotBump: 1.09 }
+        { seq: [c1, c2], name: 'Alternating rotation 1', hasCover: hasWheat, rotBump: 1.09 },
+        { seq: [c2, c1], name: 'Alternating rotation 2', hasCover: hasWheat, rotBump: 1.09 }
       ];
     } else {
       // Exact 4 candidate 3-step sequences from FieldShift_LiveAPI_Engineeee.m (Lines 626-637)
       rotDefs = [
-        { seq: ['Corn', 'Soy', 'Wheat'], name: '물 절약·균형 윤작', hasCover: false, rotBump: 1.11 },
-        { seq: ['Soy', 'Wheat', 'Corn'], name: '질소 고정·토양 재생 윤작', hasCover: true, rotBump: 1.10 },
-        { seq: ['Wheat', 'Corn', 'Soy'], name: '수분 방어·표토 보전 윤작', hasCover: true, rotBump: 1.10 },
-        { seq: ['Corn', 'Soy', 'Corn'],  name: '수익 집중 교호 윤작', hasCover: false, rotBump: 1.08 }
+        { seq: ['Corn', 'Soy', 'Wheat'], name: 'Water-saving balanced rotation', hasCover: false, rotBump: 1.11 },
+        { seq: ['Soy', 'Wheat', 'Corn'], name: 'N-fixing soil-building rotation', hasCover: true, rotBump: 1.10 },
+        { seq: ['Wheat', 'Corn', 'Soy'], name: 'Moisture-protecting topsoil rotation', hasCover: true, rotBump: 1.10 },
+        { seq: ['Corn', 'Soy', 'Corn'],  name: 'Return-focused alternating rotation', hasCover: false, rotBump: 1.08 }
       ];
     }
 
@@ -390,12 +390,12 @@ window.MockupV8 = (() => {
 
       let korSeqStr = seq.map(c => CROP_DB[c].korName).join(' → ');
       if (d.hasCover) {
-        korSeqStr += ' (+ 겨울 피복작물)';
+        korSeqStr += ' (+ winter cover crop)';
       }
 
-      const proText = `연간 작물 물 요구량 ${Math.round(ETm_mm)}mm (단작 대비 ${waterDiff_pct >= 0 ? '+' : ''}${waterDiff_pct}%), 예상 순수익 $${profit_usd.toLocaleString()}, 유기물 ${somDiff_pct >= 0 ? '+' : ''}${somDiff_pct}% 변화`;
-      const conText = `기상청 2030년대 예측 하에서 수분 부족률 ${(waterDeficitRatio * 100).toFixed(1)}% 및 경사도(${slope}%) 유출 관리 필요`;
-      const rxText = `고도 ${state.dem.minElev_m.toFixed(1)}~${state.dem.maxElev_m.toFixed(1)}m 등고선 방향 파종 및 질소 고정량(${Math.round(meanNFix)}kg N/ha) 반영 시비 처방`;
+      const proText = `Annual crop water demand ${Math.round(ETm_mm)} mm (${waterDiff_pct >= 0 ? '+' : ''}${waterDiff_pct}% vs monoculture), est. net return $${profit_usd.toLocaleString()}, organic matter ${somDiff_pct >= 0 ? '+' : ''}${somDiff_pct}%`;
+      const conText = `Under the 2030s NWS/CMIP6 scenario: water deficit ratio ${(waterDeficitRatio * 100).toFixed(1)}%; manage runoff on the ${slope}% slope`;
+      const rxText = `Plant along contours (elevation ${state.dem.minElev_m.toFixed(1)}–${state.dem.maxElev_m.toFixed(1)} m) and adjust N rate for fixation (${Math.round(meanNFix)} kg N/ha)`;
 
       return {
         resultNum: idx + 1,
@@ -403,7 +403,7 @@ window.MockupV8 = (() => {
         rotName: d.name,
         rotSeq: korSeqStr,
         rotNames: korSeqStr,
-        title: `[${idx + 1}번 결과] ${d.name}`,
+        title: `[Result ${idx + 1}] ${d.name}`,
         hasCover: d.hasCover,
         ETm_mm: Math.round(ETm_mm),
         waterIdx,
@@ -535,7 +535,7 @@ window.MockupV8 = (() => {
       netNitrogen_kg_ha,
       nitrogenLimit_kg_ha,
       nFixedCredit_kg_ha,
-      solverName: 'FieldShift V8 심플렉스 제약 투영 솔버 (fminsearch + Simplex Projection)',
+      solverName: 'FieldShift V8 constrained simplex-projection solver (fminsearch + simplex projection)',
       summaryText
     };
     state.activeTabIdx = 0;
@@ -549,7 +549,7 @@ window.MockupV8 = (() => {
     const totalAc = (state.geo.area_m2 * 0.000247105).toFixed(1);
 
     document.getElementById('results-title').textContent =
-      `맞춤형 윤작 시나리오 추천 결과 (${state.scenarios.length}개 시나리오 · 순위 미적용)`;
+      `Rotation scenarios for your field (${state.scenarios.length} scenarios · unranked)`;
 
     // Left-middle read-only selected crops
     const ro = document.getElementById('readonly-crops-list');
@@ -558,7 +558,7 @@ window.MockupV8 = (() => {
       const crop = CROP_DB[c];
       const tag = document.createElement('span');
       tag.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#173a2b] text-white text-xs font-bold shadow-sm';
-      tag.textContent = `${crop.icon} ${crop.korName} (${crop.name})`;
+      tag.textContent = `${crop.icon} ${crop.name}`;
       ro.appendChild(tag);
     });
 
@@ -586,16 +586,16 @@ window.MockupV8 = (() => {
       epBody.appendChild(tr);
     });
     document.getElementById('proj-slopes-note').textContent =
-      `연간 변화 추세: 기온 +${state.proj.slopes.temp}°C/년 | 강우 ${state.proj.slopes.precip >= 0 ? '+' : ''}${state.proj.slopes.precip}mm/년 | 증발산 +${state.proj.slopes.evap}mm/년 (기상청 아노말리 +${state.proj.nwsAnomaly_C}°C)`;
+      `Annual trend: temp +${state.proj.slopes.temp} °C/yr | precip ${state.proj.slopes.precip >= 0 ? '+' : ''}${state.proj.slopes.precip} mm/yr | ET +${state.proj.slopes.evap} mm/yr (NWS anomaly +${state.proj.nwsAnomaly_C} °C)`;
 
     // STEP 5 Optimal Allocation Card
     const opt = state.optAlloc;
     document.getElementById('opt-alloc-text').textContent = opt.summaryText;
-    document.getElementById('opt-alloc-profit').textContent = `$${opt.totalProfit_usd.toLocaleString()}/년 ($${opt.profitPerAcre_usd}/acre)`;
-    document.getElementById('opt-alloc-water').textContent = `${opt.waterUsed_mm} mm (상한 ${opt.waterLimit_mm} mm)`;
-    document.getElementById('opt-alloc-nitrogen').textContent = `${opt.netNitrogen_kg_ha} kg N/ha (상한 ${opt.nitrogenLimit_kg_ha} kg)`;
-    document.getElementById('opt-alloc-ncredit').textContent = `-${opt.nFixedCredit_kg_ha} kg N/ha 절감`;
-    document.getElementById('opt-alloc-solver').textContent = `솔버: ${opt.solverName}`;
+    document.getElementById('opt-alloc-profit').textContent = `$${opt.totalProfit_usd.toLocaleString()}/yr ($${opt.profitPerAcre_usd}/acre)`;
+    document.getElementById('opt-alloc-water').textContent = `${opt.waterUsed_mm} mm (cap ${opt.waterLimit_mm} mm)`;
+    document.getElementById('opt-alloc-nitrogen').textContent = `${opt.netNitrogen_kg_ha} kg N/ha (cap ${opt.nitrogenLimit_kg_ha} kg)`;
+    document.getElementById('opt-alloc-ncredit').textContent = `-${opt.nFixedCredit_kg_ha} kg N/ha saved`;
+    document.getElementById('opt-alloc-solver').textContent = `Solver: ${opt.solverName}`;
 
     const barEl = document.getElementById('opt-alloc-bar');
     barEl.innerHTML = '';
@@ -617,7 +617,7 @@ window.MockupV8 = (() => {
       btn.className = active
         ? 'px-4 py-2.5 rounded-xl bg-[#173a2b] text-white text-xs font-extrabold shadow-md transition'
         : 'px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-emerald-50 text-[#173a2b] border border-slate-200 text-xs font-bold transition';
-      btn.textContent = `[${sc.resultNum}번 결과] ${sc.rotName}`;
+      btn.textContent = `[Result ${sc.resultNum}] ${sc.rotName}`;
       btn.addEventListener('click', () => {
         state.activeTabIdx = idx;
         renderResultsDashboard();
@@ -627,26 +627,26 @@ window.MockupV8 = (() => {
 
     // Active Scenario Details
     const sc = state.scenarios[state.activeTabIdx];
-    document.getElementById('scen-badge').textContent = `[${sc.resultNum}번 결과] (총 ${state.scenarios.length}개 시나리오 · 순위 미적용)`;
+    document.getElementById('scen-badge').textContent = `[Result ${sc.resultNum}] (${state.scenarios.length} scenarios total · unranked)`;
     const coverBadge = document.getElementById('scen-cover-badge');
-    coverBadge.textContent = sc.hasCover ? '🌱 겨울 피복작물 포함 (토양 재생·수분 보전)' : '⚡ 주작물 교호 윤작';
+    coverBadge.textContent = sc.hasCover ? '🌱 Includes winter cover crop (soil building · moisture conservation)' : '⚡ Main-crop alternating rotation';
     document.getElementById('scen-title').textContent = `${sc.rotName}`;
-    document.getElementById('scen-seq').textContent = `윤작 순서: ${sc.rotSeq}`;
+    document.getElementById('scen-seq').textContent = `Rotation order: ${sc.rotSeq}`;
     document.getElementById('scen-profit').textContent = `$${sc.profit_usd.toLocaleString()}`;
-    document.getElementById('scen-profit-ac').textContent = `에이커당 순수익: $${sc.netProfit_ac}/acre`;
+    document.getElementById('scen-profit-ac').textContent = `Net return per acre: $${sc.netProfit_ac}/acre`;
 
     document.getElementById('kpi-water').textContent = `${sc.ETm_mm} mm/yr`;
-    document.getElementById('kpi-water-idx').textContent = `물 사용 지수: ${sc.waterIdx}%`;
+    document.getElementById('kpi-water-idx').textContent = `Water use index: ${sc.waterIdx}%`;
     document.getElementById('kpi-wsavings').textContent = `${sc.waterDiff_pct >= 0 ? '+' : ''}${sc.waterDiff_pct}%`;
     document.getElementById('kpi-som').textContent = `${sc.somDiff_pct >= 0 ? '+' : ''}${sc.somDiff_pct}%`;
-    document.getElementById('kpi-som-idx').textContent = `유기물 지수: ${sc.somIdx}%`;
+    document.getElementById('kpi-som-idx').textContent = `Organic matter index: ${sc.somIdx}%`;
     document.getElementById('kpi-stab').textContent = `${sc.epochScores[2]}%`;
-    document.getElementById('kpi-stab-all').textContent = `현재 ${sc.epochScores[0]}% → 단기 ${sc.epochScores[1]}%`;
+    document.getElementById('kpi-stab-all').textContent = `Now ${sc.epochScores[0]}% → near-term ${sc.epochScores[1]}%`;
 
     document.getElementById('scen-pro').textContent = sc.pro;
     document.getElementById('scen-con').textContent = sc.con;
     document.getElementById('scen-rx').textContent = sc.rx;
-    document.getElementById('ba-after-label').textContent = `After · [${sc.resultNum}번 결과] ${sc.rotSeq}`;
+    document.getElementById('ba-after-label').textContent = `After · [Result ${sc.resultNum}] ${sc.rotSeq}`;
 
     // All Scenarios Table
     const allTbody = document.getElementById('all-scenarios-tbody');
@@ -658,7 +658,7 @@ window.MockupV8 = (() => {
         ? 'bg-emerald-50/90 font-bold cursor-pointer transition'
         : 'hover:bg-slate-50 cursor-pointer transition';
       tr.innerHTML = `
-        <td class="py-2.5 px-3 text-[#173a2b] font-extrabold">[${item.resultNum}번 결과]</td>
+        <td class="py-2.5 px-3 text-[#173a2b] font-extrabold">[Result ${item.resultNum}]</td>
         <td class="py-2.5 px-3">
           <div class="font-extrabold text-[#173a2b]">${item.rotName}</div>
           <div class="text-[11px] text-slate-500">${item.rotSeq}</div>
@@ -711,7 +711,7 @@ window.MockupV8 = (() => {
       const crop = CROP_DB[cropId];
       const pill = document.createElement('span');
       pill.className = 'px-2.5 py-1 rounded-md bg-emerald-950/85 text-white text-[11px] font-bold shadow border border-white/20';
-      pill.textContent = `${idx + 1}년차: ${crop.icon} ${crop.korName}`;
+      pill.textContent = `Year ${idx + 1}: ${crop.icon} ${crop.korName}`;
       badgesEl.appendChild(pill);
     });
 
@@ -768,7 +768,7 @@ window.MockupV8 = (() => {
 
   function drawTile1DemContour() {
     document.getElementById('tile1-title').textContent =
-      `① USGS 3DEP 고도 등고선 (최소 ${state.dem.minElev_m.toFixed(2)}m ~ 최대 ${state.dem.maxElev_m.toFixed(2)}m)`;
+      `① USGS 3DEP elevation contours (min ${state.dem.minElev_m.toFixed(2)} m – max ${state.dem.maxElev_m.toFixed(2)} m)`;
 
     const canvas = document.getElementById('dem-contour-canvas');
     const ctx = canvas.getContext('2d');
@@ -875,14 +875,14 @@ window.MockupV8 = (() => {
     ctx.font = 'bold 10px Inter, sans-serif';
     ctx.fillText(`${maxZ.toFixed(1)}m`, cbX + 15, padT + 9);
     ctx.fillText(`${minZ.toFixed(1)}m`, cbX + 15, padT + plotH);
-    ctx.fillText('동서 (m) [출처: USGS 3DEP]', padL + plotW / 2 - 55, H - 8);
+    ctx.fillText('East–west (m) [source: USGS 3DEP]', padL + plotW / 2 - 55, H - 8);
   }
 
   function drawTile2HydrologyChart() {
     const ctx = document.getElementById('hydrology-chart').getContext('2d');
     if (state.chartHydrology) state.chartHydrology.destroy();
 
-    const yrs = [...state.env.pastYears, ...state.proj.shortTermYears].map(y => y >= 2026 ? `${y}(예측)` : `${y}`);
+    const yrs = [...state.env.pastYears, ...state.proj.shortTermYears].map(y => y >= 2026 ? `${y} (scen.)` : `${y}`);
     const rAll = [...state.env.past.precip_mm, ...state.proj.shortTerm.precip_mm];
     const eAll = [...state.env.past.evap_mm, ...state.proj.shortTerm.evap_mm];
 
@@ -892,7 +892,7 @@ window.MockupV8 = (() => {
         labels: yrs,
         datasets: [
           {
-            label: '실측/예측 강우량 (mm)',
+            label: 'Observed / scenario precip (mm)',
             data: rAll,
             borderColor: '#2563eb',
             backgroundColor: 'rgba(37, 99, 235, 0.12)',
@@ -901,7 +901,7 @@ window.MockupV8 = (() => {
             tension: 0.25
           },
           {
-            label: '기준 증발산량 ET₀ (mm)',
+            label: 'Reference ET₀ (mm)',
             data: eAll,
             borderColor: '#dc2626',
             backgroundColor: 'rgba(220, 38, 38, 0.10)',
@@ -927,12 +927,12 @@ window.MockupV8 = (() => {
 
   function drawTile3ScenarioBarChart() {
     document.getElementById('tile3-title').textContent =
-      `③ 시나리오 비교 (순위 미적용) | 최적 배분: ${state.optAlloc.summaryText}`;
+      `③ Scenario comparison (unranked) | allocation: ${state.optAlloc.summaryText}`;
 
     const ctx = document.getElementById('scenario-bar-chart').getContext('2d');
     if (state.chartScenarioBar) state.chartScenarioBar.destroy();
 
-    const labels = state.scenarios.map(s => `${s.resultNum}번 (${s.rotName.slice(0, 6)})`);
+    const labels = state.scenarios.map(s => `#${s.resultNum} (${s.rotName.split(' ').slice(0, 2).join(' ')})`);
     const waterCol = state.scenarios.map(s => s.waterIdx);
     const stabCol = state.scenarios.map(s => s.epochScores[2]);
     const somCol = state.scenarios.map(s => s.somIdx);
@@ -943,17 +943,17 @@ window.MockupV8 = (() => {
         labels,
         datasets: [
           {
-            label: '물 사용 지수(낮을수록 절수)',
+            label: 'Water use index (lower = less water)',
             data: waterCol,
             backgroundColor: '#2e8bc0'
           },
           {
-            label: '2030년대 수확 안정성(%)',
+            label: '2030s yield stability (%)',
             data: stabCol,
             backgroundColor: '#3ca63c'
           },
           {
-            label: '토양 유기물 지수(%)',
+            label: 'Soil organic matter index (%)',
             data: somCol,
             backgroundColor: '#d98c26'
           }
@@ -979,7 +979,7 @@ window.MockupV8 = (() => {
 
     const palette = ['#2e8b38', '#1f6194', '#8c6bbf', '#cc4033'];
     const datasets = state.scenarios.map((sc, idx) => ({
-      label: `${sc.resultNum}번 결과 (${sc.rotName})`,
+      label: `Result ${sc.resultNum} (${sc.rotName})`,
       data: sc.epochScores,
       borderColor: palette[idx % palette.length],
       backgroundColor: palette[idx % palette.length],
@@ -1013,37 +1013,37 @@ window.MockupV8 = (() => {
     const ac = (state.geo.area_m2 * 0.000247105).toFixed(1);
     const lines = [];
     lines.push('========================================================================================');
-    lines.push('  FIELD SHIFT (NASA Space Apps 2026) - FieldShift_LiveAPI_Engine.m (V8) 실행 리포트');
+    lines.push('  FIELD SHIFT (NASA Space Apps 2026) - FieldShift_LiveAPI_Engine.m (V8) run report');
     lines.push('========================================================================================');
-    lines.push(`[STEP 1] 다각형 면적: ${state.geo.area_m2.toFixed(1)} m² (${ha} ha / ${ac} acres) | 둘레: ${state.geo.perimeter_m.toFixed(1)} m [기준: WGS84 타원체]`);
-    lines.push(`[STEP 1] 고도(USGS 3DEP): 최소 ${state.dem.minElev_m.toFixed(2)} m | 중앙값 ${state.dem.medianElev_m.toFixed(2)} m | 최대 ${state.dem.maxElev_m.toFixed(2)} m | 평균 경사도: ${state.dem.slope_pct.toFixed(2)}%`);
-    lines.push(`         데이터 출처: ${state.dem.source}`);
-    lines.push(`[STEP 2] 과거 10년(2016~2025) 평균 기온: ${state.env.current.temp_C.toFixed(2)} °C | 평균 강우: ${state.env.current.precip_mm.toFixed(1)} mm | 기준 증발산(ET0): ${state.env.current.evap_mm.toFixed(1)} mm | 한발 위험 연도 비율: ${state.env.current.droughtRiskPct}%`);
-    lines.push(`         데이터 출처: ${state.env.source}`);
-    lines.push(`[STEP 3] 미래 기후 전망 (${state.proj.source})`);
-    lines.push(`   - 연간 추세 기울기: 기온 +${state.proj.slopes.temp.toFixed(3)} °C/년 | 강우 ${state.proj.slopes.precip.toFixed(2)} mm/년 | 증발산 +${state.proj.slopes.evap.toFixed(2)} mm/년`);
-    lines.push(`   - 과거·현재(2016~2025): 기온 ${state.proj.epochs.temp_C[0].toFixed(2)} °C | 강우 ${state.proj.epochs.precip_mm[0].toFixed(0)} mm | 증발산 ${state.proj.epochs.evap_mm[0].toFixed(0)} mm`);
-    lines.push(`   - 단기 예측(2026~2029): 기온 ${state.proj.epochs.temp_C[1].toFixed(2)} °C | 강우 ${state.proj.epochs.precip_mm[1].toFixed(0)} mm | 증발산 ${state.proj.epochs.evap_mm[1].toFixed(0)} mm`);
-    lines.push(`   - 장기 예측(2030년대) : 기온 ${state.proj.epochs.temp_C[2].toFixed(2)} °C | 강우 ${state.proj.epochs.precip_mm[2].toFixed(0)} mm | 증발산 ${state.proj.epochs.evap_mm[2].toFixed(0)} mm`);
+    lines.push(`[STEP 1] Polygon area: ${state.geo.area_m2.toFixed(1)} m² (${ha} ha / ${ac} acres) | perimeter: ${state.geo.perimeter_m.toFixed(1)} m [WGS84 ellipsoid]`);
+    lines.push(`[STEP 1] Elevation (USGS 3DEP): min ${state.dem.minElev_m.toFixed(2)} m | median ${state.dem.medianElev_m.toFixed(2)} m | max ${state.dem.maxElev_m.toFixed(2)} m | mean slope: ${state.dem.slope_pct.toFixed(2)}%`);
+    lines.push(`         Data source: ${state.dem.source}`);
+    lines.push(`[STEP 2] Past 10 years (2016–2025) mean temp: ${state.env.current.temp_C.toFixed(2)} °C | mean precip: ${state.env.current.precip_mm.toFixed(1)} mm | reference ET (ET0): ${state.env.current.evap_mm.toFixed(1)} mm | drought-risk years: ${state.env.current.droughtRiskPct}%`);
+    lines.push(`         Data source: ${state.env.source}`);
+    lines.push(`[STEP 3] Future climate scenario (${state.proj.source})`);
+    lines.push(`   - Annual trend slope: temp +${state.proj.slopes.temp.toFixed(3)} °C/yr | precip ${state.proj.slopes.precip.toFixed(2)} mm/yr | ET +${state.proj.slopes.evap.toFixed(2)} mm/yr`);
+    lines.push(`   - Past–present (2016–2025): temp ${state.proj.epochs.temp_C[0].toFixed(2)} °C | precip ${state.proj.epochs.precip_mm[0].toFixed(0)} mm | ET ${state.proj.epochs.evap_mm[0].toFixed(0)} mm`);
+    lines.push(`   - Near-term scenario (2026–2029): temp ${state.proj.epochs.temp_C[1].toFixed(2)} °C | precip ${state.proj.epochs.precip_mm[1].toFixed(0)} mm | ET ${state.proj.epochs.evap_mm[1].toFixed(0)} mm`);
+    lines.push(`   - Long-term scenario (2030s)   : temp ${state.proj.epochs.temp_C[2].toFixed(2)} °C | precip ${state.proj.epochs.precip_mm[2].toFixed(0)} mm | ET ${state.proj.epochs.evap_mm[2].toFixed(0)} mm`);
     lines.push('----------------------------------------------------------------------------------------');
-    lines.push('[STEP 4] 윤작 시나리오 결과 (최소 2종 이상 조합, 순위 미적용)');
-    lines.push('         산출 근거: UN FAO Paper No. 56 (Kc) & No. 33 (Ky) | USDA ERS & NRCS');
+    lines.push('[STEP 4] Rotation scenario results (2+ crop combinations, unranked)');
+    lines.push('         Basis: UN FAO Paper No. 56 (Kc) & No. 33 (Ky) | USDA ERS & NRCS');
     lines.push('----------------------------------------------------------------------------------------');
     state.scenarios.forEach(c => {
-      lines.push(`▶ [${c.resultNum}번 결과] ${c.rotName} : ${c.rotSeq}`);
-      lines.push(`   • 물 요구량(ETm): ${c.ETm_mm} mm/년 (단작 대비 ${c.waterDiff_pct >= 0 ? '+' : ''}${c.waterDiff_pct}%) | 예상 순수익: $${c.profit_usd.toLocaleString()}/년 | 유기물: ${c.somDiff_pct >= 0 ? '+' : ''}${c.somDiff_pct}%`);
-      lines.push(`   • 기후 시대별 수확 안정성: [과거·현재 ${c.epochScores[0].toFixed(1)}%] → [2026~2029 ${c.epochScores[1].toFixed(1)}%] → [2030년대 ${c.epochScores[2].toFixed(1)}%]`);
-      lines.push(`   • 장점: ${c.pro}`);
-      lines.push(`   • 단점/주의: ${c.con}`);
-      lines.push(`   • 처방: ${c.rx}`);
+      lines.push(`▶ [Result ${c.resultNum}] ${c.rotName} : ${c.rotSeq}`);
+      lines.push(`   • Water demand (ETm): ${c.ETm_mm} mm/yr (${c.waterDiff_pct >= 0 ? '+' : ''}${c.waterDiff_pct}% vs monoculture) | est. net return: $${c.profit_usd.toLocaleString()}/yr | organic matter: ${c.somDiff_pct >= 0 ? '+' : ''}${c.somDiff_pct}%`);
+      lines.push(`   • Yield stability by climate period: [past–present ${c.epochScores[0].toFixed(1)}%] → [2026–2029 ${c.epochScores[1].toFixed(1)}%] → [2030s ${c.epochScores[2].toFixed(1)}%]`);
+      lines.push(`   • Advantage: ${c.pro}`);
+      lines.push(`   • Trade-off / caution: ${c.con}`);
+      lines.push(`   • Prescription: ${c.rx}`);
     });
     lines.push('----------------------------------------------------------------------------------------');
-    lines.push('[STEP 5] 수자원·질소 제약 조건부 최적 작물 면적 배분 솔버');
-    lines.push(`   • 사용 솔버: ${state.optAlloc.solverName}`);
-    lines.push(`   • 최적 면적 배분 비율: ${state.optAlloc.summaryText}`);
-    lines.push(`   • 최적 배분 시 예상 총 순수익: $${state.optAlloc.totalProfit_usd.toLocaleString()}/년 (에이커당 $${state.optAlloc.profitPerAcre_usd.toFixed(1)}/acre)`);
-    lines.push(`   • 물 사용량 / 수자원 상한선: ${state.optAlloc.waterUsed_mm.toFixed(1)} mm / ${state.optAlloc.waterLimit_mm.toFixed(1)} mm`);
-    lines.push(`   • 순 질소 요구량 / 환경 상한선: ${state.optAlloc.netNitrogen_kg_ha.toFixed(1)} kg N/ha / ${state.optAlloc.nitrogenLimit_kg_ha.toFixed(1)} kg N/ha (대두 질소고정 크레딧 -${state.optAlloc.nFixedCredit_kg_ha.toFixed(1)} kg N/ha)`);
+    lines.push('[STEP 5] Crop area allocation solver under water and nitrogen constraints');
+    lines.push(`   • Solver: ${state.optAlloc.solverName}`);
+    lines.push(`   • Area allocation: ${state.optAlloc.summaryText}`);
+    lines.push(`   • Est. total net return at this allocation: $${state.optAlloc.totalProfit_usd.toLocaleString()}/yr ($${state.optAlloc.profitPerAcre_usd.toFixed(1)}/acre)`);
+    lines.push(`   • Water use / water cap: ${state.optAlloc.waterUsed_mm.toFixed(1)} mm / ${state.optAlloc.waterLimit_mm.toFixed(1)} mm`);
+    lines.push(`   • Net N requirement / environmental cap: ${state.optAlloc.netNitrogen_kg_ha.toFixed(1)} kg N/ha / ${state.optAlloc.nitrogenLimit_kg_ha.toFixed(1)} kg N/ha (soybean N-fixation credit -${state.optAlloc.nFixedCredit_kg_ha.toFixed(1)} kg N/ha)`);
     lines.push('========================================================================================');
 
     document.getElementById('matlab-console-output').textContent = lines.join('\n');
